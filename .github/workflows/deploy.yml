@@ -34,7 +34,7 @@ jobs:
       - name: Build Next.js
         run: npm run build
 
-              - name: Add .nojekyll file
+      - name: Add .nojekyll file
         run: touch ./out/.nojekyll
 
       - name: Upload artifact
