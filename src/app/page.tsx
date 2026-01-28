@@ -244,11 +244,20 @@ export default function Home() {
             </h1>
             <p className="text-lg text-slate-500 font-medium">Domain Investor Dashboard</p>
           </div>
-          {lastUpdated && (
-            <div className="px-4 py-2 bg-white/60 backdrop-blur-md rounded-full text-xs font-semibold text-indigo-600 border border-indigo-100 shadow-sm">
-              Data Updated: {lastUpdated}
-            </div>
-          )}
+          <div className="flex items-center gap-4">
+            <a
+              href="/instant-appraisal"
+              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-lg shadow-sm shadow-indigo-200 transition-all active:scale-95 flex items-center gap-2"
+            >
+              <Sparkles className="w-4 h-4" />
+              Instant Appraisal
+            </a>
+            {lastUpdated && (
+              <div className="px-4 py-2 bg-white/60 backdrop-blur-md rounded-full text-xs font-semibold text-indigo-600 border border-indigo-100 shadow-sm">
+                Data Updated: {lastUpdated}
+              </div>
+            )}
+          </div>
         </header>
 
         <div className="grid gap-8 lg:grid-cols-[320px_1fr]">

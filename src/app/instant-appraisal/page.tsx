@@ -55,7 +55,10 @@ export default function InstantAppraisal() {
             <div className="max-w-3xl w-full space-y-10">
 
                 {/* Header */}
-                <div className="text-center space-y-4">
+                <div className="text-center space-y-4 relative">
+                    <a href="/" className="absolute left-0 top-1/2 -translate-y-1/2 md:-ml-20 p-2 text-slate-400 hover:text-indigo-600 transition-colors hidden md:block" title="Back to Dashboard">
+                        <Activity className="w-6 h-6 rotate-[-90deg]" /> {/* Using Activity as placeholder arrow or import ChevronLeft in real app */}
+                    </a>
                     <h1 className="text-5xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-violet-600 flex items-center justify-center gap-3">
                         <Sparkles className="w-10 h-10 text-indigo-500" />
                         Instant Appraisal
