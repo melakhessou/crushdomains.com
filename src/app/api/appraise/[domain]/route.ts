@@ -25,21 +25,33 @@ export async function GET(
     }
 
     try {
-        const apiUrl = process.env.GODADDY_API_URL || 'https://api.godaddy.com';
-        console.log(`[Appraisal] Fetching for ${domain} from ${apiUrl}... with key ending in ...${apiKey?.slice(-4)}`);
+        const apiUrl = (process.env.GODADDY_API_URL || 'https://api.godaddy.com').replace(/\/$/, '');
+        const fullUrl = `${apiUrl}/v1/appraisal/${domain}`;
 
-        const response = await fetch(`${apiUrl}/v1/appraisal/${domain}`, {
+        console.log(`[Appraisal] Fetching from: ${fullUrl}`);
+
+        const response = await fetch(fullUrl, {
             headers: {
                 'Authorization': `sso-key ${apiKey}:${apiSecret}`,
-                'Content-Type': 'application/json',
                 'Accept': 'application/json',
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                // Using a more standard/minimal User-Agent to avoid WAF blocks
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
             },
         });
 
         if (!response.ok) {
             const errorText = await response.text();
-            console.error(`[Appraisal] Error ${response.status}: ${errorText}`);
+            const contentType = response.headers.get('content-type') || '';
+
+            console.error(`[Appraisal] Error ${response.status}: ${contentType}`);
+
+            if (contentType.includes('text/html')) {
+                console.error('[Appraisal] Received HTML error (possible WAF block or Access Denied):', errorText.slice(0, 500));
+                return NextResponse.json(
+                    { error: 'Access denied by GoDaddy (WAF block). Please check if your API keys are correct for the Production environment and if you are using HTTPS.', details: 'HTML_ERROR_FROM_GODADDY' },
+                    { status: response.status }
+                );
+            }
 
             let errorData: any = {};
             try {
