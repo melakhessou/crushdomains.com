@@ -15,7 +15,9 @@ export async function GET(
 
     if (!apiKey || !apiSecret) {
         // Return a generic error to the client, but log the specific missing config on the server
-        console.error('Missing GODADDY_KEY or GODADDY_SECRET environment variables');
+        if (!apiKey) console.error('[Appraisal API] Configuration Error: GODADDY_KEY is missing');
+        if (!apiSecret) console.error('[Appraisal API] Configuration Error: GODADDY_SECRET is missing');
+
         return NextResponse.json(
             { error: 'Server configuration error' },
             { status: 500 }
