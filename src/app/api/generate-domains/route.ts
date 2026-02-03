@@ -139,14 +139,38 @@ export async function POST(req: NextRequest) {
 
         // --- Post-Processing ---
 
-        const sortedResults = Array.from(results)
-            .sort((a, b) => b.score - a.score)
-            .slice(0, 50); // Provide more than 30 as requested
-
-        return NextResponse.json(sortedResults);
+        return new NextResponse(JSON.stringify(sortedResults), {
+            status: 200,
+            headers: {
+                'Content-Type': 'application/json',
+                'Cache-Control': 'no-store, max-age=0',
+                'Surrogate-Control': 'no-store',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'POST, OPTIONS',
+                'Access-Control-Allow-Headers': 'Content-Type'
+            }
+        });
 
     } catch (error: any) {
         console.error('[Generation Engine] Error:', error.message);
-        return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+        return NextResponse.json({ error: 'Internal server error' }, {
+            status: 500,
+            headers: {
+                'Cache-Control': 'no-store, max-age=0',
+                'Surrogate-Control': 'no-store'
+            }
+        });
     }
+}
+
+export async function OPTIONS() {
+    return new NextResponse(null, {
+        status: 204,
+        headers: {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'POST, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type',
+            'Access-Control-Max-Age': '86400'
+        }
+    });
 }

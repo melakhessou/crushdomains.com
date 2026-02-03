@@ -27,7 +27,10 @@ export async function GET(req: NextRequest) {
         return NextResponse.json({ error: 'Server configuration error' }, { status: 500 });
     }
 
-    // 3. Prepare Request Options
+    // 3. Prepare Request Options & Rate Limiting
+    // Add small delay to prevent rapid-fire blocks in some environments
+    await new Promise(resolve => setTimeout(resolve, 50));
+
     // Prioritize Fastly Direct API as it's typically faster/cleaner
     let url: string;
     let headers: Record<string, string>;
@@ -47,7 +50,7 @@ export async function GET(req: NextRequest) {
         const response = await fetch(url, {
             method: 'GET',
             headers,
-            next: { revalidate: 900 } // Cache results for 15 minutes at the edge
+            cache: 'no-store' // Disable Next.js internal cache
         });
 
         if (!response.ok) {
@@ -55,7 +58,13 @@ export async function GET(req: NextRequest) {
             console.error(`[API Error] Domainr API returned ${response.status}: ${errorText}`);
             return NextResponse.json(
                 { error: 'Error checking domain availability', status: response.status },
-                { status: response.status }
+                {
+                    status: response.status,
+                    headers: {
+                        'Cache-Control': 'no-store, max-age=0',
+                        'Surrogate-Control': 'no-store'
+                    }
+                }
             );
         }
 
@@ -70,17 +79,46 @@ export async function GET(req: NextRequest) {
         // 'undelegated' or 'inactive' typically indicates availability
         const available = status.summary === 'undelegated' || status.summary === 'inactive';
 
-        return NextResponse.json({
+        return new NextResponse(JSON.stringify({
             domain: status.domain,
             available: available,
             status: status.summary
+        }), {
+            status: 200,
+            headers: {
+                'Content-Type': 'application/json',
+                'Cache-Control': 'no-store, max-age=0',
+                'Surrogate-Control': 'no-store',
+                'Access-Control-Allow-Origin': '*', // Adjust for production if needed
+                'Access-Control-Allow-Methods': 'GET, OPTIONS',
+                'Access-Control-Allow-Headers': 'Content-Type, Fastly-Key'
+            }
         });
 
     } catch (error: any) {
         console.error(`[API Error] Domain check failed: ${error.message}`);
         return NextResponse.json(
             { error: 'Internal server error' },
-            { status: 500 }
+            {
+                status: 500,
+                headers: {
+                    'Cache-Control': 'no-store, max-age=0',
+                    'Surrogate-Control': 'no-store'
+                }
+            }
         );
     }
+}
+
+// Handle preflight requests
+export async function OPTIONS() {
+    return new NextResponse(null, {
+        status: 204,
+        headers: {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type, Fastly-Key',
+            'Access-Control-Max-Age': '86400'
+        }
+    });
 }

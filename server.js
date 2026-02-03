@@ -74,6 +74,21 @@ app.use('/api/', rateLimit({
     message: { error: 'Too many requests' }
 }));
 
+// No-Cache and CORS Middleware for API
+app.use('/api/', (req, res, next) => {
+    res.set({
+        'Cache-Control': 'no-store, max-age=0',
+        'Surrogate-Control': 'no-store',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Fastly-Key, Authorization'
+    });
+    if (req.method === 'OPTIONS') {
+        return res.sendStatus(204);
+    }
+    next();
+});
+
 // --- Routes ---
 
 /**

@@ -67,13 +67,42 @@ export async function GET(
         }
 
         const data = await response.json();
-        return NextResponse.json(data);
+        return new NextResponse(JSON.stringify(data), {
+            status: 200,
+            headers: {
+                'Content-Type': 'application/json',
+                'Cache-Control': 'no-store, max-age=0',
+                'Surrogate-Control': 'no-store',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'GET, OPTIONS',
+                'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+                'Access-Control-Max-Age': '86400'
+            }
+        });
 
     } catch (error) {
         console.error('Appraisal API Error:', error);
         return NextResponse.json(
             { error: 'Internal Server Error' },
-            { status: 500 }
+            {
+                status: 500,
+                headers: {
+                    'Cache-Control': 'no-store, max-age=0',
+                    'Surrogate-Control': 'no-store'
+                }
+            }
         );
     }
+}
+
+export async function OPTIONS() {
+    return new NextResponse(null, {
+        status: 204,
+        headers: {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+            'Access-Control-Max-Age': '86400'
+        }
+    });
 }
