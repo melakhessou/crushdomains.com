@@ -139,6 +139,10 @@ export async function POST(req: NextRequest) {
 
         // --- Post-Processing ---
 
+        const sortedResults = Array.from(results)
+            .sort((a, b) => b.score - a.score)
+            .slice(0, 50);
+
         return new NextResponse(JSON.stringify(sortedResults), {
             status: 200,
             headers: {
