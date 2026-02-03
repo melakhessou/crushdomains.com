@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
@@ -19,12 +20,27 @@ export async function GET(req: NextRequest) {
     }
 
     // 2. Configuration
+    // REQUIRED: One of these must be set in your production environment (e.g., Vercel)
+    // - DOMAINR_API_KEY: Your RapidAPI key for the Domainr API
+    // - FASTLY_KEY: Your Fastly API key for direct Domainr access (preferred)
     const FASTLY_KEY = process.env.FASTLY_KEY;
     const DOMAINR_API_KEY = process.env.DOMAINR_API_KEY;
 
     if (!FASTLY_KEY && !DOMAINR_API_KEY) {
-        console.error('[API Error] No Domainr API keys found in environment variables');
-        return NextResponse.json({ error: 'Server configuration error' }, { status: 500 });
+        console.error('[API Error] Missing required Configuration: Set FASTLY_KEY or DOMAINR_API_KEY');
+        return NextResponse.json(
+            {
+                error: 'Server configuration error',
+                message: 'API credentials are not configured. Please ensure environment variables are set.'
+            },
+            {
+                status: 500,
+                headers: {
+                    'Cache-Control': 'no-store, max-age=0',
+                    'Surrogate-Control': 'no-store'
+                }
+            }
+        );
     }
 
     // 3. Prepare Request Options & Rate Limiting
