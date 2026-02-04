@@ -19,15 +19,28 @@ export async function GET(req: NextRequest) {
         );
     }
 
-    // 2. Configuration - FASTLY_KEY is required
+    // 2. Configuration
+    // REQUIRED: One of these must be set in your production environment (e.g., Vercel)
+    // - DOMAINR_API_KEY: Your RapidAPI key for the Domainr API
+    // - FASTLY_KEY: Your Fastly API key for direct Domainr access (preferred)
     const FASTLY_KEY = process.env.FASTLY_KEY;
+    const DOMAINR_API_KEY = process.env.DOMAINR_API_KEY;
 
-    if (!FASTLY_KEY) {
-        console.error('[API Error] Missing required Configuration: FASTLY_KEY is not set');
+    // Debug: log environment variable status
+    console.log('[API Debug] FASTLY_KEY exists:', !!FASTLY_KEY, 'length:', FASTLY_KEY?.length || 0);
+    console.log('[API Debug] DOMAINR_API_KEY exists:', !!DOMAINR_API_KEY, 'length:', DOMAINR_API_KEY?.length || 0);
+
+    if (!FASTLY_KEY && !DOMAINR_API_KEY) {
+        console.error('[API Error] Missing required Configuration: Set FASTLY_KEY or DOMAINR_API_KEY');
         return NextResponse.json(
             {
                 error: 'Server configuration error',
-                message: 'FASTLY_KEY is not configured.'
+                message: 'Neither FASTLY_KEY nor DOMAINR_API_KEY is configured. Check Vercel Environment Variables.',
+                debug: {
+                    hasFastlyKey: !!FASTLY_KEY,
+                    hasDomainrKey: !!DOMAINR_API_KEY,
+                    nodeEnv: process.env.NODE_ENV
+                }
             },
             {
                 status: 500,
@@ -40,10 +53,23 @@ export async function GET(req: NextRequest) {
     }
 
     // 3. Prepare Request Options & Rate Limiting
+    // Add small delay to prevent rapid-fire blocks in some environments
     await new Promise(resolve => setTimeout(resolve, 50));
 
-    const url = `https://api.domainr.com/v2/status?domain=${domain}`;
-    const headers = { 'Fastly-Key': FASTLY_KEY };
+    // Prioritize Fastly Direct API as it's typically faster/cleaner
+    let url: string;
+    let headers: Record<string, string>;
+
+    if (FASTLY_KEY) {
+        url = `https://api.domainr.com/v2/status?domain=${domain}`;
+        headers = { 'Fastly-Key': FASTLY_KEY };
+    } else {
+        url = `https://domainr.p.rapidapi.com/v2/status?domain=${domain}`;
+        headers = {
+            'x-rapidapi-key': DOMAINR_API_KEY!,
+            'x-rapidapi-host': 'domainr.p.rapidapi.com'
+        };
+    }
 
     try {
         const response = await fetch(url, {
