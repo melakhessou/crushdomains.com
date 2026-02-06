@@ -1,18 +1,39 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 /**
- * Heuristic syllable counter for English-like words.
+ * Refined syllable counter using consonant-vowel transitions.
  */
-function getSyllableCount(word: string): number {
-    word = word.toLowerCase().trim().replace(/[^a-z]/g, '');
+function countSyllables(domainLabel: string): number {
+    // 1. Lowercase and remove non-letters
+    let word = domainLabel.toLowerCase().replace(/[^a-z]/g, '');
+    if (word.length === 0) return 1;
     if (word.length <= 3) return 1;
 
-    // Basic heuristic: count vowel groups, handle silent 'e'
-    word = word.replace(/(?:[^laeiouy]es|ed|[^laeiouy]e)$/, '');
-    word = word.replace(/^y/, '');
-    const vowelGroups = word.match(/[aeiouy]{1,2}/g);
+    const vowels = ['a', 'e', 'i', 'o', 'u', 'y'];
+    let count = 0;
+    let prevIsVowel = vowels.includes(word[0]);
 
-    return vowelGroups ? Math.max(1, vowelGroups.length) : 1;
+    // Count initial vowel if exists
+    if (prevIsVowel) count++;
+
+    // 2. Count transitions: consonant -> vowel
+    for (let i = 1; i < word.length; i++) {
+        const isVowel = vowels.includes(word[i]);
+        if (isVowel && !prevIsVowel) {
+            count++;
+        }
+        prevIsVowel = isVowel;
+    }
+
+    // 3. Subtract 1 for trailing silent "e" (except "le" cases)
+    if (word.length > 2 && word.endsWith('e') && !word.endsWith('le')) {
+        // Only subtract if it's not the only "vowel group" we counted
+        // e.g. "code" -> 1 transition (c->o), "de" -> would be 0 if we subtracted (but handled by min 1)
+        if (count > 1) count--;
+    }
+
+    // 4. Minimum 1 syllable
+    return Math.max(1, count);
 }
 
 /**
@@ -35,7 +56,7 @@ function calculateDomainScore(domain: string, sld: string, factors: any): number
     if (factors.isPremiumWord) score += 10;
 
     // 4. Syllable Penalty/Bonus
-    const syllables = getSyllableCount(sld);
+    const syllables = countSyllables(sld);
     if (syllables <= 2) score += 10;
     else if (syllables >= 5) score -= 15;
 
@@ -54,7 +75,7 @@ export async function GET(req: NextRequest) {
         return NextResponse.json({ error: 'Domain is required' }, { status: 400 });
     }
 
-    const apiKey = process.env.DOMSCAN_API_KEY;
+    const apiKey = process.env.DOMSCAN_API_KEY?.trim();
 
     if (!apiKey) {
         console.error('[Appraise API] DOMSCAN_API_KEY is missing');
@@ -70,22 +91,27 @@ export async function GET(req: NextRequest) {
         const response = await fetch(`https://domscan.net/v1/value?domain=${encodeURIComponent(domain)}`, {
             headers: {
                 'Authorization': `Bearer ${apiKey}`,
-                'Accept': 'application/json'
+                'Accept': 'application/json',
+                'User-Agent': 'CrushDomains/1.0'
             },
             cache: 'no-store'
         });
 
         if (!response.ok) {
-            console.error(`[Appraisal] DomScan Error: ${response.status}`);
+            const status = response.status;
             const text = await response.text();
+            console.error(`[Appraisal] DomScan Error ${status}: ${text}`);
 
             return NextResponse.json(
                 {
                     success: false,
                     error: 'Failed to fetch appraisal',
-                    details: text.slice(0, 100)
+                    debug: {
+                        status,
+                        message: text.slice(0, 200)
+                    }
                 },
-                { status: response.status }
+                { status: status }
             );
         }
 
@@ -93,7 +119,7 @@ export async function GET(req: NextRequest) {
         const sld = data.domain?.split('.')[0] || '';
 
         // Calculate custom metrics
-        const syllables = getSyllableCount(sld);
+        const syllables = countSyllables(sld);
         const domainScore = calculateDomainScore(data.domain || domain, sld, data.factors || {});
 
         // Normalize the response
