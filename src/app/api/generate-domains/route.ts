@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { GEO_DATA } from '@/lib/geo-data';
 
 /**
  * Domain Generation Engine API
@@ -63,6 +64,7 @@ function calculateScore(domain: string, style: string): number {
     // 3. Brandability (Style bonuses)
     if (style === 'fusion') score += 10;
     if (style === 'emotional') score += 5;
+    if (style === 'geo') score += 10; // Bonus for geo domains
 
     // 4. Memorability (No double letters or awkward clusters)
     const hasDoubleLetters = /(.)\1/.test(domain);
@@ -74,27 +76,30 @@ function calculateScore(domain: string, style: string): number {
 function cleanDomain(domain: string): string {
     return domain
         .toLowerCase()
-        .replace(/[^a-z]/g, '') // No hyphens, no numbers
-        .substring(0, 12);      // Max 12 characters
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // Remove accents
+        .replace(/[^a-z0-9]/g, '') // Keep numbers, remove hyphens/spaces
+        .substring(0, 25);         // Max 25 (increased for geo combos)
 }
 
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
-        const { keyword1, keyword2, niche } = body;
+        const { keyword1, keyword2, niche, geoMode, country, keywordPosition } = body;
 
-        if (!keyword1 || !niche) {
-            return NextResponse.json({ error: 'keyword1 and niche are required' }, { status: 400 });
+        if (!keyword1) {
+            return NextResponse.json({ error: 'keyword1 is required' }, { status: 400 });
         }
 
         const k1 = cleanDomain(keyword1);
         const k2 = keyword2 ? cleanDomain(keyword2) : '';
-        const selectedNiche = NICHES[niche.toLowerCase()] || NICHES.generic;
         const results: Set<{ domain: string, score: number, style: string }> = new Set();
 
+        // Reusable Helper
         const addResult = (domain: string, style: string) => {
             const cleaned = cleanDomain(domain);
-            if (cleaned.length >= 3 && cleaned.length <= 12) {
+            // Allow slightly longer domains for Geo mode as City+Keyword can be long
+            const maxLength = geoMode ? 25 : 15;
+            if (cleaned.length >= 3 && cleaned.length <= maxLength) {
                 const finalDomain = `${cleaned}.com`;
                 // Prevent duplicates
                 if (!Array.from(results).some(r => r.domain === finalDomain)) {
@@ -107,34 +112,97 @@ export async function POST(req: NextRequest) {
             }
         };
 
-        // --- Generation Strategy ---
+        if (geoMode) {
+            // --- Geo Mode Generation ---
+            if (!country || !GEO_DATA[country]) {
+                return NextResponse.json({ error: 'Valid country is required for Geo Mode' }, { status: 400 });
+            }
 
-        // 1. Keyword Combination (k1 + k2)
-        if (k2) {
-            addResult(`${k1}${k2}`, 'combination');
-            addResult(`${k2}${k1}`, 'combination');
-            // Fusion: k1 + start of k2
-            addResult(`${k1}${k2.substring(0, 3)}`, 'fusion');
-            // Fusion: k2 + start of k1
-            addResult(`${k2}${k1.substring(0, 3)}`, 'fusion');
-        }
+            const geoData = GEO_DATA[country];
+            const locationType = body.locationType || 'Cities';
 
-        // 2. Niche Affixes
-        selectedNiche.prefixes.forEach(p => addResult(`${p}${k1}`, 'prefix'));
-        selectedNiche.suffixes.forEach(s => addResult(`${k1}${s}`, 'suffix'));
+            if (locationType === 'States') {
+                // Generate based on State / Province Names ONLY
+                geoData.states.forEach(state => {
+                    const cleanName = cleanDomain(state.name);
 
-        if (k2) {
-            selectedNiche.prefixes.slice(0, 5).forEach(p => addResult(`${p}${k2}`, 'prefix'));
-            selectedNiche.suffixes.slice(0, 5).forEach(s => addResult(`${k2}${s}`, 'suffix'));
-        }
+                    if (keywordPosition === 'after') {
+                        // State + Keyword
+                        addResult(`${cleanName}${k1}`, 'geo');
+                        if (k2) addResult(`${cleanName}${k2}`, 'geo');
+                    } else {
+                        // Keyword + State
+                        addResult(`${k1}${cleanName}`, 'geo');
+                        if (k2) addResult(`${k2}${cleanName}`, 'geo');
+                    }
+                });
+            } else if (locationType === 'Codes') {
+                // Generate based on State / Province Codes ONLY
+                geoData.states.forEach(state => {
+                    const cleanCode = cleanDomain(state.code);
 
-        // 3. Emotional / Brandable
-        EMOTIONAL_PREFIXES.forEach(p => addResult(`${p}${k1}`, 'emotional'));
+                    if (keywordPosition === 'after') {
+                        // Code + Keyword
+                        addResult(`${cleanCode}${k1}`, 'geo-code');
+                        if (k2) addResult(`${cleanCode}${k2}`, 'geo-code');
+                    } else {
+                        // Keyword + Code
+                        addResult(`${k1}${cleanCode}`, 'geo-code');
+                        if (k2) addResult(`${k2}${cleanCode}`, 'geo-code');
+                    }
+                });
+            } else {
+                // Generate based on Cities
+                geoData.cities.forEach(city => {
+                    const cleanCity = cleanDomain(city);
 
-        // 4. Phonetic Fusion (Portmanteau style)
-        if (k2) {
-            const fusion = k1.substring(0, Math.ceil(k1.length / 2)) + k2.substring(Math.floor(k2.length / 2));
-            addResult(fusion, 'fusion');
+                    if (keywordPosition === 'after') {
+                        // City + Keyword
+                        addResult(`${cleanCity}${k1}`, 'geo');
+                        if (k2) addResult(`${cleanCity}${k2}`, 'geo');
+                    } else {
+                        // Keyword + City
+                        addResult(`${k1}${cleanCity}`, 'geo');
+                        if (k2) addResult(`${k2}${cleanCity}`, 'geo');
+                    }
+                });
+            }
+
+        } else {
+            // --- Standard Niche Generation ---
+            if (!niche) {
+                return NextResponse.json({ error: 'niche is required' }, { status: 400 });
+            }
+
+            const selectedNiche = NICHES[niche.toLowerCase()] || NICHES.generic;
+
+            // 1. Keyword Combination (k1 + k2)
+            if (k2) {
+                addResult(`${k1}${k2}`, 'combination');
+                addResult(`${k2}${k1}`, 'combination');
+                // Fusion: k1 + start of k2
+                addResult(`${k1}${k2.substring(0, 3)}`, 'fusion');
+                // Fusion: k2 + start of k1
+                addResult(`${k2}${k1.substring(0, 3)}`, 'fusion');
+            }
+
+            // 2. Niche Affixes
+            selectedNiche.prefixes.forEach(p => addResult(`${p}${k1}`, 'prefix'));
+            selectedNiche.suffixes.forEach(s => addResult(`${k1}${s}`, 'suffix'));
+
+            if (k2) {
+                selectedNiche.prefixes.slice(0, 5).forEach(p => addResult(`${p}${k2}`, 'prefix'));
+                selectedNiche.suffixes.slice(0, 5).forEach(s => addResult(`${k2}${s}`, 'suffix'));
+            }
+
+            // 3. Emotional / Brandable
+            EMOTIONAL_PREFIXES.forEach(p => addResult(`${p}${k1}`, 'emotional'));
+
+            // 4. Phonetic Fusion (Portmanteau style)
+            if (k2) {
+                const fusion = k1.substring(0, Math.ceil(k1.length / 2)) + k2.substring(Math.floor(k2.length / 2));
+                addResult(fusion, 'fusion');
+            }
         }
 
         // --- Post-Processing ---

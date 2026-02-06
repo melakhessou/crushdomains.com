@@ -16,6 +16,12 @@ export default function GeneratorPage() {
         const filterAvailability = document.querySelector('#filter-availability') as HTMLSelectElement;
         const scoreValue = document.querySelector('#score-value') as HTMLSpanElement;
 
+        // Geo Mode Elements
+        const geoToggle = document.querySelector('#geo-mode-toggle') as HTMLInputElement;
+        const geoOptions = document.querySelector('#geo-options') as HTMLDivElement;
+        const nicheContainer = document.querySelector('#niche-container') as HTMLDivElement;
+        const geoBadge = document.querySelector('#geo-badge') as HTMLDivElement;
+
         if (!form) return;
 
         // --- State Management ---
@@ -77,6 +83,22 @@ export default function GeneratorPage() {
             el.addEventListener('input', applyFilters);
         });
 
+        // --- Geo Mode Logic ---
+        if (geoToggle) {
+            geoToggle.addEventListener('change', () => {
+                const isGeo = geoToggle.checked;
+                if (isGeo) {
+                    geoOptions.classList.remove('hidden');
+                    nicheContainer.classList.add('hidden');
+                    geoBadge.classList.remove('hidden');
+                } else {
+                    geoOptions.classList.add('hidden');
+                    nicheContainer.classList.remove('hidden');
+                    geoBadge.classList.add('hidden');
+                }
+            });
+        }
+
         // --- Availability Check Logic ---
         async function processQueue() {
             if (activeChecks >= CONCURRENT_CHECKS || checkQueue.length === 0) return;
@@ -129,11 +151,21 @@ export default function GeneratorPage() {
             e.preventDefault();
 
             const formData = new FormData(form);
-            const payload = {
+            const isGeo = geoToggle?.checked;
+
+            const payload: any = {
                 keyword1: formData.get('keyword1'),
                 keyword2: formData.get('keyword2') || undefined,
-                niche: formData.get('niche')
             };
+
+            if (isGeo) {
+                payload.geoMode = true;
+                payload.country = formData.get('country');
+                payload.locationType = formData.get('locationType');
+                payload.keywordPosition = formData.get('keywordPosition');
+            } else {
+                payload.niche = formData.get('niche');
+            }
 
             if (!payload.keyword1) return;
 
@@ -206,7 +238,18 @@ export default function GeneratorPage() {
                         <div class="flex items-center gap-4">
                             <div class="flex flex-col items-end">
                                 <span class="text-xl font-black ${getScoreColor(d.score)}">${d.score}</span>
-                                <span class="text-[10px] text-slate-400 font-bold uppercase">Brand Score</span>
+                                <div class="flex items-center justify-end gap-1.5 relative">
+                                    <span class="text-[10px] text-slate-400 font-bold uppercase">Domain Score</span>
+                                    <div class="group relative flex items-center">
+                                        <svg class="w-3.5 h-3.5 text-slate-300 cursor-help hover:text-indigo-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                        <div class="absolute bottom-full right-0 mb-2 w-48 p-3 bg-slate-800 text-white text-[10px] leading-relaxed font-medium rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
+                                            Domain Score is a 0–100 score that evaluates the overall quality of the domain name (memorability, readability, brand potential, and basic SEO factors).
+                                            <div class="absolute -bottom-1 right-1 w-2 h-2 bg-slate-800 transform rotate-45"></div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     `;
@@ -266,6 +309,7 @@ export default function GeneratorPage() {
                 {/* Main Generator Form */}
                 <div className="premium-glass rounded-3xl shadow-2xl p-8 md:p-10 mb-12 border border-white">
                     <form id="generator-form" className="space-y-8">
+                        {/* Top Row: Keywords */}
                         <div className="grid md:grid-cols-2 gap-6">
                             <div className="space-y-2">
                                 <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Main Keyword</label>
@@ -276,10 +320,75 @@ export default function GeneratorPage() {
                                 <input name="keyword2" type="text" placeholder="e.g. Pay" className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all text-slate-800 font-medium" />
                             </div>
                         </div>
-                        <div className="space-y-2">
+
+                        <hr className="border-slate-100" />
+
+                        {/* Geo Mode Toggle */}
+                        <div className="flex items-center justify-between">
+                            <label className="flex items-center gap-3 cursor-pointer group">
+                                <div className="relative">
+                                    <input type="checkbox" id="geo-mode-toggle" className="sr-only peer" />
+                                    <div className="w-14 h-8 bg-slate-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-7 after:w-7 after:transition-all peer-checked:bg-indigo-600"></div>
+                                </div>
+                                <span className="text-sm font-bold text-slate-600 group-hover:text-indigo-600 transition-colors uppercase tracking-widest">
+                                    Use Geo Locations?
+                                </span>
+                            </label>
+
+                            {/* Visual Hint for Geo Mode */}
+                            <div id="geo-badge" className="hidden px-3 py-1 bg-indigo-50 text-indigo-600 rounded-full text-[10px] font-bold uppercase tracking-widest border border-indigo-100">
+                                Geo Active
+                            </div>
+                        </div>
+
+                        {/* Geo Options (Hidden by default) */}
+                        <div id="geo-options" className="hidden grid md:grid-cols-3 gap-6 animate-in fade-in slide-in-from-top-4 duration-300">
+                            <div className="space-y-2">
+                                <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Country</label>
+                                <div className="relative">
+                                    <select name="country" className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none appearance-none cursor-pointer text-slate-800 font-medium">
+                                        <option value="USA">USA</option>
+                                        <option value="Canada">Canada</option>
+                                        <option value="Australia">Australia</option>
+                                        <option value="UK">UK</option>
+                                    </select>
+                                    <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"></path></svg>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Location Type</label>
+                                <div className="relative">
+                                    <select name="locationType" className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none appearance-none cursor-pointer text-slate-800 font-medium">
+                                        <option value="Cities">Cities</option>
+                                        <option value="States">States / Provinces</option>
+                                        <option value="Codes">State / Province Codes</option>
+                                    </select>
+                                    <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"></path></svg>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Position</label>
+                                <div className="relative">
+                                    <select name="keywordPosition" className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none appearance-none cursor-pointer text-slate-800 font-medium">
+                                        <option value="after">City + Keyword</option>
+                                        <option value="before">Keyword + City</option>
+                                    </select>
+                                    <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"></path></svg>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Niche Category (Only show if Geo is OFF) */}
+                        <div id="niche-container" className="space-y-2 transition-all duration-300">
                             <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Niche Category</label>
                             <div className="relative">
-                                <select name="niche" required className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none appearance-none cursor-pointer text-slate-800 font-medium">
+                                <select name="niche" className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none appearance-none cursor-pointer text-slate-800 font-medium">
                                     <option value="Business">Business</option>
                                     <option value="Tech">Tech</option>
                                     <option value="Wellness / Spa">Wellness / Spa</option>
@@ -292,6 +401,7 @@ export default function GeneratorPage() {
                                 </div>
                             </div>
                         </div>
+
                         <button id="generate-btn" type="submit" className="w-full py-5 btn-primary text-white font-bold text-lg rounded-2xl transition-all active:scale-[0.98] flex items-center justify-center gap-3">
                             Generate Domains
                         </button>
@@ -345,6 +455,10 @@ export default function GeneratorPage() {
                             </p>
                         </div>
                     </div>
+
+                    <p className="mt-8 text-[10px] text-slate-400 text-center font-medium">
+                        All scores and valuations are automated estimates. Please refer to our <a href="/terms-of-service" className="underline hover:text-indigo-500 transition-colors">Terms of Service</a> for details.
+                    </p>
                 </div>
 
                 <footer className="mt-24 text-center">
