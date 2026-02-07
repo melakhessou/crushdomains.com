@@ -1,5 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GEO_DATA } from '@/lib/geo-data';
+import { USA_CITIES, type USACity } from '@/lib/usa-cities';
+
+// Build city lookup map for fast matching
+const cityLookupMap = new Map<string, USACity>();
+USA_CITIES.forEach(c => {
+    const key = c.city.toLowerCase().replace(/[^a-z]/g, '');
+    if (!cityLookupMap.has(key)) cityLookupMap.set(key, c);
+});
 
 /**
  * Domain Generation Engine API
@@ -92,21 +100,53 @@ export async function POST(req: NextRequest) {
 
         const k1 = cleanDomain(keyword1);
         const k2 = keyword2 ? cleanDomain(keyword2) : '';
-        const results: Set<{ domain: string, score: number, style: string }> = new Set();
 
-        // Reusable Helper
+        // Result type with optional geo fields
+        interface DomainResult {
+            domain: string;
+            score: number;
+            style: string;
+            city?: string;
+            state?: string;
+            population?: number;
+        }
+
+        const results: Set<DomainResult> = new Set();
+
+        // Reusable Helper for standard domains
         const addResult = (domain: string, style: string) => {
             const cleaned = cleanDomain(domain);
-            // Allow slightly longer domains for Geo mode as City+Keyword can be long
             const maxLength = geoMode ? 25 : 15;
             if (cleaned.length >= 3 && cleaned.length <= maxLength) {
                 const finalDomain = `${cleaned}.com`;
-                // Prevent duplicates
                 if (!Array.from(results).some(r => r.domain === finalDomain)) {
                     results.add({
                         domain: finalDomain,
                         score: calculateScore(cleaned, style),
                         style
+                    });
+                }
+            }
+        };
+
+        // Geo-specific helper that includes city metadata
+        const addGeoResult = (domain: string, style: string, cityName: string) => {
+            const cleaned = cleanDomain(domain);
+            const maxLength = 25;
+            if (cleaned.length >= 3 && cleaned.length <= maxLength) {
+                const finalDomain = `${cleaned}.com`;
+                if (!Array.from(results).some(r => r.domain === finalDomain)) {
+                    // Look up city data
+                    const cityKey = cityName.toLowerCase().replace(/[^a-z]/g, '');
+                    const cityData = cityLookupMap.get(cityKey);
+
+                    results.add({
+                        domain: finalDomain,
+                        score: calculateScore(cleaned, style),
+                        style,
+                        city: cityName,
+                        state: cityData?.state ?? undefined,
+                        population: cityData?.population ?? undefined,
                     });
                 }
             }
@@ -152,18 +192,18 @@ export async function POST(req: NextRequest) {
                     }
                 });
             } else {
-                // Generate based on Cities
+                // Generate based on Cities - use addGeoResult for city metadata
                 geoData.cities.forEach(city => {
                     const cleanCity = cleanDomain(city);
 
                     if (keywordPosition === 'after') {
                         // City + Keyword
-                        addResult(`${cleanCity}${k1}`, 'geo');
-                        if (k2) addResult(`${cleanCity}${k2}`, 'geo');
+                        addGeoResult(`${cleanCity}${k1}`, 'geo', city);
+                        if (k2) addGeoResult(`${cleanCity}${k2}`, 'geo', city);
                     } else {
                         // Keyword + City
-                        addResult(`${k1}${cleanCity}`, 'geo');
-                        if (k2) addResult(`${k2}${cleanCity}`, 'geo');
+                        addGeoResult(`${k1}${cleanCity}`, 'geo', city);
+                        if (k2) addGeoResult(`${k2}${cleanCity}`, 'geo', city);
                     }
                 });
             }
@@ -211,7 +251,13 @@ export async function POST(req: NextRequest) {
             .sort((a, b) => b.score - a.score)
             .slice(0, 50);
 
-        return new NextResponse(JSON.stringify(sortedResults), {
+        // Return response with total count
+        const response = {
+            totalDomains: sortedResults.length,
+            items: sortedResults
+        };
+
+        return new NextResponse(JSON.stringify(response), {
             status: 200,
             headers: {
                 'Content-Type': 'application/json',

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Toaster } from "sonner";
 import { Navigation } from "@/components/Navigation";
 import "./globals.css";
 
@@ -60,6 +61,16 @@ export default function RootLayout({
                 "priceCurrency": "USD"
               }
             })
+          }}
+        />
+        <Toaster
+          position="top-right"
+          richColors
+          closeButton
+          toastOptions={{
+            style: {
+              fontFamily: 'var(--font-geist-sans)',
+            },
           }}
         />
         <Navigation />

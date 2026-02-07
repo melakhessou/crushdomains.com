@@ -1,8 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Search, Loader2, DollarSign, Activity, Tag, AlertTriangle, Sparkles, CheckCircle, XCircle, Info } from 'lucide-react';
 import clsx from 'clsx';
+import { toast } from 'sonner';
+import { useDomainValidation } from '@/hooks/useDomainValidation';
+import { ValidatedInput } from '@/components/ui/ValidatedInput';
 
 interface AppraisalResult {
     success: boolean;
@@ -34,12 +37,68 @@ interface AvailabilityResult {
 }
 
 export default function InstantAppraisal() {
-    const [domain, setDomain] = useState('');
     const [loading, setLoading] = useState(false);
     const [result, setResult] = useState<AppraisalResult | null>(null);
     const [availability, setAvailability] = useState<AvailabilityResult | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [availabilityError, setAvailabilityError] = useState<string | null>(null);
+
+    // Domain validation hook
+    const handleAppraiseDomain = useCallback(async (cleanedDomain: string) => {
+        setLoading(true);
+        setError(null);
+        setAvailabilityError(null);
+        setResult(null);
+        setAvailability(null);
+
+        try {
+            const encodedDomain = encodeURIComponent(cleanedDomain);
+
+            // Execute both calls in parallel
+            const [appraisalResponse, availabilityResponse] = await Promise.all([
+                fetch(`/api/appraise?domain=${encodedDomain}`).then(r => r.json()),
+                fetch(`/api/check-availability?domain=${encodedDomain}`).then(r => r.json()).catch(err => ({ success: false, error: 'Network error' }))
+            ]);
+
+            // Handle Appraisal Result
+            if (appraisalResponse.success) {
+                setResult(appraisalResponse);
+                toast.success(`Appraised ${cleanedDomain}`, {
+                    description: `Estimated value: $${appraisalResponse.mid?.toLocaleString()}`,
+                });
+            } else {
+                const errorMsg = appraisalResponse.error || 'Failed to get appraisal';
+                setError(errorMsg);
+                toast.error('Appraisal failed', { description: errorMsg });
+            }
+
+            // Handle Availability Result
+            if (availabilityResponse.success) {
+                setAvailability(availabilityResponse);
+            } else {
+                setAvailabilityError('Availability could not be checked');
+            }
+
+        } catch (err: any) {
+            const errorMsg = err.message || 'Something went wrong';
+            setError(errorMsg);
+            toast.error('Error', { description: errorMsg });
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    const {
+        register,
+        handleSubmit,
+        validationState,
+        errorMessage,
+        cleanedDomain,
+        isSubmitting,
+    } = useDomainValidation({
+        onValidSubmit: handleAppraiseDomain,
+        showToasts: false, // We handle toasts manually above
+    });
 
     // Helper to get length category
     const getLengthCategory = (len: number) => {
@@ -63,46 +122,7 @@ export default function InstantAppraisal() {
         return 'bg-rose-500';
     };
 
-    const handleAppraise = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!domain.trim()) return;
-
-        setLoading(true);
-        setError(null);
-        setAvailabilityError(null);
-        setResult(null);
-        setAvailability(null);
-
-        try {
-            const cleanDomain = domain.replace(/^https?:\/\//, '').replace(/\/$/, '');
-            const encodedDomain = encodeURIComponent(cleanDomain);
-
-            // Execute both calls in parallel
-            const [appraisalResponse, availabilityResponse] = await Promise.all([
-                fetch(`/api/appraise?domain=${encodedDomain}`).then(r => r.json()),
-                fetch(`/api/check-availability?domain=${encodedDomain}`).then(r => r.json()).catch(err => ({ success: false, error: 'Network error' }))
-            ]);
-
-            // Handle Appraisal Result
-            if (appraisalResponse.success) {
-                setResult(appraisalResponse);
-            } else {
-                setError(appraisalResponse.error || 'Failed to get appraisal');
-            }
-
-            // Handle Availability Result
-            if (availabilityResponse.success) {
-                setAvailability(availabilityResponse);
-            } else {
-                setAvailabilityError('Availability could not be checked');
-            }
-
-        } catch (err: any) {
-            setError(err.message || 'Something went wrong');
-        } finally {
-            setLoading(false);
-        }
-    };
+    const isFormLoading = loading || isSubmitting;
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-slate-50 to-indigo-100 py-6 md:py-12 px-4 md:px-10 font-sans text-slate-800 flex flex-col items-center">
@@ -122,24 +142,25 @@ export default function InstantAppraisal() {
 
                 {/* Input Card */}
                 <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-xl border border-white/50 p-8">
-                    <form onSubmit={handleAppraise} className="flex flex-col md:flex-row gap-4">
-                        <div className="relative flex-1 group">
-                            <Search className="absolute left-4 top-3.5 h-5 w-5 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
-                            <input
-                                type="text"
+                    <form onSubmit={handleSubmit} className="flex flex-col md:flex-row gap-4">
+                        <div className="flex-1">
+                            <ValidatedInput
+                                {...register('domain')}
                                 placeholder="Enter domain (e.g. startup.io)"
-                                className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-lg outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all placeholder:text-slate-400"
-                                value={domain}
-                                onChange={(e) => setDomain(e.target.value)}
-                                disabled={loading}
+                                icon={<Search className="h-5 w-5" />}
+                                validationState={validationState}
+                                errorMessage={errorMessage}
+                                showCleanedValue={cleanedDomain}
+                                helperText="Supports: example.com, sub.example.io — auto-strips http/https/www"
+                                disabled={isFormLoading}
                             />
                         </div>
                         <button
                             type="submit"
-                            disabled={loading || !domain.trim()}
-                            className="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white text-lg font-semibold rounded-xl shadow-lg shadow-indigo-200 transition-all active:scale-95 flex items-center justify-center gap-2 min-w-[180px]"
+                            disabled={isFormLoading || validationState === 'invalid'}
+                            className="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white text-lg font-semibold rounded-xl shadow-lg shadow-indigo-200 transition-all active:scale-95 flex items-center justify-center gap-2 min-w-[180px] h-fit self-start mt-0 md:mt-0"
                         >
-                            {loading ? (
+                            {isFormLoading ? (
                                 <>
                                     <Loader2 className="w-5 h-5 animate-spin" />
                                     Analyzing...
@@ -150,7 +171,7 @@ export default function InstantAppraisal() {
                         </button>
                     </form>
 
-                    {/* Error Message */}
+                    {/* API Error Message */}
                     {error && (
                         <div className="mt-6 p-4 bg-red-50 border border-red-100 rounded-xl flex items-center gap-3 text-red-600 animate-in fade-in slide-in-from-top-2">
                             <AlertTriangle className="w-5 h-5 flex-shrink-0" />

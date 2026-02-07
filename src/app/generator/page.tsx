@@ -26,6 +26,7 @@ export default function GeneratorPage() {
 
         // --- State Management ---
         let masterResults: any[] = [];
+        let totalDomainsCount = 0;
         const CONCURRENT_CHECKS = 3;
         const checkQueue: string[] = [];
         let activeChecks = 0;
@@ -182,7 +183,9 @@ export default function GeneratorPage() {
 
                 if (!response.ok) throw new Error('Generation failed');
 
-                masterResults = await response.json();
+                const data = await response.json();
+                totalDomainsCount = data.totalDomains || 0;
+                masterResults = data.items || [];
 
                 // Reset filters to defaults on new generation
                 filterScore.value = "0";
@@ -209,6 +212,12 @@ export default function GeneratorPage() {
         function renderUI(domains: any[]) {
             resultsList.innerHTML = '';
 
+            // Update total count display
+            const countEl = document.querySelector('#total-domains-count');
+            if (countEl) {
+                countEl.textContent = `Total domains generated: ${totalDomainsCount}`;
+            }
+
             if (domains.length === 0) {
                 resultsList.innerHTML = '<p class="text-center text-slate-500 py-8 italic font-medium">No domains match your filters.</p>';
             } else {
@@ -225,6 +234,50 @@ export default function GeneratorPage() {
                             : '<span class="flex items-center gap-1.5 px-2 py-0.5 bg-slate-50 text-slate-400 rounded-full text-[10px] font-bold border border-slate-100">🔴 Taken</span>';
                     }
 
+                    // Build geo info HTML if available
+                    let geoInfoHtml = '';
+                    if (d.city && d.style === 'geo') {
+                        const popFormatted = d.population ? d.population.toLocaleString() : 'N/A';
+                        const stateText = d.state || 'N/A';
+                        geoInfoHtml = `
+                            <div class="flex items-center gap-4 mt-2">
+                                <!-- State with tooltip -->
+                                <div class="flex items-center gap-1.5">
+                                    <span class="flex items-center gap-1 px-2 py-0.5 bg-indigo-50 text-indigo-600 rounded-full text-[9px] font-bold border border-indigo-100">
+                                        📍 ${d.city}, ${stateText}
+                                    </span>
+                                    <div class="tooltip-trigger relative flex items-center">
+                                        <svg class="w-3.5 h-3.5 text-slate-400 cursor-help hover:text-indigo-500 transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <circle cx="12" cy="12" r="10" stroke-width="2"></circle>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 16v-4m0-4h.01"></path>
+                                        </svg>
+                                        <div class="tooltip-content absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 bg-slate-900 text-white text-[10px] leading-relaxed font-medium rounded-lg shadow-2xl opacity-0 invisible scale-95 transition-all duration-200 ease-out z-[100] pointer-events-none text-center">
+                                            <strong class="text-indigo-300">State</strong>: The US state where this city is located.
+                                            <div class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 transform rotate-45"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Population with tooltip -->
+                                ${d.population ? `
+                                <div class="flex items-center gap-1.5">
+                                    <span class="text-[9px] font-bold text-slate-500">👥 ${popFormatted}</span>
+                                    <div class="tooltip-trigger relative flex items-center">
+                                        <svg class="w-3.5 h-3.5 text-slate-400 cursor-help hover:text-indigo-500 transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <circle cx="12" cy="12" r="10" stroke-width="2"></circle>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 16v-4m0-4h.01"></path>
+                                        </svg>
+                                        <div class="tooltip-content absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-52 p-2 bg-slate-900 text-white text-[10px] leading-relaxed font-medium rounded-lg shadow-2xl opacity-0 invisible scale-95 transition-all duration-200 ease-out z-[100] pointer-events-none text-center">
+                                            <strong class="text-indigo-300">Population</strong>: Estimated city population. Higher population = larger potential market.
+                                            <div class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 transform rotate-45"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                ` : ''}
+                            </div>
+                        `;
+                    }
+
                     card.innerHTML = `
                         <div class="flex flex-col gap-1">
                             <div class="flex items-center gap-3">
@@ -234,19 +287,21 @@ export default function GeneratorPage() {
                                 </div>
                             </div>
                             <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">${d.style}</span>
+                            ${geoInfoHtml}
                         </div>
                         <div class="flex items-center gap-4">
                             <div class="flex flex-col items-end">
                                 <span class="text-xl font-black ${getScoreColor(d.score)}">${d.score}</span>
                                 <div class="flex items-center justify-end gap-1.5 relative">
                                     <span class="text-[10px] text-slate-400 font-bold uppercase">Domain Score</span>
-                                    <div class="group relative flex items-center">
-                                        <svg class="w-3.5 h-3.5 text-slate-300 cursor-help hover:text-indigo-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    <div class="tooltip-trigger relative flex items-center">
+                                        <svg class="w-4 h-4 text-slate-400 cursor-help hover:text-indigo-500 transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <circle cx="12" cy="12" r="10" stroke-width="2"></circle>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 16v-4m0-4h.01"></path>
                                         </svg>
-                                        <div class="absolute bottom-full right-0 mb-2 w-48 p-3 bg-slate-800 text-white text-[10px] leading-relaxed font-medium rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
-                                            Domain Score is a 0–100 score that evaluates the overall quality of the domain name (memorability, readability, brand potential, and basic SEO factors).
-                                            <div class="absolute -bottom-1 right-1 w-2 h-2 bg-slate-800 transform rotate-45"></div>
+                                        <div class="tooltip-content absolute bottom-full right-0 mb-2 w-72 p-3 bg-slate-900 text-white text-xs leading-relaxed font-medium rounded-xl shadow-2xl opacity-0 invisible scale-95 transition-all duration-200 ease-out z-[100] pointer-events-none">
+                                            <strong class="text-indigo-300">Domain Score</strong> is a 0–100 metric that evaluates overall domain quality including memorability, readability, brand potential, and basic SEO factors.
+                                            <div class="absolute -bottom-1.5 right-3 w-3 h-3 bg-slate-900 transform rotate-45"></div>
                                         </div>
                                     </div>
                                 </div>
@@ -294,6 +349,13 @@ export default function GeneratorPage() {
                 }
                 .custom-scrollbar::-webkit-scrollbar { width: 6px; }
                 .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+                
+                /* Tooltip hover behavior */
+                .tooltip-trigger:hover .tooltip-content {
+                    opacity: 1;
+                    visibility: visible;
+                    transform: scale(1);
+                }
             `}} />
 
             <div className="max-w-4xl mx-auto px-6 py-12 md:py-24">
@@ -313,7 +375,7 @@ export default function GeneratorPage() {
                         <div className="grid md:grid-cols-2 gap-6">
                             <div className="space-y-2">
                                 <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Main Keyword</label>
-                                <input name="keyword1" type="text" required placeholder="e.g. Swift" className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all text-slate-800 font-medium" />
+                                <input name="keyword1" type="text" required placeholder="e.g. Dental" className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all text-slate-800 font-medium" />
                             </div>
                             <div className="space-y-2">
                                 <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Secondary (Optional)</label>
@@ -331,7 +393,7 @@ export default function GeneratorPage() {
                                     <div className="w-14 h-8 bg-slate-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-7 after:w-7 after:transition-all peer-checked:bg-indigo-600"></div>
                                 </div>
                                 <span className="text-sm font-bold text-slate-600 group-hover:text-indigo-600 transition-colors uppercase tracking-widest">
-                                    Use Geo Locations?
+                                    Geo domain
                                 </span>
                             </label>
 
@@ -436,7 +498,10 @@ export default function GeneratorPage() {
                     </div>
 
                     <div className="flex items-center justify-between mb-8">
-                        <h2 className="text-2xl font-black text-slate-800">Domain Suggestions</h2>
+                        <div className="flex flex-col gap-1">
+                            <h2 className="text-2xl font-black text-slate-800">Domain Suggestions</h2>
+                            <span id="total-domains-count" className="text-sm font-bold text-indigo-600">Total domains generated: 0</span>
+                        </div>
                         <span className="px-3 py-1 bg-white border border-slate-200 rounded-full text-[10px] font-bold text-slate-400 uppercase tracking-widest shadow-sm">Instant Filter Enabled</span>
                     </div>
 
