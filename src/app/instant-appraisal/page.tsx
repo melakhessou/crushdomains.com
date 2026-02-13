@@ -1,32 +1,23 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { Search, Loader2, DollarSign, Activity, Tag, AlertTriangle, Sparkles, CheckCircle, XCircle, Info } from 'lucide-react';
+import { Search, Loader2, DollarSign, Activity, Tag, AlertTriangle, Sparkles, CheckCircle, XCircle, Info, TrendingUp, Briefcase, ShoppingCart } from 'lucide-react';
 import clsx from 'clsx';
 import { toast } from 'sonner';
 import { useDomainValidation } from '@/hooks/useDomainValidation';
 import { ValidatedInput } from '@/components/ui/ValidatedInput';
 
 interface AppraisalResult {
-    success: boolean;
     domain: string;
-    currency: string;
-    mid: number;
-    low: number;
-    high: number;
-    confidence: number;
-    domainScore: number;
-    sldLength: number;
-    syllables: number;
-    factors: {
-        length: number;
-        tldTier: string;
-        isDictionaryWord: boolean;
-        isBrandable: boolean;
-        isPremiumWord: boolean;
-        pronounceability: number;
-    };
-    raw?: any;
+    status: 'ok' | 'fallback_required';
+    liquidity_price: number | null;
+    market_price: number | null;
+    buy_now_price: number | null;
+    brand_score: 'high' | 'medium' | 'low';
+    length: number;
+    tld: string;
+    word_count: number;
+    error?: string;
 }
 
 interface AvailabilityResult {
@@ -56,16 +47,43 @@ export default function InstantAppraisal() {
 
             // Execute both calls in parallel
             const [appraisalResponse, availabilityResponse] = await Promise.all([
-                fetch(`/api/appraise?domain=${encodedDomain}`).then(r => r.json()),
-                fetch(`/api/check-availability?domain=${encodedDomain}`).then(r => r.json()).catch(err => ({ success: false, error: 'Network error' }))
+                fetch('/api/appraise', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ domains: [cleanedDomain] })
+                }).then(async r => {
+                    const text = await r.text();
+                    try { return JSON.parse(text); }
+                    catch (e) {
+                        console.error('Appraisal JSON Error:', text);
+                        throw new Error('Invalid server response');
+                    }
+                }),
+                fetch(`/api/check-availability?domain=${encodedDomain}`).then(async r => {
+                    const text = await r.text();
+                    try { return JSON.parse(text); }
+                    catch (e) {
+                        console.error('Availability JSON Error:', text);
+                        return { success: false, error: 'Network error' };
+                    }
+                }).catch(err => ({ success: false, error: 'Network error' }))
             ]);
 
             // Handle Appraisal Result
-            if (appraisalResponse.success) {
-                setResult(appraisalResponse);
-                toast.success(`Appraised ${cleanedDomain}`, {
-                    description: `Estimated value: $${appraisalResponse.mid?.toLocaleString()}`,
-                });
+            if (appraisalResponse.appraisals && appraisalResponse.appraisals.length > 0) {
+                const appraisal = appraisalResponse.appraisals[0];
+                setResult(appraisal);
+
+                if (appraisal.status === 'ok') {
+                    toast.success(`Appraised ${cleanedDomain}`, {
+                        description: `Market value: $${appraisal.market_price?.toLocaleString()}`,
+                    });
+                } else {
+                    toast.warning(`Appraisal limitation for ${cleanedDomain}`, {
+                        description: appraisal.error || 'Check details for more info',
+                    });
+                }
+
             } else {
                 const errorMsg = appraisalResponse.error || 'Failed to get appraisal';
                 setError(errorMsg);
@@ -100,26 +118,11 @@ export default function InstantAppraisal() {
         showToasts: false, // We handle toasts manually above
     });
 
-    // Helper to get length category
-    const getLengthCategory = (len: number) => {
-        if (len <= 6) return { label: 'Short', color: 'bg-emerald-50 text-emerald-700 border-emerald-100' };
-        if (len <= 12) return { label: 'Medium', color: 'bg-indigo-50 text-indigo-700 border-indigo-100' };
-        return { label: 'Long', color: 'bg-slate-50 text-slate-700 border-slate-100' };
-    };
-
-    // Helper to get brandability category
-    const getBrandabilityCategory = (syllables: number) => {
-        if (syllables <= 2) return { label: 'Very Brandable', color: 'bg-emerald-100 text-emerald-800' };
-        if (syllables <= 4) return { label: 'Moderately Brandable', color: 'bg-indigo-100 text-indigo-800' };
-        return { label: 'Complex', color: 'bg-slate-100 text-slate-800' };
-    };
-
-    // Helper to get score color
-    const getScoreColor = (score: number) => {
-        if (score >= 80) return 'bg-emerald-500';
-        if (score >= 60) return 'bg-indigo-500';
-        if (score >= 40) return 'bg-amber-500';
-        return 'bg-rose-500';
+    // Helper to get brand score color
+    const getBrandScoreColor = (score: string) => {
+        if (score === 'high') return { bg: 'bg-emerald-500', text: 'text-emerald-700', badge: 'bg-emerald-100' };
+        if (score === 'medium') return { bg: 'bg-indigo-500', text: 'text-indigo-700', badge: 'bg-indigo-100' };
+        return { bg: 'bg-amber-500', text: 'text-amber-700', badge: 'bg-amber-100' };
     };
 
     const isFormLoading = loading || isSubmitting;
@@ -127,7 +130,7 @@ export default function InstantAppraisal() {
     return (
         <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-slate-50 to-indigo-100 py-6 md:py-12 px-4 md:px-10 font-sans text-slate-800 flex flex-col items-center">
 
-            <div className="max-w-3xl w-full space-y-6">
+            <div className="max-w-4xl w-full space-y-6">
 
                 {/* Header */}
                 <div className="text-center space-y-2 relative">
@@ -136,7 +139,7 @@ export default function InstantAppraisal() {
                         Domain Appraisal
                     </h1>
                     <p className="text-base text-slate-500 font-medium">
-                        Get a real-time market valuation using CrushDomains technology.
+                        Get a real-time market valuation using Humbleworth & CrushDomains technology.
                     </p>
                 </div>
 
@@ -186,146 +189,117 @@ export default function InstantAppraisal() {
 
                         {/* Main Value Card */}
                         {result && (
-                            <div className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl border border-indigo-100 p-8 md:col-span-2 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
+                            <div className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl border border-indigo-100 p-8 md:col-span-2 flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden">
                                 <div className="absolute top-0 right-0 p-32 bg-indigo-500/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
 
-                                <div className="space-y-2 text-center md:text-left z-10 w-full md:w-auto">
+                                <div className="space-y-4 text-center md:text-left z-10 w-full md:w-auto">
                                     <h3 className="text-slate-500 font-semibold uppercase tracking-wider text-sm flex items-center gap-2 justify-center md:justify-start">
-                                        <DollarSign className="w-4 h-4" /> Estimated Value
+                                        <DollarSign className="w-4 h-4" /> Market Value
                                     </h3>
-                                    <div className="text-6xl font-black text-slate-800 tracking-tight">
-                                        ${result.mid?.toLocaleString()}
+                                    <div className="text-5xl md:text-6xl font-black text-slate-800 tracking-tight">
+                                        {result.market_price ? `$${result.market_price.toLocaleString()}` : 'N/A'}
                                     </div>
-                                    <div className="flex items-center justify-center md:justify-start gap-4 mt-2">
-                                        <span className="text-sm font-bold px-2 py-1 bg-indigo-50 text-indigo-700 rounded-lg">
-                                            {result.currency}
-                                        </span>
-                                        {(result.confidence ?? 0) > 0 && (
-                                            <span className={clsx("text-sm font-bold px-2 py-1 rounded-lg",
-                                                (result.confidence ?? 0) > 0.7 ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700"
-                                            )}>
-                                                {Math.round((result.confidence ?? 0) * 100)}% Confidence
-                                            </span>
-                                        )}
-                                    </div>
+                                    {result.status === 'fallback_required' && (
+                                        <div className="text-amber-600 text-sm font-medium flex items-center gap-1 justify-center md:justify-start">
+                                            <AlertTriangle className="w-4 h-4" />
+                                            Estimation based on fallback logic
+                                        </div>
+                                    )}
+                                    {result.status === 'ok' && (
+                                        <div className="flex items-center justify-center md:justify-start gap-2">
+                                            <span className="text-sm font-bold text-slate-400">USD Estimate</span>
+                                        </div>
+                                    )}
                                 </div>
 
-                                {/* Key Factors */}
-                                <div className="flex-1 grid grid-cols-2 gap-y-3 gap-x-6 z-10 p-4 bg-slate-50/50 rounded-xl border border-slate-100">
-                                    {result.factors?.isBrandable && (
-                                        <div className="flex items-center gap-2 text-sm font-medium text-slate-600">
-                                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
-                                            Brandable
+                                {/* Pricing Breakdown */}
+                                <div className="flex-1 grid grid-cols-2 gap-4 z-10 w-full md:w-auto">
+
+                                    <div className="p-4 bg-indigo-50 rounded-xl border border-indigo-100 flex flex-col items-center md:items-start">
+                                        <div className="text-xs font-bold text-indigo-400 uppercase tracking-widest mb-1 flex items-center gap-1">
+                                            <TrendingUp className="w-3 h-3" /> Liquidity
                                         </div>
-                                    )}
-                                    {result.factors?.isDictionaryWord && (
-                                        <div className="flex items-center gap-2 text-sm font-medium text-slate-600">
-                                            <div className="w-1.5 h-1.5 rounded-full bg-indigo-500"></div>
-                                            Dictionary Word
+                                        <div className="text-xl font-bold text-indigo-900">
+                                            {result.liquidity_price ? `$${result.liquidity_price.toLocaleString()}` : '-'}
                                         </div>
-                                    )}
-                                    {result.factors?.isPremiumWord && (
-                                        <div className="flex items-center gap-2 text-sm font-medium text-slate-600">
-                                            <div className="w-1.5 h-1.5 rounded-full bg-violet-500"></div>
-                                            Premium Keyword
-                                        </div>
-                                    )}
-                                    <div className="flex items-center gap-2 text-sm font-medium text-slate-600">
-                                        <div className="w-1.5 h-1.5 rounded-full bg-slate-400"></div>
-                                        Length: {result.factors?.length}
+                                        <div className="text-[10px] text-indigo-400 font-medium">Fast sale price</div>
                                     </div>
-                                    <div className="flex items-center gap-2 text-sm font-medium text-slate-600">
-                                        <div className="w-1.5 h-1.5 rounded-full bg-slate-400"></div>
-                                        TLD: {result.factors?.tldTier}
+
+                                    <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-100 flex flex-col items-center md:items-start">
+                                        <div className="text-xs font-bold text-emerald-400 uppercase tracking-widest mb-1 flex items-center gap-1">
+                                            <ShoppingCart className="w-3 h-3" /> Buy Now
+                                        </div>
+                                        <div className="text-xl font-bold text-emerald-900">
+                                            {result.buy_now_price ? `$${result.buy_now_price.toLocaleString()}` : '-'}
+                                        </div>
+                                        <div className="text-[10px] text-emerald-500 font-medium">Retail listing</div>
                                     </div>
+
                                 </div>
                             </div>
                         )}
 
-                        {/* Domain Score Block */}
+                        {/* Metadata & Brand Score */}
                         {result && (
-                            <div className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl border border-indigo-50 p-6 md:col-span-2 animate-in zoom-in-95 duration-500">
-                                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                                    <div className="space-y-4 flex-1">
-                                        <div className="flex items-center justify-between mb-1">
-                                            <h4 className="font-bold text-slate-700 flex items-center gap-2">
-                                                <Activity className="w-5 h-5 text-indigo-500" />
-                                                Domain Score
-                                            </h4>
-                                            <span className="text-xl font-black text-indigo-600">{result.domainScore} <span className="text-slate-300 text-sm font-bold">/ 100</span></span>
-                                        </div>
+                            <div className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl border border-slate-100 p-6 flex flex-col justify-between">
+                                <div className="flex items-center justify-between mb-6">
+                                    <h4 className="font-bold text-slate-700 flex items-center gap-2">
+                                        <Activity className="w-5 h-5 text-indigo-500" />
+                                        Domain Strength
+                                    </h4>
+                                    <span className={clsx("text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide", getBrandScoreColor(result.brand_score).badge, getBrandScoreColor(result.brand_score).text)}>
+                                        {result.brand_score} Brand Score
+                                    </span>
+                                </div>
 
-                                        {/* Progress Bar */}
-                                        <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden border border-slate-50">
-                                            <div
-                                                className={clsx("h-full transition-all duration-1000 ease-out rounded-full", getScoreColor(result.domainScore))}
-                                                style={{ width: `${result.domainScore}%` }}
-                                            />
-                                        </div>
-
-                                        {/* Metrics Row */}
-                                        <div className="flex flex-wrap gap-4 pt-2">
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Length:</span>
-                                                <span className="text-sm font-bold text-slate-700">{result.sldLength} chars</span>
-                                                <span className={clsx("text-[10px] px-2 py-0.5 rounded-full font-bold border", getLengthCategory(result.sldLength).color)}>
-                                                    {getLengthCategory(result.sldLength).label}
-                                                </span>
-                                            </div>
-                                            <div className="w-px h-4 bg-slate-200 hidden md:block" />
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Syllables:</span>
-                                                <span className="text-sm font-bold text-slate-700">{result.syllables}</span>
-                                                <span className={clsx("text-[10px] px-2 py-0.5 rounded-full font-bold", getBrandabilityCategory(result.syllables).color)}>
-                                                    {getBrandabilityCategory(result.syllables).label}
-                                                </span>
-                                            </div>
-                                        </div>
+                                <div className="space-y-4">
+                                    <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+                                        <span className="text-sm font-medium text-slate-500">Length</span>
+                                        <span className="font-bold text-slate-700">{result.length} characters</span>
                                     </div>
-
-                                    {/* Desktop-only visual hint */}
-                                    <div className="hidden md:flex flex-col items-center justify-center p-4 bg-indigo-50/30 rounded-2xl border border-indigo-100/50 w-32 shrink-0">
-                                        <div className="relative">
-                                            <svg className="w-16 h-16 transform -rotate-90">
-                                                <circle cx="32" cy="32" r="28" stroke="currentColor" strokeWidth="4" fill="transparent" className="text-slate-100" />
-                                                <circle cx="32" cy="32" r="28" stroke="currentColor" strokeWidth="4" fill="transparent" strokeDasharray={176} strokeDashoffset={176 - (176 * result.domainScore) / 100} className="text-indigo-500 transition-all duration-1000" />
-                                            </svg>
-                                            <div className="absolute inset-0 flex items-center justify-center font-black text-xs text-slate-700">
-                                                {result.domainScore}%
-                                            </div>
-                                        </div>
-                                        <span className="text-[10px] font-bold text-indigo-400 uppercase mt-2">Quality</span>
+                                    <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+                                        <span className="text-sm font-medium text-slate-500">Extension</span>
+                                        <span className="font-bold text-slate-700">.{result.tld}</span>
                                     </div>
+                                    <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+                                        <span className="text-sm font-medium text-slate-500">Word Count</span>
+                                        <span className="font-bold text-slate-700">~{result.word_count}</span>
+                                    </div>
+                                    {result.error && (
+                                        <div className="p-3 bg-red-50 rounded-lg text-xs text-red-600">
+                                            Note: {result.error}
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         )}
 
                         {/* Availability Card */}
-                        <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-lg border border-white/50 p-6 flex flex-col justify-center">
+                        <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-lg border border-white/50 p-6 flex flex-col justify-center min-h-[240px]">
                             <h4 className="font-semibold text-slate-700 mb-4 flex items-center gap-2">
                                 <Search className="w-4 h-4 text-indigo-500" />
                                 Availability Status
                             </h4>
                             {availability ? (
                                 <div className={clsx(
-                                    "p-4 rounded-xl flex items-center gap-4 border transition-all duration-500",
+                                    "p-6 rounded-xl flex items-center gap-4 border transition-all duration-500 flex-1",
                                     availability.available
-                                        ? "bg-emerald-50 border-emerald-100 text-emerald-800 shadow-sm shadow-emerald-100"
-                                        : "bg-amber-50 border-amber-100 text-amber-800 shadow-sm shadow-amber-100"
+                                        ? "bg-emerald-50 border-emerald-100 text-emerald-800 shadow-emerald-100"
+                                        : "bg-amber-50 border-amber-100 text-amber-800 shadow-amber-100"
                                 )}>
                                     {availability.available ? (
-                                        <CheckCircle className="w-8 h-8 text-emerald-500 p-1 bg-white rounded-full" />
+                                        <CheckCircle className="w-10 h-10 text-emerald-500 p-1 bg-white rounded-full flex-shrink-0" />
                                     ) : (
-                                        <XCircle className="w-8 h-8 text-amber-500 p-1 bg-white rounded-full" />
+                                        <XCircle className="w-10 h-10 text-amber-500 p-1 bg-white rounded-full flex-shrink-0" />
                                     )}
                                     <div>
-                                        <div className="font-bold text-lg">
+                                        <div className="font-bold text-2xl mb-1">
                                             {availability.available ? 'Available' : 'Taken'}
                                         </div>
-                                        <div className="text-sm opacity-80 leading-tight">
+                                        <div className="text-sm opacity-80 leading-relaxed">
                                             {availability.available
-                                                ? 'This domain is likely ready to register!'
-                                                : 'This domain is already registered.'}
+                                                ? 'This domain is likely available for registration!'
+                                                : 'This domain is already registered to someone else.'}
                                         </div>
                                     </div>
                                 </div>
@@ -335,37 +309,9 @@ export default function InstantAppraisal() {
                                     <span className="text-sm">{availabilityError}</span>
                                 </div>
                             ) : (
-                                <div className="p-8 flex flex-col items-center justify-center text-slate-400 gap-3">
-                                    <Loader2 className="w-6 h-6 animate-spin text-indigo-200" />
-                                    <span className="text-sm font-medium">Checking status...</span>
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Price Range */}
-                        <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-lg border border-white/50 p-6">
-                            <h4 className="font-semibold text-slate-700 mb-3 flex items-center gap-2">
-                                <Tag className="w-4 h-4 text-indigo-500" />
-                                Typical Range
-                            </h4>
-                            {result ? (
-                                <div className="space-y-4">
-                                    <div className="flex justify-between items-end">
-                                        <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">Low</div>
-                                        <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">High</div>
-                                    </div>
-                                    <div className="h-4 bg-slate-100 rounded-full relative overflow-hidden border border-slate-50 shadow-inner">
-                                        <div className="absolute inset-y-0 bg-gradient-to-r from-indigo-400/20 via-indigo-500/40 to-indigo-600/20 w-full" />
-                                        <div className="absolute inset-y-0 bg-indigo-500 shadow-[0_0_15px_rgba(99,102,241,0.5)] w-1 rounded-full left-1/2 transform -translate-x-1/2" />
-                                    </div>
-                                    <div className="flex justify-between font-black text-slate-700 text-lg">
-                                        <span>${result.low?.toLocaleString()}</span>
-                                        <span>${result.high?.toLocaleString()}</span>
-                                    </div>
-                                </div>
-                            ) : (
-                                <div className="h-24 flex items-center justify-center text-slate-300 italic text-sm">
-                                    Awaiting appraisal...
+                                <div className="flex-1 flex flex-col items-center justify-center text-slate-400 gap-3">
+                                    <Loader2 className="w-8 h-8 animate-spin text-indigo-200" />
+                                    <span className="text-sm font-medium">Checking global registries...</span>
                                 </div>
                             )}
                         </div>
@@ -381,24 +327,24 @@ export default function InstantAppraisal() {
                             <div className="grid md:grid-cols-3 gap-8">
                                 <div className="space-y-3">
                                     <div className="p-2 w-10 h-10 bg-white/5 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
-                                        <Activity className="w-5 h-5 text-indigo-400" />
+                                        <Briefcase className="w-5 h-5 text-indigo-400" />
                                     </div>
-                                    <h5 className="font-bold text-lg">Linguistic Quality</h5>
-                                    <p className="text-slate-400 text-sm leading-relaxed">Length, syllables, and keywords determine brandability and consumer trust.</p>
+                                    <h5 className="font-bold text-lg">Market Consensus</h5>
+                                    <p className="text-slate-400 text-sm leading-relaxed">Values derived from liquidity (auction) and retail (marketplace) data.</p>
                                 </div>
                                 <div className="space-y-3">
                                     <div className="p-2 w-10 h-10 bg-white/5 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
                                         <Search className="w-5 h-5 text-indigo-400" />
                                     </div>
-                                    <h5 className="font-bold text-lg">Market Sales</h5>
-                                    <p className="text-slate-400 text-sm leading-relaxed">Comparative data from millions of historical domain sales and market trends.</p>
+                                    <h5 className="font-bold text-lg">AI Prediction</h5>
+                                    <p className="text-slate-400 text-sm leading-relaxed">Powered by Humbleworth model to estimate real-time fair market value.</p>
                                 </div>
                                 <div className="space-y-3">
                                     <div className="p-2 w-10 h-10 bg-white/5 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
                                         <Sparkles className="w-5 h-5 text-indigo-400" />
                                     </div>
-                                    <h5 className="font-bold text-lg">AI Estimation</h5>
-                                    <p className="text-slate-400 text-sm leading-relaxed">Our neural network weighs factors like TLD scarcity and keyword commercial intent.</p>
+                                    <h5 className="font-bold text-lg">Brand Strength</h5>
+                                    <p className="text-slate-400 text-sm leading-relaxed">Analysis of length, keyword density, and TLD authority.</p>
                                 </div>
                             </div>
                         </div>

@@ -118,7 +118,15 @@ export default function GeneratorPage() {
                 if (!checkCache.has(domain)) {
                     const res = await fetch(`/api/check-domain?domain=${domain}`);
                     if (!res.ok) throw new Error('Check failed');
-                    const data = await res.json();
+
+                    const text = await res.text();
+                    let data;
+                    try {
+                        data = JSON.parse(text);
+                    } catch (e) {
+                        console.error('Check JSON Error. Response:', text);
+                        throw e;
+                    }
                     checkCache.set(domain, { available: data.available });
                 }
 
@@ -183,7 +191,14 @@ export default function GeneratorPage() {
 
                 if (!response.ok) throw new Error('Generation failed');
 
-                const data = await response.json();
+                const text = await response.text();
+                let data;
+                try {
+                    data = JSON.parse(text);
+                } catch (e) {
+                    console.error('JSON Parse Error. Response:', text);
+                    throw new Error('Invalid server response format');
+                }
                 totalDomainsCount = data.totalDomains || 0;
                 masterResults = data.items || [];
 

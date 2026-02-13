@@ -1,70 +1,51 @@
 import { NextRequest, NextResponse } from 'next/server';
+import Replicate from 'replicate';
 
-/**
- * Refined syllable counter using consonant-vowel transitions.
- */
-function countSyllables(domainLabel: string): number {
-    // 1. Lowercase and remove non-letters
-    let word = domainLabel.toLowerCase().replace(/[^a-z]/g, '');
-    if (word.length === 0) return 1;
-    if (word.length <= 3) return 1;
 
-    const vowels = ['a', 'e', 'i', 'o', 'u', 'y'];
-    let count = 0;
-    let prevIsVowel = vowels.includes(word[0]);
 
-    // Count initial vowel if exists
-    if (prevIsVowel) count++;
+const REPLICATE_API_TOKEN = process.env.REPLICATE_API_TOKEN;
 
-    // 2. Count transitions: consonant -> vowel
-    for (let i = 1; i < word.length; i++) {
-        const isVowel = vowels.includes(word[i]);
-        if (isVowel && !prevIsVowel) {
-            count++;
-        }
-        prevIsVowel = isVowel;
-    }
+import { calculateFallbackPrice } from '../../../lib/appraisal-fallback';
+import { evaluateBrand } from '../../../lib/brand-evaluation';
 
-    // 3. Subtract 1 for trailing silent "e" (except "le" cases)
-    if (word.length > 2 && word.endsWith('e') && !word.endsWith('le')) {
-        // Only subtract if it's not the only "vowel group" we counted
-        // e.g. "code" -> 1 transition (c->o), "de" -> would be 0 if we subtracted (but handled by min 1)
-        if (count > 1) count--;
-    }
-
-    // 4. Minimum 1 syllable
-    return Math.max(1, count);
+interface AppraisalResult {
+    domain: string;
+    source: 'primary' | 'fallback';
+    liquidity_price: number | null;
+    market_price: number | null;
+    // Kept for frontend backward compatibility
+    status: 'ok' | 'fallback_required';
+    buy_now_price: number | null;
+    brand_score: 'high' | 'medium' | 'low';
+    brand_level: 'HIGH' | 'MEDIUM' | 'LOW';
+    brand_multiplier: number;
+    length: number;
+    tld: string;
+    word_count: number;
+    error?: string;
+    fallback_signals?: any;
 }
 
-/**
- * Calculates a custom domain score based on linguistic and market factors.
- */
-function calculateDomainScore(domain: string, sld: string, factors: any): number {
-    let score = 40; // Reduced base for more dynamic range
+// Initialize Replicate
+const replicate = new Replicate({
+    auth: REPLICATE_API_TOKEN,
+});
 
-    // 1. Length (Shorter is better, SLD focus)
-    const lengthScore = Math.max(0, (12 - sld.length) * 5);
-    score += lengthScore;
+export async function POST(req: NextRequest) {
+    try {
+        const body = await req.json();
+        const { domains } = body;
 
-    // 2. TLD Factor
-    if (domain.endsWith('.com')) score += 15;
-    else if (factors.tldTier === 'premium') score += 10;
+        if (!domains || !Array.isArray(domains) || domains.length === 0) {
+            return NextResponse.json({ error: 'Invalid domains input' }, { status: 400 });
+        }
 
-    // 3. Brandability Signals
-    if (factors.isBrandable) score += 15;
-    if (factors.isDictionaryWord) score += 10;
-    if (factors.isPremiumWord) score += 10;
-
-    // 4. Syllable Penalty/Bonus
-    const syllables = countSyllables(sld);
-    if (syllables <= 2) score += 10;
-    else if (syllables >= 5) score -= 15;
-
-    // 5. Complexity cluster
-    const hasClusters = /[^aeiouy]{3,}/i.test(sld);
-    if (hasClusters) score -= 10;
-
-    return Math.min(100, Math.max(0, Math.round(score)));
+        const appraisals = await getAppraisals(domains);
+        return NextResponse.json({ appraisals });
+    } catch (error: any) {
+        console.error('Appraisal API Error:', error);
+        return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
+    }
 }
 
 export async function GET(req: NextRequest) {
@@ -72,88 +53,176 @@ export async function GET(req: NextRequest) {
     const domain = searchParams.get('domain');
 
     if (!domain) {
-        return NextResponse.json({ error: 'Domain is required' }, { status: 400 });
-    }
-
-    const apiKey = process.env.DOMSCAN_API_KEY?.trim();
-
-    if (!apiKey) {
-        console.error('[Appraise API] DOMSCAN_API_KEY is missing');
-        return NextResponse.json(
-            { error: 'Appraisal service not configured' },
-            { status: 500 }
-        );
+        return NextResponse.json({ error: 'Domain parameter is required' }, { status: 400 });
     }
 
     try {
-        console.log(`[Appraisal] Fetching valuation for ${domain} from DomScan`);
+        const results = await getAppraisals([domain]);
+        const result = results[0];
 
-        const response = await fetch(`https://domscan.net/v1/value?domain=${encodeURIComponent(domain)}`, {
-            headers: {
-                'Authorization': `Bearer ${apiKey}`,
-                'Accept': 'application/json',
-                'User-Agent': 'CrushDomains/1.0'
-            },
-            cache: 'no-store'
-        });
-
-        if (!response.ok) {
-            const status = response.status;
-            const text = await response.text();
-            console.error(`[Appraisal] DomScan Error ${status}: ${text}`);
-
-            return NextResponse.json(
-                {
-                    success: false,
-                    error: 'Failed to fetch appraisal',
-                    debug: {
-                        status,
-                        message: text.slice(0, 200)
-                    }
-                },
-                { status: status }
-            );
-        }
-
-        const data = await response.json();
-        const sld = data.domain?.split('.')[0] || '';
-
-        // Calculate custom metrics
-        const syllables = countSyllables(sld);
-        const domainScore = calculateDomainScore(data.domain || domain, sld, data.factors || {});
-
-        // Normalize the response
-        const normalized = {
-            success: true,
-            domain: data.domain,
-            currency: data.estimate?.currency || 'USD',
-            mid: data.estimate?.mid || 0,
-            low: data.estimate?.low || 0,
-            high: data.estimate?.high || 0,
-            confidence: data.confidence || 0,
-            domainScore: domainScore,
-            sldLength: sld.length,
-            syllables: syllables,
-            factors: {
-                length: data.factors?.length,
-                tldTier: data.factors?.tldTier || 'standard',
-                isDictionaryWord: data.factors?.isDictionaryWord,
-                isBrandable: data.factors?.isBrandable,
-                isPremiumWord: data.factors?.isPremiumWord,
-                pronounceability: data.factors?.pronounceability
-            }
-        };
-
-        return NextResponse.json(normalized, { status: 200 });
+        // Maintain some backward compatibility structure if needed by frontend
+        // But primarily return the new structure as the "raw" result or main object
+        // For now, returning the new structure directly.
+        return NextResponse.json(result);
 
     } catch (error: any) {
-        console.error('[Appraise API] Internal Error:', error);
-        return NextResponse.json(
-            {
-                success: false,
-                error: 'Internal server error while fetching appraisal'
-            },
-            { status: 500 }
-        );
+        console.error('Appraisal API Error:', error);
+        return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
     }
+}
+
+
+async function getAppraisals(domains: string[]): Promise<AppraisalResult[]> {
+    try {
+        const input = {
+            domains: domains.join(','),
+        };
+
+        const output: any = await replicate.run(
+            "humbleworth/price-predict-v1:a925db842c707850e4ca7b7e86b217692b0353a9ca05eb028802c4a85db93843",
+            { input }
+        );
+
+        // console.log("Replicate Output:", JSON.stringify(output, null, 2));
+
+        // The model output format validation
+        // Actual output structure: { valuations: [ { domain, marketplace, auction, brokerage } ] }
+        let valuations = [];
+        if (output && Array.isArray(output.valuations)) {
+            valuations = output.valuations;
+        } else if (Array.isArray(output)) {
+            // Fallback if structure varies
+            valuations = output;
+        } else {
+            console.error("Invalid Replicate output format", output);
+            return domains.map(d => createFallbackResult(d));
+        }
+
+        console.log("Valuations found:", JSON.stringify(valuations));
+
+        return domains.map((domain, index) => {
+            // Find matching result logic
+            const modelResult = valuations.find((r: any) => r.domain === domain) || valuations[index];
+            if (!modelResult) console.warn(`No model result for ${domain}`);
+            return processModelResult(domain, modelResult);
+        });
+
+    } catch (error: any) {
+        console.error("Replicate Inference Error:", error);
+        // Return all fallbacks
+        return domains.map(d => createFallbackResult(d, `Model inference failed: ${error.message || error}`));
+    }
+}
+
+function processModelResult(domain: string, result: any): AppraisalResult {
+    const metadata = extractMetadata(domain);
+
+    // STEP 2: VALIDATE RESPONSE
+    // If any critical value is missing/null/error -> fallback
+    if (!result || result.error || result.marketplace === undefined || result.auction === undefined || result.brokerage === undefined) {
+        return createFallbackResult(domain, result?.error || 'Invalid model output');
+    }
+
+    // STEP 3: INTERNAL PRICING MODEL
+    const marketplace = Number(result.marketplace);
+    const auction = Number(result.auction);
+    const brokerage = Number(result.brokerage);
+
+    if (isNaN(marketplace) || isNaN(auction) || isNaN(brokerage)) {
+        return createFallbackResult(domain, 'NaN values in model output');
+    }
+
+    if (marketplace <= 0 && auction <= 0 && brokerage <= 0) {
+        return createFallbackResult(domain, 'Zero values in model output');
+    }
+
+    // Brand evaluation
+    const brand = evaluateBrand(domain);
+    const multiplier = brand.brand_multiplier;
+
+    const liquidity_price = Math.round(auction * multiplier);
+
+    const market_price = Math.round(
+        ((marketplace * 0.7) + (brokerage * 0.3)) * multiplier
+    );
+
+    const buy_now_price = Math.round(
+        market_price * 1.18
+    );
+
+    return {
+        domain,
+        source: 'primary' as const,
+        status: 'ok' as const,
+        liquidity_price,
+        market_price,
+        buy_now_price,
+        brand_level: brand.brand_level,
+        brand_multiplier: brand.brand_multiplier,
+        ...metadata
+    };
+}
+
+function createFallbackResult(domain: string, errorMsg?: string): AppraisalResult {
+    const metadata = extractMetadata(domain);
+    const fallback = calculateFallbackPrice(domain);
+    const brand = evaluateBrand(domain);
+    const multiplier = brand.brand_multiplier;
+
+    const market_price = Math.round(fallback.fallback_price * multiplier);
+    const liquidity_price = Math.round(market_price * 0.6);
+    const buy_now_price = Math.round(market_price * 1.5);
+
+    // Log internally for debugging but never expose to users
+    if (errorMsg) {
+        console.warn(`[Fallback] ${domain}: ${errorMsg}`);
+    }
+
+    return {
+        domain,
+        source: 'fallback' as const,
+        status: 'ok' as const,
+        liquidity_price,
+        market_price,
+        buy_now_price,
+        brand_level: brand.brand_level,
+        brand_multiplier: brand.brand_multiplier,
+        ...metadata,
+    };
+}
+
+
+function extractMetadata(domain: string) {
+    const parts = domain.split('.');
+    const tld = parts.length > 1 ? parts[parts.length - 1] : '';
+    const name = parts[0]; // simplistic, assumes no subdomains or handles them as part of name
+    const length = name.length;
+
+    // Word count approx:
+    // Split by common delimiters if any (though domains usually valid hostname chars)
+    // or use a simple heuristic. User said "split by dictionary detection (approx)".
+    // Without a dictionary, we can try to split by some logic or just set to 1 if no clear separators.
+    // Since we don't have a dictionary loaded here in Edge runtime easily, 
+    // we'll stick to a very simple heuristic or just usage of hyphens if any.
+    // Improved heuristic: crude estimation based on avg word length (5). 
+    // Real dictionary splitting is heavy for Edge.
+    const word_count = name.includes('-')
+        ? name.split('-').length
+        : Math.max(1, Math.round(length / 5));
+
+
+    // Brand Score logic:
+    // short(<10) -> high
+    // medium(<15) -> medium
+    // else -> low
+    let brand_score: 'high' | 'medium' | 'low' = 'low';
+    if (length < 10) brand_score = 'high';
+    else if (length < 15) brand_score = 'medium';
+
+    return {
+        length,
+        tld,
+        word_count,
+        brand_score
+    };
 }
