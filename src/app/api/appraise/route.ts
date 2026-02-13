@@ -6,6 +6,7 @@ const REPLICATE_API_TOKEN = process.env.REPLICATE_API_TOKEN;
 import { calculateFallbackPrice } from '../../../lib/appraisal-fallback';
 import { evaluateBrand } from '../../../lib/brand-evaluation';
 import { radioTest } from '../../../lib/radio-test';
+import { checkTldRegistrations } from '../../../lib/tld-checker';
 
 // --- Types ---
 
@@ -17,6 +18,8 @@ interface AppraisalResult {
     radio_flagged: boolean;
     brand_level: 'HIGH' | 'MEDIUM' | 'LOW';
     brand_multiplier: number;
+    tlds_registered_count: number;
+    registered_tlds: string[];
     // Kept for frontend backward compatibility
     status: 'ok';
     buy_now_price: number;
@@ -78,7 +81,7 @@ async function runPipeline(domains: string[]): Promise<AppraisalResult[]> {
     const primaryResults = await callPrimaryModel(domains);
 
     // Process each domain through the full pipeline
-    return domains.map((domain, index) => {
+    const results = await Promise.all(domains.map(async (domain, index) => {
         const primaryResult = primaryResults[domain] || null;
 
         // STEP 2 — Validate primary
@@ -101,10 +104,21 @@ async function runPipeline(domains: string[]): Promise<AppraisalResult[]> {
         const brand = evaluateBrand(domain);
 
         // STEP 6 — Comparable Sales Adjustment
-        // No comparable sales data source available → adjustment = 0
         const comparableAdjustment = 0;
 
-        // STEP 7 — Multi-Model Blending
+        // STEP 7 — Count Registered TLDs
+        let tldResult = { tlds_registered_count: 0, registered_tlds: [] as string[] };
+        try {
+            const tldCheck = await checkTldRegistrations(domain);
+            tldResult = {
+                tlds_registered_count: tldCheck.tlds_registered_count,
+                registered_tlds: tldCheck.registered_tlds,
+            };
+        } catch (err: any) {
+            console.warn(`[TLD Check] Failed for ${domain}: ${err.message}`);
+        }
+
+        // STEP 8 — Multi-Model Blending
         let primaryMarket = 0;
         if (primaryValid) {
             const mp = Number(primaryResult.marketplace);
@@ -114,8 +128,6 @@ async function runPipeline(domains: string[]): Promise<AppraisalResult[]> {
 
         const fallbackMarket = fallbackPrice;
 
-        // Blend: primary×0.55 + fallback×0.15 + comparable×0.20 (remaining 0.10 is implicit)
-        // When primary is unavailable, fallback carries full weight
         let blendedMarket: number;
         if (primaryValid) {
             blendedMarket = Math.round(
@@ -124,7 +136,6 @@ async function runPipeline(domains: string[]): Promise<AppraisalResult[]> {
                 (comparableAdjustment * 0.20)
             );
         } else {
-            // Fallback-only: use fallback as the full base
             blendedMarket = fallbackMarket;
         }
 
@@ -132,7 +143,7 @@ async function runPipeline(domains: string[]): Promise<AppraisalResult[]> {
         const market_price = Math.round(blendedMarket * brand.brand_multiplier);
         const liquidity_price = Math.round(market_price * 0.65);
 
-        // STEP 8 — Build output
+        // STEP 9 — Build output
         const metadata = extractMetadata(domain);
 
         return {
@@ -143,12 +154,16 @@ async function runPipeline(domains: string[]): Promise<AppraisalResult[]> {
             radio_flagged: radio.flagged,
             brand_level: brand.brand_level,
             brand_multiplier: brand.brand_multiplier,
+            tlds_registered_count: tldResult.tlds_registered_count,
+            registered_tlds: tldResult.registered_tlds,
             // Frontend compat
             status: 'ok' as const,
             buy_now_price: Math.round(market_price * 1.18),
             ...metadata,
         };
-    });
+    }));
+
+    return results;
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━
