@@ -132,18 +132,17 @@ function processModelResult(domain: string, result: any): AppraisalResult {
         return createFallbackResult(domain, 'NaN values in model output');
     }
 
-    if (marketplace <= 0 && auction <= 0 && brokerage <= 0) {
-        return createFallbackResult(domain, 'Zero values in model output');
+    if (marketplace <= 0 || auction <= 0 || brokerage <= 0) {
+        return createFallbackResult(domain, 'Zero/negative values in model output');
     }
 
-    // Brand evaluation
+    // Brand evaluation (metadata only — not applied to prices per spec)
     const brand = evaluateBrand(domain);
-    const multiplier = brand.brand_multiplier;
 
-    const liquidity_price = Math.round(auction * multiplier);
+    const liquidity_price = auction;
 
     const market_price = Math.round(
-        ((marketplace * 0.7) + (brokerage * 0.3)) * multiplier
+        (marketplace * 0.7) + (brokerage * 0.3)
     );
 
     const buy_now_price = Math.round(
@@ -167,13 +166,11 @@ function createFallbackResult(domain: string, errorMsg?: string): AppraisalResul
     const metadata = extractMetadata(domain);
     const fallback = calculateFallbackPrice(domain);
     const brand = evaluateBrand(domain);
-    const multiplier = brand.brand_multiplier;
 
-    const market_price = Math.round(fallback.fallback_price * multiplier);
+    const market_price = fallback.fallback_price;
     const liquidity_price = Math.round(market_price * 0.6);
     const buy_now_price = Math.round(market_price * 1.5);
 
-    // Log internally for debugging but never expose to users
     if (errorMsg) {
         console.warn(`[Fallback] ${domain}: ${errorMsg}`);
     }
