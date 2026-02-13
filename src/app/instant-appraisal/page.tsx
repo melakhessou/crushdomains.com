@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { Search, Loader2, DollarSign, Activity, Tag, AlertTriangle, Sparkles, CheckCircle, XCircle, Info, TrendingUp, Briefcase, ShoppingCart } from 'lucide-react';
+import { Search, Loader2, DollarSign, Activity, Tag, AlertTriangle, Sparkles, CheckCircle, XCircle, Info, TrendingUp, Briefcase, ShoppingCart, Globe } from 'lucide-react';
 import clsx from 'clsx';
 import { toast } from 'sonner';
 import { useDomainValidation } from '@/hooks/useDomainValidation';
@@ -17,6 +17,8 @@ interface AppraisalResult {
     length: number;
     tld: string;
     word_count: number;
+    tlds_registered_count?: number;
+    registered_tlds?: string[];
     error?: string;
 }
 
@@ -265,9 +267,22 @@ export default function InstantAppraisal() {
                                         <span className="text-sm font-medium text-slate-500">Word Count</span>
                                         <span className="font-bold text-slate-700">~{result.word_count}</span>
                                     </div>
-                                    {result.error && (
-                                        <div className="p-3 bg-red-50 rounded-lg text-xs text-red-600">
-                                            Note: {result.error}
+                                    {result.tlds_registered_count !== undefined && (
+                                        <div className="p-3 bg-indigo-50 rounded-lg border border-indigo-100">
+                                            <div className="flex justify-between items-center">
+                                                <span className="text-sm font-medium text-indigo-600 flex items-center gap-1.5">
+                                                    <Globe className="w-3.5 h-3.5" />
+                                                    Registered TLDs
+                                                </span>
+                                                <span className="font-bold text-indigo-900">{result.tlds_registered_count} / 10</span>
+                                            </div>
+                                            {result.registered_tlds && result.registered_tlds.length > 0 && (
+                                                <div className="flex flex-wrap gap-1.5 mt-2">
+                                                    {result.registered_tlds.map((tld: string) => (
+                                                        <span key={tld} className="text-[10px] font-bold px-2 py-0.5 bg-indigo-100 text-indigo-700 rounded-full">.{tld}</span>
+                                                    ))}
+                                                </div>
+                                            )}
                                         </div>
                                     )}
                                 </div>
