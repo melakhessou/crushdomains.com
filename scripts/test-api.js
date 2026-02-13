@@ -1,29 +1,20 @@
 // Use native fetch (Node 18+)
-const fetchFn = fetch;
 
 async function testApi() {
-    const domains = ['coolshop.com', 'my-long-test-domain.com', 'rare.ai'];
+    const domains = ['coolshop.com', 'xbzqkrwnpfl.com', 'my-long-test-domain.com', 'rare.ai'];
 
+    console.log('Testing /api/appraise with:', domains);
 
     try {
-        console.log('Testing /api/appraise with:', domains);
-        const response = await fetchFn('http://localhost:3000/api/appraise', {
+        const res = await fetch('http://localhost:3000/api/appraise', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ domains })
         });
-
-        if (!response.ok) {
-            console.error('API Error:', response.status, response.statusText);
-            const text = await response.text();
-            console.error('Body:', text);
-            return;
-        }
-
-        const data = await response.json();
+        const data = await res.json();
         console.log('API Response:', JSON.stringify(data, null, 2));
-    } catch (error) {
-        console.error('Test Failed:', error);
+    } catch (err) {
+        console.error('Fetch error:', err.message);
     }
 }
 
