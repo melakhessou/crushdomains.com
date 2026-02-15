@@ -6,6 +6,7 @@ import clsx from 'clsx';
 import { toast } from 'sonner';
 import { useDomainValidation } from '@/hooks/useDomainValidation';
 import { ValidatedInput } from '@/components/ui/ValidatedInput';
+import BuyDomainButton from '@/components/BuyDomainButton';
 
 interface AppraisalResult {
     domain: string;
@@ -227,14 +228,20 @@ export default function InstantAppraisal() {
                                         <div className="text-[10px] text-indigo-400 font-medium">Fast sale price</div>
                                     </div>
 
-                                    <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-100 flex flex-col items-center md:items-start">
-                                        <div className="text-xs font-bold text-emerald-400 uppercase tracking-widest mb-1 flex items-center gap-1">
-                                            <ShoppingCart className="w-3 h-3" /> Buy Now
+                                    <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-100 flex flex-col items-center justify-between">
+                                        <div className="text-xs font-bold text-emerald-400 uppercase tracking-widest mb-2 flex items-center gap-1">
+                                            <ShoppingCart className="w-3 h-3" /> Retail Options
                                         </div>
-                                        <div className="text-xl font-bold text-emerald-900">
-                                            {result.buy_now_price ? `$${result.buy_now_price.toLocaleString()}` : '-'}
+                                        <div className="w-full flex justify-center">
+                                            <BuyDomainButton
+                                                domain={result.domain}
+                                                className="w-full bg-emerald-600 hover:bg-emerald-700 shadow-emerald-200"
+                                                disabled={!availability?.available}
+                                            />
                                         </div>
-                                        <div className="text-[10px] text-emerald-500 font-medium">Retail listing</div>
+                                        <div className="mt-2 text-[10px] text-emerald-500 font-medium text-center">
+                                            Check availability & price
+                                        </div>
                                     </div>
 
                                 </div>

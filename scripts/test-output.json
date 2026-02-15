@@ -1,0 +1,86 @@
+[
+  {
+    "domain": "example.com",
+    "fallback_price": 270,
+    "signals": {
+      "length": 7,
+      "tld": ".com",
+      "keyword_detected": null,
+      "penalty": 0,
+      "pronounce_bonus": 20,
+      "structure_bonus": 20
+    }
+  },
+  {
+    "domain": "coolshop.com",
+    "fallback_price": 360,
+    "signals": {
+      "length": 8,
+      "tld": ".com",
+      "keyword_detected": "shop",
+      "penalty": 0,
+      "pronounce_bonus": 20,
+      "structure_bonus": 20
+    }
+  },
+  {
+    "domain": "my-app.net",
+    "fallback_price": 230,
+    "signals": {
+      "length": 6,
+      "tld": ".net",
+      "keyword_detected": "app",
+      "penalty": -25,
+      "pronounce_bonus": 0,
+      "structure_bonus": 20
+    }
+  },
+  {
+    "domain": "app123.io",
+    "fallback_price": 250,
+    "signals": {
+      "length": 6,
+      "tld": ".io",
+      "keyword_detected": "app",
+      "penalty": -40,
+      "pronounce_bonus": 0,
+      "structure_bonus": 20
+    }
+  },
+  {
+    "domain": "short.ai",
+    "fallback_price": 210,
+    "signals": {
+      "length": 5,
+      "tld": ".ai",
+      "keyword_detected": null,
+      "penalty": 0,
+      "pronounce_bonus": 0,
+      "structure_bonus": 20
+    }
+  },
+  {
+    "domain": "supercalifragilistic.com",
+    "fallback_price": 215,
+    "signals": {
+      "length": 20,
+      "tld": ".com",
+      "keyword_detected": null,
+      "penalty": 0,
+      "pronounce_bonus": 20,
+      "structure_bonus": 20
+    }
+  },
+  {
+    "domain": "123456.com",
+    "fallback_price": 250,
+    "signals": {
+      "length": 6,
+      "tld": ".com",
+      "keyword_detected": null,
+      "penalty": -40,
+      "pronounce_bonus": 0,
+      "structure_bonus": 20
+    }
+  }
+]

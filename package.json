@@ -12,6 +12,7 @@
     "package": "npm run build && electron-packager . CrushDomains --platform=win32 --arch=x64 --out=dist --overwrite"
   },
   "dependencies": {
+    "@floating-ui/react": "^0.27.17",
     "@hookform/resolvers": "^5.2.2",
     "@types/papaparse": "^5.5.2",
     "axios": "^1.13.4",
