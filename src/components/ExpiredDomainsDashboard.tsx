@@ -288,6 +288,7 @@ export function ExpiredDomainsDashboard({ initialSearch = '', nicheTitle }: Dash
                     </aside>
 
                     <main>
+
                         <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-xl border border-white/50 overflow-hidden flex flex-col h-full min-h-[800px]">
                             <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-white/50">
                                 <div className="flex items-baseline gap-2">
@@ -303,6 +304,50 @@ export function ExpiredDomainsDashboard({ initialSearch = '', nicheTitle }: Dash
                                     </button>
                                 </div>
                             </div>
+
+
+                            {/* Pagination Toolbar */}
+                            <div className="px-4 py-3 border-b border-slate-100 bg-white/50 flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-slate-500">
+                                <div className="flex items-center gap-2">
+                                    <span>Rows per page:</span>
+                                    <select
+                                        className="bg-white border border-slate-200 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                                        value={itemsPerPage}
+                                        onChange={(e) => {
+                                            setItemsPerPage(Number(e.target.value));
+                                            setCurrentPage(1);
+                                        }}
+                                    >
+                                        <option value={25}>25</option>
+                                        <option value={50}>50</option>
+                                        <option value={100}>100</option>
+                                        <option value={200}>200</option>
+                                    </select>
+                                </div>
+
+                                <div className="flex items-center gap-4">
+                                    <span>
+                                        {startItem}-{endItem} of {totalItems}
+                                    </span>
+                                    <div className="flex items-center gap-1">
+                                        <button
+                                            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                                            disabled={currentPage === 1}
+                                            className="p-1 rounded hover:bg-slate-200 disabled:opacity-50 disabled:hover:bg-transparent transition-colors"
+                                        >
+                                            <ChevronLeft className="w-5 h-5" />
+                                        </button>
+                                        <button
+                                            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                                            disabled={currentPage === totalPages}
+                                            className="p-1 rounded hover:bg-slate-200 disabled:opacity-50 disabled:hover:bg-transparent transition-colors"
+                                        >
+                                            <ChevronRight className="w-5 h-5" />
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
                             <div className="flex-1 overflow-auto">
                                 <DomainTable domains={paginatedDomains} />
                             </div>

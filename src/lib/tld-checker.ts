@@ -34,8 +34,8 @@ export async function checkTldRegistrations(
     const registered: string[] = [];
     const available: string[] = [];
 
-    // Check each TLD — use sequential calls with small delay to respect rate limits
-    for (const tld of tldsToCheck) {
+    // Check each TLD in parallel
+    const checkPromises = tldsToCheck.map(async (tld) => {
         try {
             const fullDomain = `${sld}.${tld}`;
 
@@ -61,13 +61,13 @@ export async function checkTldRegistrations(
 
             if (!response.ok) {
                 console.warn(`[TLD Check] ${fullDomain}: HTTP ${response.status}`);
-                continue;
+                return;
             }
 
             const data = await response.json();
             const status = data.status?.[0];
 
-            if (!status) continue;
+            if (!status) return;
 
             // 'active' = registered, 'undelegated'/'inactive' = available
             if (status.summary === 'undelegated' || status.summary === 'inactive') {
@@ -76,13 +76,12 @@ export async function checkTldRegistrations(
                 registered.push(tld);
             }
 
-            // Small delay between requests to avoid rate limiting
-            await new Promise(resolve => setTimeout(resolve, 80));
-
         } catch (err: any) {
             console.warn(`[TLD Check] Error checking ${sld}.${tld}: ${err.message}`);
         }
-    }
+    });
+
+    await Promise.all(checkPromises);
 
     return {
         tlds_registered_count: registered.length,

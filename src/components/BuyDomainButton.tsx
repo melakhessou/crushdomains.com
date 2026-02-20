@@ -27,11 +27,10 @@ const getAffiliateLink = (registrar: string, domain: string) => {
     const encodedDomain = encodeURIComponent(domain);
     // Replace these with your actual affiliate IDs/URLs
     const links: Record<string, string> = {
+        dynadot: `https://www.dynadot.com/domain/search?domain=${encodedDomain}&aff=CRUSHDOMAINS&utm_source=crushdomains&utm_campaign=dynadot-ambassador`,
         namecheap: `https://www.namecheap.com/domains/registration/results/?domain=${encodedDomain}&aff=YOUR_ID`,
         spaceship: `https://www.spaceship.com/domain-search/?query=${encodedDomain}&aff=YOUR_ID`,
         godaddy: `https://uk.godaddy.com/domainsearch/find?checkAvail=1&domainToCheck=${encodedDomain}&aff=YOUR_ID`,
-        namecom: `https://www.name.com/domain/search/${encodedDomain}?aff=YOUR_ID`,
-        gname: `https://www.gname.com/search?domain=${encodedDomain}&aff=YOUR_ID`,
     };
     return links[registrar] || '#';
 };
@@ -44,6 +43,17 @@ interface Registrar {
 }
 
 const REGISTRARS: Registrar[] = [
+    {
+        id: 'dynadot',
+        name: 'Dynadot',
+        badge: 'Partner',
+        icon: (
+            <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5">
+                <circle cx="12" cy="12" r="10" stroke="#10B981" strokeWidth="2" />
+                <path d="M8 8H12C14.2091 8 16 9.79086 16 12C16 14.2091 14.2091 16 12 16H8V8Z" stroke="#10B981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+        ),
+    },
     {
         id: 'namecheap',
         name: 'Namecheap',
@@ -78,29 +88,6 @@ const REGISTRARS: Registrar[] = [
                 <path d="M17.5 19C19.9853 19 22 16.9853 22 14.5C22 12.132 20.177 10.2 17.85 10.01" stroke="#1BDBDB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 <path d="M6.5 19C4.01472 19 2 16.9853 2 14.5C2 12.132 3.823 10.2 6.15 10.01" stroke="#1BDBDB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 <path d="M12 14C13.6569 14 15 12.6569 15 11C15 9.34315 13.6569 8 12 8C10.3431 8 9 9.34315 9 11C9 12.6569 10.3431 14 12 14Z" stroke="#1BDBDB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-        ),
-    },
-    {
-        id: 'namecom',
-        name: 'Name.com',
-        icon: (
-            <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5">
-                <rect x="3" y="3" width="18" height="18" rx="2" stroke="#2C3E50" strokeWidth="2" />
-                <path d="M7 8H17" stroke="#2C3E50" strokeWidth="2" strokeLinecap="round" />
-                <path d="M7 12H17" stroke="#2C3E50" strokeWidth="2" strokeLinecap="round" />
-                <path d="M7 16H12" stroke="#2C3E50" strokeWidth="2" strokeLinecap="round" />
-            </svg>
-        ),
-    },
-    {
-        id: 'gname',
-        name: 'Gname',
-        icon: (
-            <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5">
-                <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="#E67E22" strokeWidth="2" />
-                <path d="M15 9L9 15" stroke="#E67E22" strokeWidth="2" strokeLinecap="round" />
-                <path d="M9 9L15 15" stroke="#E67E22" strokeWidth="2" strokeLinecap="round" />
             </svg>
         ),
     },

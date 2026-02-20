@@ -304,10 +304,10 @@ export default function GeneratorPage() {
                             <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">${d.style}</span>
                             ${geoInfoHtml}
                         </div>
-                        <div class="flex items-center gap-4">
-                            <div class="flex flex-col items-end">
-                                <span class="text-xl font-black ${getScoreColor(d.score)}">${d.score}</span>
-                                <div class="flex items-center justify-end gap-1.5 relative">
+                        <div className="flex items-center gap-4">
+                            <div className="flex flex-col items-end">
+                                <span className="text-xl font-black ${getScoreColor(d.score)}">${d.score}</span>
+                                <div className="flex items-center justify-end gap-1.5 relative">
                                     <span class="text-[10px] text-slate-400 font-bold uppercase">Domain Score</span>
                                     <div class="tooltip-trigger relative flex items-center">
                                         <svg class="w-4 h-4 text-slate-400 cursor-help hover:text-indigo-500 transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -321,6 +321,29 @@ export default function GeneratorPage() {
                                     </div>
                                 </div>
                             </div>
+                            
+                            <!-- Dynadot Button -->
+                            <a 
+                                href="https://www.dynadot.com/domain/search?domain=${d.domain}&aff=CRUSHDOMAINS&utm_source=crushdomains&utm_campaign=dynadot-ambassador" 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                class="hidden md:flex flex-col items-center justify-center px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl shadow-lg shadow-emerald-200 transition-all hover:scale-105 active:scale-95 group/btn"
+                                title="30% off via CrushDomains"
+                            >
+                                <div class="flex items-center gap-1.5">
+                                    <span class="font-bold text-sm">Buy @ Dynadot</span>
+                                    <svg viewBox="0 0 24 24" fill="none" class="w-4 h-4 text-white/90">
+                                        <path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </div>
+                                <span class="text-[10px] font-medium text-emerald-50 opacity-90">
+                                    ${d.domain.endsWith('.com') ? '$10.00' :
+                            d.domain.endsWith('.io') ? '$39.00' :
+                                d.domain.endsWith('.xyz') ? '$1.00' :
+                                    d.domain.endsWith('.net') ? '$12.00' : '$10.00'
+                        }
+                                </span>
+                            </a>
                         </div>
                     `;
                     resultsList.appendChild(card);
