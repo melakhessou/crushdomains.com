@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Sparkles, LayoutDashboard, Search, FileText, Menu, X } from 'lucide-react';
+import { Sparkles, LayoutDashboard, Search, FileText, Menu, X, Gavel } from 'lucide-react';
 import { useState } from 'react';
 import clsx from 'clsx';
 
@@ -10,6 +10,7 @@ const NAV_ITEMS = [
     { label: 'Expired Domains', href: '/', icon: LayoutDashboard },
     { label: 'Domain Generator', href: '/generator', icon: Sparkles },
     { label: 'Domain Appraisal', href: '/instant-appraisal', icon: FileText },
+    { label: 'Auctions', href: '/auctions', icon: Gavel },
 ];
 
 export function Navigation() {
