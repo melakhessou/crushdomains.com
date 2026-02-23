@@ -11,6 +11,7 @@ const NAV_ITEMS = [
     { label: 'Domain Generator', href: '/generator', icon: Sparkles },
     { label: 'Domain Appraisal', href: '/instant-appraisal', icon: FileText },
     { label: 'Auctions', href: '/auctions', icon: Gavel },
+    { label: 'Domain Search', href: '/domain-search', icon: Search },
 ];
 
 export function Navigation() {

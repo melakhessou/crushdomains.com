@@ -1,232 +1,222 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { RefreshCw, Gavel, Clock, Globe, SlidersHorizontal } from 'lucide-react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
+import { RefreshCw, Gavel, SlidersHorizontal, X } from 'lucide-react';
 import clsx from 'clsx';
-import { FiltersSidebar, DEFAULT_FILTERS, type Filters, type Lang as SidebarLang } from '@/components/FiltersSidebar';
-import { TableAuctions, type HumbleMap, type Lang as TableLang } from '@/components/TableAuctions';
 import type { Auction } from '@/app/api/auctions/route';
+import { parsePatterns, domainMatchesPatterns } from '@/lib/domain-pattern';
+import { DynadotFilters, type FilterState, SUPPORTED_TLDS } from '@/components/DynadotFilters';
+import { ResultsTable, type SortBy, type SortDir, type PageSize } from '@/components/ResultsTable';
 
-// ─── I18n ─────────────────────────────────────────────────────────────────────
+const DYNADOT_AFF_LINK = 'https://www.dynadot.com/?rsc=crushdomains&rsctrn=crushdomains&rscreg=crushdomains&rsceh=crushdomains&rscsb=crushdomains&rscco=crushdomains&rscbo=crushdomains';
+const LS_KEY_TLDS = 'crush-auctions-tlds';
 
-type Lang = 'en' | 'fr' | 'ar';
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
-const PAGE_DICT = {
-    en: {
-        title: 'Top Expired Deals',
-        subtitle: 'Best expired-domain auctions from Dynadot — filtered for deals.',
-        refresh: 'Refresh', refreshing: 'Refreshing…',
-        nextRefresh: 'Next refresh in',
-        cached: '(cached)', live: 'Live', fetched: 'Fetched',
-        error: 'Error loading auctions.', noKey: 'Dynadot API key not configured.',
-        results: (x: number, y: number) => `${x} deals · ${y} total`,
-        filters: 'Filters',
-    },
-    fr: {
-        title: 'Meilleures Offres Expirées',
-        subtitle: 'Les meilleures enchères Dynadot filtrées pour vous.',
-        refresh: 'Actualiser', refreshing: 'Chargement…',
-        nextRefresh: 'Prochain rafraîchissement dans',
-        cached: '(cache)', live: 'En direct', fetched: 'Récupéré',
-        error: 'Erreur de chargement.', noKey: 'Clé API Dynadot non configurée.',
-        results: (x: number, y: number) => `${x} offres · ${y} total`,
-        filters: 'Filtres',
-    },
-    ar: {
-        title: 'أفضل الصفقات',
-        subtitle: 'أفضل مزادات النطاقات من Dynadot — مفلترة لك.',
-        refresh: 'تحديث', refreshing: 'جارٍ التحديث…',
-        nextRefresh: 'التحديث القادم خلال',
-        cached: '(مخزن)', live: 'مباشر', fetched: 'جُلب',
-        error: 'خطأ في التحميل.', noKey: 'مفتاح API غير مُهيَّأ.',
-        results: (x: number, y: number) => `${x} صفقة · ${y} إجمالي`,
-        filters: 'الفلاتر',
-    },
-} as const;
+function parsePrice(str: string) {
+    return parseFloat(str.replace(/[^0-9.]/g, '')) || 0;
+}
 
-const LANGS: { code: Lang; label: string }[] = [
-    { code: 'en', label: 'EN' },
-    { code: 'fr', label: 'FR' },
-    { code: 'ar', label: 'AR' },
-];
+function parseDynaAppraisal(raw: string | null): number {
+    if (!raw) return 0;
+    return parseFloat(raw.replace(/[^0-9.]/g, '')) || 0;
+}
 
-const REFRESH_INTERVAL = 10 * 60; // 10 min
-const HUMBLE_BATCH = 20;      // domains per batch
+// ─── Props ────────────────────────────────────────────────────────────────────
 
-// ─── Build API URL from filters ───────────────────────────────────────────────
-
-function buildUrl(filters: Filters, force: boolean): string {
-    const p = new URLSearchParams();
-    p.set('priceMax', String(filters.priceMax));
-    if (filters.bids !== 'all') p.set('bids', filters.bids);
-    if (filters.time !== 'all') p.set('time', filters.time);
-    if (filters.tlds.size > 0) p.set('tlds', Array.from(filters.tlds).join(','));
-    if (force) p.set('force', '1');
-    return `/api/auctions?${p.toString()}`;
+interface Props {
+    auctions: Auction[];
+    generatedAt: string;
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export function AuctionsPageClient() {
-    const [auctions, setAuctions] = useState<Auction[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-    const [isMissingKey, setIsMissingKey] = useState(false);
-    const [fetchedAt, setFetchedAt] = useState<string | null>(null);
-    const [isCached, setIsCached] = useState(false);
-    const [total, setTotal] = useState(0);
-    const [lang, setLang] = useState<Lang>('en');
-    const [countdown, setCountdown] = useState(REFRESH_INTERVAL);
-    const [filters, setFilters] = useState<Filters>(() => ({
-        ...DEFAULT_FILTERS,
-        tlds: new Set(DEFAULT_FILTERS.tlds),
-    }));
-    const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+export function AuctionsPageClient({ auctions, generatedAt }: Props) {
+    const router = useRouter();
 
-    // HumbleWorth state
-    const [humbleMap, setHumbleMap] = useState<HumbleMap>({});
-    const [isHumbleLoading, setIsHumbleLoading] = useState(false);
+    // ── Filter state ─────────────────────────────────────────────────────────
+    const [showFilters, setShowFilters] = useState(true);
+    const [filters, setFilters] = useState<FilterState>({
+        selectedTlds: [],
+        maxPrice: null,
+        minBids: 0,
+        search: '',
+        patternInput: ''
+    });
+    const [patternHelpOpen, setPatternHelpOpen] = useState(false);
 
-    const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
-    const t = PAGE_DICT[lang];
-
-    // ── Fetch auctions ─────────────────────────────────────────────────────────
-    const fetchAuctions = useCallback(async (force = false) => {
-        setIsLoading(true);
-        setError(null);
-        setCountdown(REFRESH_INTERVAL);
-        setHumbleMap({});
-
-        try {
-            const res = await fetch(buildUrl(filters, force), { cache: 'no-store' });
-            const data = await res.json();
-
-            if (!res.ok) {
-                if (data.error?.includes('DYNA_DOT_API_KEY') || data.error?.includes('key missing')) {
-                    setIsMissingKey(true);
-                } else {
-                    setError(data.error ?? t.error);
-                }
-                setAuctions([]);
-            } else {
-                setAuctions(data.auctions ?? []);
-                setFetchedAt(data.fetchedAt ?? new Date().toISOString());
-                setIsCached(data.cached ?? false);
-                setTotal(data.total ?? data.auctions?.length ?? 0);
-                setIsMissingKey(false);
-            }
-        } catch {
-            setError(t.error);
-        } finally {
-            setIsLoading(false);
-        }
-    }, [filters, t.error]);
-
-    // ── HumbleWorth batch fetch ────────────────────────────────────────────────
-    const fetchHumble = useCallback(async (domains: string[]) => {
-        if (!domains.length) return;
-        setIsHumbleLoading(true);
-        const map: HumbleMap = {};
-
-        for (let i = 0; i < domains.length; i += HUMBLE_BATCH) {
-            const batch = domains.slice(i, i + HUMBLE_BATCH);
+    // ── Load / Save Preferences ──────────────────────────────────────────────
+    useEffect(() => {
+        const saved = localStorage.getItem(LS_KEY_TLDS);
+        if (saved) {
             try {
-                const res = await fetch('/api/bulk-appraisal', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ domains: batch }),
-                });
-                if (!res.ok) continue;
-                const data = await res.json();
-                for (const item of data.results ?? []) {
-                    map[item.domain] = item.market ?? 0;
+                const tlds = JSON.parse(saved);
+                if (Array.isArray(tlds)) {
+                    setFilters(prev => ({ ...prev, selectedTlds: tlds }));
                 }
-            } catch { /* non-fatal */ }
+            } catch { /* ignore */ }
         }
-
-        setHumbleMap(prev => ({ ...prev, ...map }));
-        setIsHumbleLoading(false);
     }, []);
 
-    // Trigger humble fetch when toggle is on and auctions load
     useEffect(() => {
-        if (filters.humbleMin && auctions.length > 0) {
-            const missing = auctions
-                .filter(a => humbleMap[a.domain] === undefined)
-                .map(a => a.domain)
-                .slice(0, 200); // cap at 200 to avoid overload
-            if (missing.length) fetchHumble(missing);
+        localStorage.setItem(LS_KEY_TLDS, JSON.stringify(filters.selectedTlds));
+    }, [filters.selectedTlds]);
+
+    // Compiled regexes — recomputed only when patternInput changes
+    const patternRegexes = useMemo(() => parsePatterns(filters.patternInput), [filters.patternInput]);
+
+    // ── Sort state ───────────────────────────────────────────────────────────
+    const [sortBy, setSortBy] = useState<SortBy>('endTime');
+    const [sortDir, setSortDir] = useState<SortDir>('asc');
+
+    // ── Pagination state ─────────────────────────────────────────────────────
+    const [pageSize, setPageSize] = useState<PageSize>(25);
+    const [currentPage, setCurrentPage] = useState(1);
+
+    // ── Refresh ──────────────────────────────────────────────────────────────
+    const [isRefreshing, setIsRefreshing] = useState(false);
+
+    const handleRefresh = useCallback(() => {
+        setIsRefreshing(true);
+        router.refresh();
+        setTimeout(() => setIsRefreshing(false), 2000);
+    }, [router]);
+
+    const handleSort = useCallback((col: SortBy) => {
+        if (sortBy === col) {
+            setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+        } else {
+            setSortBy(col);
+            setSortDir('asc');
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [filters.humbleMin, auctions]);
+    }, [sortBy]);
 
-    // Initial load (and when non-humble filters change)
-    useEffect(() => { fetchAuctions(); }, [fetchAuctions]);
+    const resetPage = useCallback(() => setCurrentPage(1), []);
 
-    // Auto-refresh every 10 min
-    useEffect(() => {
-        const timer = setInterval(() => fetchAuctions(false), REFRESH_INTERVAL * 1000);
-        return () => clearInterval(timer);
-    }, [fetchAuctions]);
+    // ── Filter + Sort (100% local) ───────────────────────────────────────────
+    const filteredAndSorted = useMemo(() => {
+        let list = [...auctions];
 
-    // Countdown ticker
-    useEffect(() => {
-        if (countdownRef.current) clearInterval(countdownRef.current);
-        countdownRef.current = setInterval(() => {
-            setCountdown(c => c <= 1 ? REFRESH_INTERVAL : c - 1);
-        }, 1000);
-        return () => { if (countdownRef.current) clearInterval(countdownRef.current); };
-    }, [fetchedAt]);
+        // TLD filter (multi)
+        if (filters.selectedTlds.length > 0) {
+            list = list.filter(a => filters.selectedTlds.includes(a.tld));
+        }
+        if (filters.maxPrice !== null && filters.maxPrice > 0) {
+            list = list.filter(a => parsePrice(a.current_bid_price) <= (filters.maxPrice as number));
+        }
+        if (filters.minBids > 0) {
+            list = list.filter(a => a.bids >= filters.minBids);
+        }
+        if (filters.search.trim() !== '') {
+            const q = filters.search.toLowerCase();
+            list = list.filter(a => a.domain.toLowerCase().includes(q));
+        }
+        if (patternRegexes.length > 0) {
+            list = list.filter(a => domainMatchesPatterns(a.domain, patternRegexes));
+        }
 
-    const mins = String(Math.floor(countdown / 60)).padStart(2, '0');
-    const secs = String(countdown % 60).padStart(2, '0');
-    const fetchedLabel = fetchedAt
-        ? new Date(fetchedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        : null;
+        list.sort((a, b) => {
+            let va: number, vb: number;
+            switch (sortBy) {
+                case 'endTime':
+                    va = a.time_left_hours ?? Infinity;
+                    vb = b.time_left_hours ?? Infinity;
+                    break;
+                case 'price':
+                    va = parsePrice(a.current_bid_price);
+                    vb = parsePrice(b.current_bid_price);
+                    break;
+                case 'bids':
+                    va = a.bids; vb = b.bids;
+                    break;
+                case 'visitors':
+                    va = a.visitors ?? 0; vb = b.visitors ?? 0;
+                    break;
+                case 'links':
+                    va = a.links ?? 0; vb = b.links ?? 0;
+                    break;
+                case 'age':
+                    va = a.age ?? 0; vb = b.age ?? 0;
+                    break;
+                case 'appraisal':
+                    va = parseDynaAppraisal(a.dyna_appraisal);
+                    vb = parseDynaAppraisal(b.dyna_appraisal);
+                    break;
+                case 'domain':
+                    return sortDir === 'asc'
+                        ? a.domain.localeCompare(b.domain)
+                        : b.domain.localeCompare(a.domain);
+                default:
+                    va = 0; vb = 0;
+            }
+            return sortDir === 'asc' ? va - vb : vb - va;
+        });
 
-    const isRtl = lang === 'ar';
+        return list;
+    }, [auctions, filters, patternRegexes, sortBy, sortDir]);
+
+    // ── Pagination ───────────────────────────────────────────────────────────
+    const totalItems = filteredAndSorted.length;
+    const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+    const currentPageSafe = Math.min(currentPage, totalPages);
+    const startIndex = (currentPageSafe - 1) * pageSize;
+    const pageItems = filteredAndSorted.slice(startIndex, startIndex + pageSize);
+
+    const activeFilterCount = [
+        filters.selectedTlds.length > 0,
+        filters.maxPrice !== null && filters.maxPrice > 0,
+        filters.minBids > 0,
+        filters.search.trim() !== '',
+        filters.patternInput.trim() !== '',
+    ].filter(Boolean).length;
+
+    const resetFilters = useCallback(() => {
+        setFilters({
+            selectedTlds: [],
+            maxPrice: null,
+            minBids: 0,
+            search: '',
+            patternInput: ''
+        });
+        resetPage();
+    }, [resetPage]);
+
+    const handleFilterChange = useCallback((newFilters: FilterState) => {
+        setFilters(newFilters);
+        resetPage();
+    }, [resetPage]);
+
+    const fetchedLabel = new Date(generatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
     return (
-        <div
-            className={clsx('min-h-screen bg-gradient-to-br from-indigo-50 via-slate-50 to-indigo-100', isRtl && 'text-right')}
-            dir={isRtl ? 'rtl' : 'ltr'}
-        >
-            <div className="max-w-screen-xl mx-auto px-4 md:px-8 py-8 space-y-6">
+        <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-slate-50 to-indigo-100">
+            <div className="max-w-screen-2xl mx-auto px-4 md:px-8 py-8 space-y-6">
 
                 {/* ── Header ── */}
                 <header className="flex flex-col md:flex-row md:items-start justify-between gap-4">
                     <div className="space-y-1">
                         <h1 className="text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-violet-600 flex items-center gap-3 flex-wrap">
                             <Gavel className="w-7 h-7 text-indigo-500 flex-shrink-0" />
-                            {t.title}
+                            Expired Domain Auctions
                         </h1>
-                        <p className="text-sm text-slate-500 font-medium max-w-xl">{t.subtitle}</p>
+                        <p className="text-sm text-slate-500 font-medium max-w-xl">
+                            Best expired-domain auctions from{' '}
+                            <a href={DYNADOT_AFF_LINK} target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:text-indigo-700 font-semibold underline underline-offset-2">
+                                Dynadot
+                            </a>
+                            {' '}— filtered for deals.
+                        </p>
                     </div>
 
                     <div className="flex flex-wrap items-center gap-2">
-                        {/* Lang switcher */}
-                        <div className="flex items-center gap-1 bg-white/70 border border-slate-200 rounded-xl p-1 shadow-sm">
-                            <Globe className="w-4 h-4 text-slate-400 mx-1" />
-                            {LANGS.map(({ code, label }) => (
-                                <button
-                                    key={code}
-                                    onClick={() => setLang(code)}
-                                    className={clsx(
-                                        'px-2.5 py-1 text-xs font-bold rounded-lg transition-all',
-                                        lang === code ? 'bg-indigo-600 text-white shadow' : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100'
-                                    )}
-                                >{label}</button>
-                            ))}
-                        </div>
-
-                        {/* Refresh */}
                         <button
-                            onClick={() => fetchAuctions(true)}
-                            disabled={isLoading}
+                            onClick={handleRefresh}
+                            disabled={isRefreshing}
                             className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white text-sm font-semibold rounded-xl shadow-sm shadow-indigo-200 transition-all active:scale-95"
                         >
-                            <RefreshCw className={clsx('w-4 h-4', isLoading && 'animate-spin')} />
-                            {isLoading ? t.refreshing : t.refresh}
+                            <RefreshCw className={clsx('w-4 h-4', isRefreshing && 'animate-spin')} />
+                            {isRefreshing ? 'Refreshing…' : 'Refresh'}
                         </button>
                     </div>
                 </header>
@@ -235,91 +225,72 @@ export function AuctionsPageClient() {
                 <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500">
                     <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full font-semibold">
                         <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                        {t.live}
+                        Live
                     </span>
-
-                    {fetchedLabel && (
-                        <span className="inline-flex items-center gap-1 bg-white/60 border border-slate-200 px-2.5 py-1 rounded-full">
-                            <Clock className="w-3 h-3" />
-                            {t.fetched} {fetchedLabel} {isCached && <span className="text-slate-400">{t.cached}</span>}
-                        </span>
-                    )}
-
-                    {!isLoading && !error && (
-                        <span className="bg-white/60 border border-slate-200 px-2.5 py-1 rounded-full">
-                            {t.nextRefresh}: <strong>{mins}:{secs}</strong>
-                        </span>
-                    )}
-
-                    {!isLoading && auctions.length > 0 && (
-                        <span className="bg-indigo-50 border border-indigo-200 text-indigo-700 px-2.5 py-1 rounded-full font-semibold">
-                            {t.results(auctions.length, total)}
-                        </span>
-                    )}
+                    <span className="inline-flex items-center gap-1 bg-white/60 border border-slate-200 px-2.5 py-1 rounded-full">
+                        Fetched {fetchedLabel}
+                    </span>
+                    <span className="bg-indigo-50 border border-indigo-200 text-indigo-700 px-2.5 py-1 rounded-full font-semibold">
+                        {filteredAndSorted.length} deals · {auctions.length} total
+                    </span>
                 </div>
 
-                {/* ── Error / Missing key ── */}
-                {isMissingKey && (
-                    <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 text-amber-800">
-                        <p className="font-bold text-sm">⚠️ {t.noKey}</p>
-                        <code className="mt-2 block text-xs bg-amber-100 rounded-lg px-3 py-2 font-mono">
-                            DYNA_DOT_API_KEY=your_key_here
-                        </code>
-                    </div>
-                )}
-                {error && !isMissingKey && (
-                    <div className="bg-red-50 border border-red-200 rounded-2xl p-5 text-red-700 text-sm font-medium">{error}</div>
-                )}
+                {/* ── Filter + Table card ── */}
+                <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-lg border border-white/50 overflow-hidden">
 
-                {/* ── Main layout: sidebar + table ── */}
-                {!isMissingKey && (
-                    <div className="flex gap-6 items-start">
-                        <FiltersSidebar
+                    {/* Filter toggle */}
+                    <div className="flex items-center justify-between px-5 py-3 border-b border-slate-100">
+                        <button
+                            onClick={() => setShowFilters(!showFilters)}
+                            className="flex items-center gap-2 text-sm font-semibold text-slate-700 hover:text-indigo-600 transition-colors"
+                        >
+                            <SlidersHorizontal className="w-4 h-4" />
+                            {showFilters ? 'Hide Filters' : 'Show Filters'}
+                            {activeFilterCount > 0 && (
+                                <span className="bg-indigo-600 text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center">
+                                    {activeFilterCount}
+                                </span>
+                            )}
+                        </button>
+                        {activeFilterCount > 0 && (
+                            <button
+                                onClick={resetFilters}
+                                className="flex items-center gap-1 text-xs text-red-500 hover:text-red-700 font-medium transition-colors"
+                            >
+                                <X className="w-3 h-3" />
+                                Reset All
+                            </button>
+                        )}
+                    </div>
+
+                    {/* Filter bar */}
+                    {showFilters && (
+                        <DynadotFilters
                             filters={filters}
-                            onChange={setFilters}
-                            lang={lang as SidebarLang}
-                            mobileOpen={mobileFiltersOpen}
-                            onMobileClose={() => setMobileFiltersOpen(false)}
+                            onChange={handleFilterChange}
+                            totalMatches={totalItems}
+                            totalAvailable={auctions.length}
+                            patternHelpOpen={patternHelpOpen}
+                            setPatternHelpOpen={setPatternHelpOpen}
+                            patternCount={patternRegexes.length}
                         />
+                    )}
 
-                        <div className="flex-1 min-w-0 bg-white/80 backdrop-blur-xl rounded-2xl shadow-xl border border-white/50 p-5">
-                            <TableAuctions
-                                auctions={auctions}
-                                isLoading={isLoading}
-                                isHumbleLoading={isHumbleLoading}
-                                humbleMap={humbleMap}
-                                humbleMin={filters.humbleMin}
-                                priceMax={filters.priceMax}
-                                lang={lang as TableLang}
-                            />
-                        </div>
-                    </div>
-                )}
-            </div>
-
-            {/* ── Mobile FAB — Filters ── */}
-            <div className="lg:hidden fixed bottom-6 right-6 z-30">
-                <button
-                    onClick={() => setMobileFiltersOpen(true)}
-                    className="flex items-center gap-2 px-4 py-3 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-2xl shadow-lg shadow-indigo-300 active:scale-95 transition-all"
-                >
-                    <SlidersHorizontal className="w-4 h-4" />
-                    {t.filters}
-                    {(() => {
-                        // active filter count badge
-                        let count = 0;
-                        if (filters.priceMax !== 100) count++;
-                        if (filters.bids !== 'all') count++;
-                        if (filters.time !== 'all') count++;
-                        if (filters.tlds.size !== 3 || !filters.tlds.has('com')) count++;
-                        if (filters.humbleMin) count++;
-                        return count > 0 ? (
-                            <span className="bg-white text-indigo-600 text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center">
-                                {count}
-                            </span>
-                        ) : null;
-                    })()}
-                </button>
+                    {/* Results Table */}
+                    <ResultsTable
+                        auctions={pageItems}
+                        isLoading={auctions.length === 0}
+                        sortBy={sortBy}
+                        sortDir={sortDir}
+                        onSort={handleSort}
+                        pageSize={pageSize}
+                        onPageSizeChange={setPageSize}
+                        currentPage={currentPageSafe}
+                        onPageChange={setCurrentPage}
+                        totalItems={totalItems}
+                        onResetFilters={resetFilters}
+                    />
+                </div>
             </div>
         </div>
     );

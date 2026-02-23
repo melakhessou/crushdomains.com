@@ -8,10 +8,18 @@ export interface Auction {
     auction_type: string;
     current_bid_price: string;
     bids: number;
+    bidders: number;
     time_left: string;
     time_left_hours: number;   // computed
-    tld: string;   // computed
+    tld: string;               // computed
     currency?: string;
+    visitors: number | null;
+    links: number | null;
+    age: number | null;
+    dyna_appraisal: string | null;   // e.g. "$62.00"
+    renewal_price: string | null;    // e.g. "10.88"
+    start_time_stamp: number;
+    end_time_stamp: number;
 }
 
 // ─── Time parser ──────────────────────────────────────────────────────────────
@@ -69,25 +77,18 @@ async function setToKV(key: string, value: string, ttl: number): Promise<void> {
 
 export const dynamic = 'force-dynamic';
 
-// Single master cache key — we cache ALL auctions once, filter per request in memory.
+// Single master cache key — we cache ALL auctions once, return all to the client.
 const MASTER_CACHE_KEY = 'dynadot-auctions-v2';
 const CACHE_TTL = 1800; // 30 min
 
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
-
-    // ── Filter params ────────────────────────────────────────────────────────
     const forceRefresh = searchParams.get('force') === '1';
-    const priceMax = Math.min(parseFloat(searchParams.get('priceMax') ?? '500'), 9999);
-    const bidsFilter = (searchParams.get('bids') ?? 'all') as 'low' | 'mid' | 'hot' | 'all';
-    const timeFilter = (searchParams.get('time') ?? 'all') as '24h' | '48h' | 'all';
-    const tldsParam = searchParams.get('tlds') ?? '';
-    const tldSet = tldsParam ? new Set(tldsParam.split(',').map(t => t.trim().toLowerCase())) : null;
 
     const apiKey = process.env.DYNA_DOT_API_KEY;
     if (!apiKey) {
         return NextResponse.json(
-            { error: 'API key missing. Add DYNA_DOT_API_KEY to your environment variables.', auctions: [], cached: false },
+            { status: 'error', message: 'API key missing. Add DYNA_DOT_API_KEY to your environment variables.' },
             { status: 500 }
         );
     }
@@ -117,49 +118,79 @@ export async function GET(request: Request) {
         const allRaw: unknown[] = [];
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let dynadotData: any;
+        let fatalFetchError: string | null = null;
 
-        try {
-            let pageIndex = 1;
-            const MAX_PAGES = 10; // cap at 5,000 domains max
-            while (pageIndex <= MAX_PAGES) {
-                const dynadotUrl = new URL('https://api.dynadot.com/api3.json');
-                dynadotUrl.searchParams.set('key', apiKey);
-                dynadotUrl.searchParams.set('command', 'get_open_auctions');
-                dynadotUrl.searchParams.set('type', 'expired');
-                dynadotUrl.searchParams.set('currency', 'USD');
-                dynadotUrl.searchParams.set('count_per_page', String(COUNT_PER_PAGE));
-                dynadotUrl.searchParams.set('page_index', String(pageIndex));
+        let pageIndex = 1;
+        const MAX_PAGES = 10; // cap at 5,000 domains max
+        while (pageIndex <= MAX_PAGES) {
+            const dynadotUrl = new URL('https://api.dynadot.com/api3.json');
+            dynadotUrl.searchParams.set('key', apiKey);
+            dynadotUrl.searchParams.set('command', 'get_open_auctions');
+            dynadotUrl.searchParams.set('type', 'expired');
+            dynadotUrl.searchParams.set('currency', 'USD');
+            dynadotUrl.searchParams.set('count_per_page', String(COUNT_PER_PAGE));
+            dynadotUrl.searchParams.set('page_index', String(pageIndex));
 
-                const res = await fetch(dynadotUrl.toString(), {
+            let res: Response;
+            try {
+                res = await fetch(dynadotUrl.toString(), {
                     cache: 'no-store',
-                    signal: AbortSignal.timeout(20_000), // 20s per page max
+                    signal: AbortSignal.timeout(25_000),
                 });
-                if (!res.ok) throw new Error(`Dynadot HTTP ${res.status}`);
-
-                // Strip bad control characters before JSON.parse
-                const rawText = await res.text();
-                // eslint-disable-next-line no-control-regex
-                const cleanText = rawText.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '');
-                dynadotData = JSON.parse(cleanText);
-                console.log(`[Auctions] page ${pageIndex}: status=${dynadotData?.status}`);
-
-                if (dynadotData?.status !== 'success') break;
-
-                const nested = dynadotData?.GetOpenAuctionsResponse?.AuctionList;
-                const pageItems = Array.isArray(nested)
-                    ? nested
-                    : Array.isArray(dynadotData.auction_list)
-                        ? dynadotData.auction_list
-                        : [];
-
-                allRaw.push(...pageItems);
-                if (pageItems.length < COUNT_PER_PAGE) break;
-                pageIndex++;
+            } catch (fetchErr) {
+                const msg = fetchErr instanceof Error ? `${fetchErr.name}: ${fetchErr.message}` : String(fetchErr);
+                console.error(`[Auctions] Network error on page ${pageIndex}:`, msg);
+                if (pageIndex === 1) { fatalFetchError = msg; }
+                break; // stop pagination, return whatever we have
             }
-        } catch (err) {
-            console.error('[Auctions] Dynadot fetch error:', err);
+
+            if (!res.ok) {
+                console.error(`[Auctions] HTTP ${res.status} on page ${pageIndex}`);
+                if (pageIndex === 1) { fatalFetchError = `Dynadot HTTP ${res.status}`; }
+                break;
+            }
+
+            let rawText: string;
+            try {
+                rawText = await res.text();
+            } catch (textErr) {
+                const msg = textErr instanceof Error ? textErr.message : String(textErr);
+                console.error(`[Auctions] Failed to read response text on page ${pageIndex}:`, msg);
+                break;
+            }
+
+            // Strip control characters that can invalidate JSON strings
+            // eslint-disable-next-line no-control-regex
+            const cleanText = rawText.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '');
+
+            try {
+                dynadotData = JSON.parse(cleanText);
+            } catch (parseErr) {
+                const msg = parseErr instanceof Error ? parseErr.message : String(parseErr);
+                console.warn(`[Auctions] JSON parse error on page ${pageIndex} (skipping page): ${msg}. Preview:`, cleanText.slice(0, 300));
+                break; // skip corrupt page, keep what we already have
+            }
+
+            console.log(`[Auctions] page ${pageIndex}: status=${dynadotData?.status}, length=${rawText.length}`);
+
+            if (dynadotData?.status !== 'success') break;
+
+            const nested = dynadotData?.GetOpenAuctionsResponse?.AuctionList;
+            const pageItems = Array.isArray(nested)
+                ? nested
+                : Array.isArray(dynadotData.auction_list)
+                    ? dynadotData.auction_list
+                    : [];
+
+            allRaw.push(...pageItems);
+            if (pageItems.length < COUNT_PER_PAGE) break;
+            pageIndex++;
+        }
+
+        // Only fail hard if we got nothing at all due to a fatal error on page 1
+        if (fatalFetchError && allRaw.length === 0) {
             return NextResponse.json(
-                { error: 'Failed to reach Dynadot API. Please try again shortly.', auctions: [], cached: false },
+                { status: 'error', message: `Failed to reach Dynadot API: ${fatalFetchError}` },
                 { status: 502 }
             );
         }
@@ -171,7 +202,7 @@ export async function GET(request: Request) {
                 dynadotData?.Error ??
                 JSON.stringify(dynadotData);
             return NextResponse.json(
-                { error: `Dynadot error: ${errMsg}`, _raw: dynadotData, auctions: [], cached: false },
+                { status: 'error', message: `Dynadot error: ${errMsg}` },
                 { status: 502 }
             );
         }
@@ -190,9 +221,17 @@ export async function GET(request: Request) {
                 auction_type: (r.auction_type ?? r.AuctionType ?? 'expired') as string,
                 current_bid_price: String(r.current_bid_price ?? r.CurrentBidPrice ?? r.min_bid ?? r.MinBidPrice ?? '0'),
                 bids: Number(r.bids ?? r.Bids ?? r.bid_count ?? 0),
+                bidders: Number(r.bidders ?? r.Bidders ?? 0),
                 time_left: timeLeft,
                 time_left_hours: parseTimeLeftHours(timeLeft),
                 currency: (r.currency ?? r.Currency ?? 'USD') as string,
+                visitors: r.visitors != null ? Number(r.visitors) : null,
+                links: r.links != null ? Number(r.links) : null,
+                age: r.age != null ? Number(r.age) : null,
+                dyna_appraisal: (r.dyna_appraisal ?? r.DynaAppraisal ?? null) as string | null,
+                renewal_price: (r.renewal_price ?? r.RenewalPrice ?? null) as string | null,
+                start_time_stamp: Number(r.start_time_stamp ?? r.StartTimeStamp ?? 0),
+                end_time_stamp: Number(r.end_time_stamp ?? r.EndTimeStamp ?? 0),
             };
         }).filter(a => a.domain !== '');
 
@@ -204,25 +243,10 @@ export async function GET(request: Request) {
         }
     }
 
-    // ── In-memory filter (fast, no extra Dynadot calls) ──────────────────────
-    const auctions = allAuctions.filter((a) => {
-        const price = parseFloat(a.current_bid_price);
-
-        if (!isNaN(price) && price > priceMax) return false;
-        if (bidsFilter === 'low' && a.bids >= 5) return false;
-        if (bidsFilter === 'mid' && (a.bids < 5 || a.bids > 20)) return false;
-        if (bidsFilter === 'hot' && a.bids <= 20) return false;
-        if (timeFilter === '24h' && a.time_left_hours > 24) return false;
-        if (timeFilter === '48h' && a.time_left_hours > 48) return false;
-        if (tldSet && !tldSet.has(a.tld)) return false;
-
-        return true;
-    });
-
+    // ── Return ALL auctions — filtering is now 100% client-side ──────────────
     return NextResponse.json({
-        auctions,
-        cached: fromCache,
-        fetchedAt,
-        total: allAuctions.length,
+        status: 'success',
+        auctions: allAuctions,
+        generatedAt: fetchedAt,
     });
 }
