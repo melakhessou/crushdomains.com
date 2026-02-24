@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
+import { useState, useCallback, useMemo, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import { Search, Loader2, ExternalLink, SlidersHorizontal, X, Zap } from 'lucide-react';
@@ -28,9 +28,26 @@ function dynadotAffiliateLink(domain: string) {
     return `https://www.dynadot.com/domain/search?domain=${encodeURIComponent(domain)}&aff=CRUSHDOMAINS&utm_source=crushdomains&utm_campaign=dynadot-ambassador`;
 }
 
-// ─── Component ────────────────────────────────────────────────────────────────
+// ─── Main Export (Wrapper with Suspense) ──────────────────────────────────────
 
 export default function DomainSearchPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen flex items-center justify-center bg-slate-50">
+                <div className="text-center space-y-4">
+                    <Loader2 className="w-10 h-10 animate-spin text-indigo-500 mx-auto" />
+                    <p className="text-slate-500 font-medium">Loading search tools...</p>
+                </div>
+            </div>
+        }>
+            <DomainSearchContent />
+        </Suspense>
+    );
+}
+
+// ─── Domain Search Logic & UI ─────────────────────────────────────────────────
+
+function DomainSearchContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
 
