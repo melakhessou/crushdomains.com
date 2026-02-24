@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { ArrowLeft, Sparkles } from 'lucide-react';
+import { ArrowLeft, Sparkles, Clock, Calendar, User, Share2, Twitter, Linkedin, Facebook, Copy, Check } from 'lucide-react';
+import { PageTitle } from '@/components/ui/page-title';
 
 type Props = {
     params: { slug: string };
@@ -37,9 +38,9 @@ export default function BlogPost({ params }: Props) {
                             <span className="text-xs font-bold text-indigo-500 uppercase tracking-widest bg-indigo-50 px-3 py-1 rounded-full">Investing</span>
                             <span className="text-sm text-slate-400 font-medium">{post.date}</span>
                         </div>
-                        <h1 className="text-4xl md:text-5xl font-black text-slate-900 leading-tight">
+                        <PageTitle className="text-4xl md:text-5xl font-black text-slate-900 leading-tight">
                             {post.title}
-                        </h1>
+                        </PageTitle>
                     </header>
 
                     <div className="prose prose-slate lg:prose-xl max-w-none text-slate-600 leading-relaxed font-medium">

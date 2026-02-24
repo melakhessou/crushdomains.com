@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
-import { Sparkles, ArrowRight } from 'lucide-react';
+import { BookOpen, Sparkles, ArrowRight, Clock, Calendar, User, Search, Filter } from 'lucide-react';
+import { PageTitle } from '@/components/ui/page-title';
 
 export const metadata: Metadata = {
     title: 'Domain Investing Blog | Tips & Strategies – CrushDomains',
@@ -26,11 +27,11 @@ export default function BlogIndex() {
     return (
         <main className="min-h-screen bg-slate-50 py-20 px-6">
             <div className="max-w-4xl mx-auto">
-                <header className="mb-16 text-center">
-                    <h1 className="text-4xl md:text-5xl font-black text-slate-900 mb-6">
-                        Domain <span className="text-indigo-600">Blog</span>
-                    </h1>
-                    <p className="text-lg text-slate-500 font-medium max-w-2xl mx-auto">
+                <header className="text-center space-y-3 relative mb-12">
+                    <PageTitle>
+                        CrushDomains Blog
+                    </PageTitle>
+                    <p className="text-base text-slate-500 font-medium max-w-2xl mx-auto">
                         Insights, strategies, and guides to help you master the world of domain investing and branding.
                     </p>
                 </header>

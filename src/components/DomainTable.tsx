@@ -14,9 +14,9 @@ interface DomainTableProps {
 export function DomainTable({ domains }: DomainTableProps) {
     if (domains.length === 0) {
         return (
-            <div className="flex flex-col items-center justify-center py-20 text-slate-400">
-                <p className="text-lg">No domains found matching your criteria.</p>
-                <p className="text-sm">Try adjusting your filters.</p>
+            <div className="flex flex-col items-center justify-center py-24 text-slate-400">
+                <p className="text-xl font-semibold text-slate-500">No domains found matching your criteria.</p>
+                <p className="text-base font-normal">Try adjusting your filters.</p>
             </div>
         );
     }
@@ -24,8 +24,8 @@ export function DomainTable({ domains }: DomainTableProps) {
     return (
         <div className="flex flex-col h-full bg-white shadow-sm rounded-lg overflow-hidden">
             <div className="flex-1 overflow-auto">
-                <table className="w-full text-sm text-left text-slate-600">
-                    <thead className="text-xs text-slate-500 uppercase bg-slate-50/80 border-b border-slate-100 font-semibold tracking-wider sticky top-0 backdrop-blur-sm z-10">
+                <table className="w-full text-base text-left text-slate-600">
+                    <thead className="text-xs text-slate-500 uppercase bg-slate-50/80 border-b border-slate-100 font-semibold tracking-widest sticky top-0 backdrop-blur-sm z-10">
                         <tr>
                             <th scope="col" className="px-6 py-4">Domain</th>
                             <th scope="col" className="px-6 py-4">Length</th>
@@ -37,8 +37,8 @@ export function DomainTable({ domains }: DomainTableProps) {
                     <tbody className="divide-y divide-slate-100">
                         {domains.map((d, i) => (
                             <tr key={`${d.domainName}-${i}`} className="bg-white/50 hover:bg-indigo-50/30 transition-colors duration-150">
-                                <td className="px-6 py-3.5 font-medium text-slate-900 whitespace-nowrap">
-                                    {d.domainName.split('.')[0]}<span className="text-slate-400">.{d.tld}</span>
+                                <td className="px-6 py-4 font-semibold text-slate-900 whitespace-nowrap text-lg">
+                                    {d.domainName.split('.')[0]}<span className="text-slate-400 font-normal">.{d.tld}</span>
                                 </td>
                                 <td className="px-6 py-3.5">
                                     <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-600">
@@ -50,7 +50,7 @@ export function DomainTable({ domains }: DomainTableProps) {
                                         .{d.tld}
                                     </span>
                                 </td>
-                                <td className="px-6 py-3.5 text-slate-500 font-mono text-xs">{d.deleteDate}</td>
+                                <td className="px-6 py-4 text-slate-500 font-mono text-sm">{d.deleteDate}</td>
                                 <td className="px-6 py-3.5 text-right">
                                     <a
                                         href={`https://${d.domainName}`}

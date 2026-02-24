@@ -2,7 +2,8 @@
 
 import React, { useState, useMemo } from 'react';
 import Papa from 'papaparse';
-import { Loader2, Upload, AlertCircle, FileDown, CheckCircle, ArrowUpDown, ArrowUp, ArrowDown, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Loader2, Upload, AlertCircle, FileDown, CheckCircle, ArrowUpDown, ArrowUp, ArrowDown, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
+import { PageTitle } from '@/components/ui/page-title';
 import { clsx } from 'clsx';
 
 
@@ -183,24 +184,24 @@ export default function BulkAppraisalPage() {
                 {/* Input View */}
                 {results.length === 0 && (
                     <>
-                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                            <div>
-                                <h1 className="text-3xl font-bold text-slate-900">Bulk Valuation</h1>
-                                <p className="text-slate-500 mt-1">
-                                    Analyze up to 200 domains at once using Crushdomains Valuation.
-                                </p>
-                            </div>
-
+                        <header className="text-center mb-12 space-y-3 relative">
+                            <PageTitle className="flex items-center justify-center gap-3">
+                                <Sparkles className="w-7 h-7 md:w-8 md:h-8 text-indigo-500 flex-shrink-0" />
+                                Bulk Valuation
+                            </PageTitle>
+                            <p className="text-lg text-slate-500 font-normal mx-auto max-w-2xl leading-relaxed">
+                                Analyze up to 200 domains at once using Crushdomains Valuation.
+                            </p>
                             {/* Loading State in Header if processing but no results yet */}
                             {isLoading && (
-                                <div className="flex items-center gap-3">
-                                    <span className="px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-sm font-medium flex items-center gap-2">
+                                <div className="pt-2 flex justify-center">
+                                    <span className="px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-xs font-semibold flex items-center gap-2">
                                         <Loader2 className="w-4 h-4 animate-spin" />
                                         Processing...
                                     </span>
                                 </div>
                             )}
-                        </div>
+                        </header>
 
                         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 space-y-6">
                             <div className="space-y-2">
@@ -249,7 +250,7 @@ export default function BulkAppraisalPage() {
                                         onClick={processDomains}
                                         disabled={isLoading || !rawInput.trim()}
                                         className={clsx(
-                                            "px-6 py-2.5 bg-indigo-600 text-white rounded-lg font-medium shadow-md shadow-indigo-500/20 hover:bg-indigo-700 active:scale-95 transition-all flex items-center gap-2",
+                                            "px-8 py-3 bg-indigo-600 text-white rounded-xl font-semibold text-base shadow-lg shadow-indigo-500/20 hover:bg-indigo-700 active:scale-95 transition-all flex items-center gap-2",
                                             (isLoading || !rawInput.trim()) && "opacity-50 cursor-not-allowed shadow-none"
                                         )}
                                     >
@@ -289,8 +290,8 @@ export default function BulkAppraisalPage() {
                                     </div>
                                 </div>
                                 <div>
-                                    <h2 className="text-xl font-bold text-slate-900">Bulk Valuation</h2>
-                                    <p className="text-sm text-slate-500">{results.length} domains analyzed</p>
+                                    <h2 className="text-2xl font-semibold text-slate-900">Bulk Valuation</h2>
+                                    <p className="text-base text-slate-500 font-normal">{results.length} domains analyzed</p>
                                 </div>
                             </div>
 
@@ -308,8 +309,8 @@ export default function BulkAppraisalPage() {
                                     <FileDown className="w-4 h-4" />
                                     CSV
                                 </button>
-                                <span className="px-3 py-1.5 bg-emerald-100 text-emerald-700 rounded-full text-sm font-medium flex items-center gap-2">
-                                    <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
+                                <span className="px-4 py-1.5 bg-emerald-100 text-emerald-700 rounded-full text-base font-semibold flex items-center gap-2">
+                                    <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
                                     Ready
                                 </span>
                             </div>
@@ -317,7 +318,7 @@ export default function BulkAppraisalPage() {
 
 
                         {/* Pagination Toolbar */}
-                        <div className="px-6 py-3 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-slate-500">
+                        <div className="px-6 py-3 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row justify-between items-center gap-4 text-base text-slate-500">
 
                             <div className="flex items-center gap-2">
                                 <span>Rows per page:</span>
@@ -361,7 +362,7 @@ export default function BulkAppraisalPage() {
 
                         {/* Table */}
                         <div className="overflow-x-auto">
-                            <table className="w-full text-left border-collapse">
+                            <table className="w-full text-left text-base border-collapse">
                                 <thead>
                                     <tr className="bg-slate-50/50 border-b border-slate-200">
                                         {[
@@ -374,7 +375,7 @@ export default function BulkAppraisalPage() {
                                                 key={col.id}
                                                 onClick={() => handleSort(col.id as SortField)}
                                                 className={clsx(
-                                                    "p-4 text-xs font-bold text-slate-400 cursor-pointer hover:bg-slate-100 transition-colors select-none tracking-wider",
+                                                    "p-4 text-xs font-semibold text-slate-400 cursor-pointer hover:bg-slate-100 transition-colors select-none tracking-widest",
                                                     col.id !== 'domain' && "text-right"
                                                 )}
                                             >
@@ -393,12 +394,12 @@ export default function BulkAppraisalPage() {
                                 <tbody className="divide-y divide-slate-100">
                                     {paginatedResults.map((row, i) => (
                                         <tr key={i} className="hover:bg-slate-50/50 transition-colors group">
-                                            <td className="p-4 font-mono font-medium text-slate-900 group-hover:text-indigo-600 transition-colors">
+                                            <td className="p-4 font-mono font-semibold text-slate-900 group-hover:text-indigo-600 transition-colors text-lg">
                                                 {row.domain}
                                             </td>
-                                            <td className="p-4 text-slate-400 font-mono text-sm text-right">{formatCurrency(row.auction)}</td>
-                                            <td className="p-4 text-slate-600 font-mono text-sm text-right">{formatCurrency(row.market)}</td>
-                                            <td className="p-4 text-slate-900 font-mono font-bold text-sm text-right">{formatCurrency(row.broker)}</td>
+                                            <td className="p-4 text-slate-400 font-mono text-base text-right">{formatCurrency(row.auction)}</td>
+                                            <td className="p-4 text-slate-600 font-mono text-base text-right">{formatCurrency(row.market)}</td>
+                                            <td className="p-4 text-slate-900 font-mono font-bold text-base text-right">{formatCurrency(row.broker)}</td>
                                         </tr>
                                     ))}
                                 </tbody>

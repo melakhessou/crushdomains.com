@@ -5,6 +5,7 @@ import Papa from 'papaparse';
 import { FileUpload } from '@/components/FileUpload';
 import { DomainTable, Domain } from '@/components/DomainTable';
 import { Search, Download, Sparkles, AlertCircle, ChevronLeft, ChevronRight, Copy } from 'lucide-react';
+import { PageTitle } from '@/components/ui/page-title';
 import clsx from 'clsx';
 
 // Helper to convert CVCV pattern to Regex
@@ -210,21 +211,21 @@ export function ExpiredDomainsDashboard({ initialSearch = '', nicheTitle }: Dash
     return (
         <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-slate-50 to-indigo-100 p-6 md:p-10 font-sans text-slate-800">
             <div className="max-w-7xl mx-auto space-y-8">
-                <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div className="space-y-1">
-                        <h1 className="text-4xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-violet-600 flex items-center gap-3">
-                            <Sparkles className="w-8 h-8 text-indigo-500" />
-                            {nicheTitle || 'Expired Domains'}
-                        </h1>
-                        <p className="text-lg text-slate-500 font-medium">{nicheTitle ? `${nicheTitle} Niche Dashboard` : 'Domain Investor Dashboard'}</p>
-                    </div>
-                    <div className="flex items-center gap-4">
-                        {lastUpdated && (
-                            <div className="px-4 py-2 bg-white/60 backdrop-blur-md rounded-full text-xs font-semibold text-indigo-600 border border-indigo-100 shadow-sm">
+                <header className="text-center space-y-3 relative">
+                    <PageTitle className="flex items-center justify-center gap-3">
+                        <Sparkles className="w-7 h-7 md:w-8 md:h-8 text-indigo-500 flex-shrink-0" />
+                        {nicheTitle || 'Expired Domains'}
+                    </PageTitle>
+                    <p className="text-lg text-slate-500 font-normal mx-auto max-w-2xl leading-relaxed">
+                        {nicheTitle ? `${nicheTitle} Niche Dashboard` : 'Premium Domain Investor Dashboard'}
+                    </p>
+                    {lastUpdated && (
+                        <div className="pt-2 flex justify-center">
+                            <div className="px-4 py-2 bg-white/60 backdrop-blur-md rounded-full text-xs font-bold text-indigo-600 border border-indigo-100 shadow-sm uppercase tracking-wider">
                                 Data Updated: {lastUpdated}
                             </div>
-                        )}
-                    </div>
+                        </div>
+                    )}
                 </header>
 
                 <div className="grid gap-8 lg:grid-cols-[320px_1fr]">
@@ -292,8 +293,8 @@ export function ExpiredDomainsDashboard({ initialSearch = '', nicheTitle }: Dash
                         <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-xl border border-white/50 overflow-hidden flex flex-col h-full min-h-[800px]">
                             <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-white/50">
                                 <div className="flex items-baseline gap-2">
-                                    <h2 className="text-lg font-bold text-slate-800">Results</h2>
-                                    <span className="text-sm font-medium text-slate-400">({totalItems})</span>
+                                    <h2 className="text-xl font-semibold text-slate-800">Results</h2>
+                                    <span className="text-base font-normal text-slate-400">({totalItems})</span>
                                 </div>
                                 <div className="flex items-center gap-3">
                                     <button onClick={handleCopy} disabled={totalItems === 0} className={clsx("flex items-center gap-2 px-3 py-2 text-sm font-semibold rounded-lg border", copied ? "bg-emerald-50 text-emerald-600 border-emerald-200" : "bg-white text-slate-600 border-slate-200")}>

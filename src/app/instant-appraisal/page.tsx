@@ -2,13 +2,14 @@
 
 import { useState, useCallback } from 'react';
 import Link from 'next/link';
-import { Search, Loader2, DollarSign, Activity, Tag, AlertTriangle, Sparkles, CheckCircle, XCircle, Info, TrendingUp, Briefcase, ShoppingCart, Globe, ArrowRight } from 'lucide-react';
+import { Search, Loader2, DollarSign, AlertTriangle, Sparkles, Info, TrendingUp, Globe, ArrowRight, AlertCircle, CheckCircle2, ShieldCheck, Zap, BarChart3, XCircle, ShoppingCart, Activity, CheckCircle, Briefcase } from 'lucide-react';
 import clsx from 'clsx';
 import { toast } from 'sonner';
 import { useDomainValidation } from '@/hooks/useDomainValidation';
 import { ValidatedInput } from '@/components/ui/ValidatedInput';
 import BuyDomainButton from '@/components/BuyDomainButton';
 import { Tooltip } from '@/components/ui/Tooltip';
+import { PageTitle } from '@/components/ui/page-title';
 
 interface AppraisalResult {
     domain: string;
@@ -151,12 +152,12 @@ export default function InstantAppraisal() {
             <div className="max-w-4xl w-full space-y-6">
 
                 {/* Header */}
-                <div className="text-center space-y-2 relative">
-                    <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-violet-600 flex items-center justify-center gap-2">
-                        <Sparkles className="w-6 h-6 md:w-7 md:h-7 text-indigo-500" />
+                <header className="text-center space-y-3 relative">
+                    <PageTitle className="flex items-center justify-center gap-3">
+                        <Sparkles className="w-7 h-7 md:w-8 md:h-8 text-indigo-500" />
                         Domain Appraisal
-                    </h1>
-                    <p className="text-base text-slate-500 font-medium">
+                    </PageTitle>
+                    <p className="text-lg text-slate-500 font-normal max-w-2xl mx-auto leading-relaxed">
                         Get a real-time market valuation using CrushDomains technology.
                     </p>
                     <div className="pt-2">
@@ -165,7 +166,7 @@ export default function InstantAppraisal() {
                             <ArrowRight className="w-4 h-4" />
                         </Link>
                     </div>
-                </div>
+                </header>
 
                 {/* Input Card */}
                 <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-xl border border-white/50 p-8">
@@ -217,10 +218,10 @@ export default function InstantAppraisal() {
                                 <div className="absolute top-0 right-0 p-32 bg-indigo-500/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
 
                                 <div className="space-y-4 text-center md:text-left z-10 w-full md:w-auto">
-                                    <h3 className="text-slate-500 font-semibold uppercase tracking-wider text-sm flex items-center gap-2 justify-center md:justify-start">
+                                    <h3 className="text-slate-500 font-semibold uppercase tracking-wider text-xs flex items-center gap-2 justify-center md:justify-start">
                                         <DollarSign className="w-4 h-4" /> Market Value
                                     </h3>
-                                    <div className="text-5xl md:text-6xl font-black text-slate-800 tracking-tight">
+                                    <div className="text-6xl md:text-7xl font-bold text-slate-800 tracking-tighter">
                                         {result.market_price !== null ? `$${result.market_price.toLocaleString()}` : 'N/A'}
                                     </div>
                                     {result.status === 'fallback_required' && (
@@ -243,10 +244,10 @@ export default function InstantAppraisal() {
                                         <div className="text-xs font-bold text-indigo-400 uppercase tracking-widest mb-1 flex items-center gap-1">
                                             <TrendingUp className="w-3 h-3" /> Liquidity
                                         </div>
-                                        <div className="text-xl font-bold text-indigo-900">
+                                        <div className="text-2xl font-bold text-indigo-900 font-mono">
                                             {result.liquidity_price !== null ? `$${result.liquidity_price.toLocaleString()}` : '-'}
                                         </div>
-                                        <div className="text-[10px] text-indigo-400 font-medium">Fast sale price</div>
+                                        <div className="text-xs text-indigo-400 font-medium">Fast sale price</div>
                                     </div>
 
                                     <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-100 flex flex-col items-center justify-between">
@@ -260,7 +261,7 @@ export default function InstantAppraisal() {
                                                 disabled={!availability?.available}
                                             />
                                         </div>
-                                        <div className="mt-2 text-[10px] text-emerald-500 font-medium text-center">
+                                        <div className="mt-2 text-xs text-emerald-500 font-medium text-center">
                                             Check availability & price
                                         </div>
                                     </div>
@@ -354,7 +355,7 @@ export default function InstantAppraisal() {
                                             {result.registered_tlds && result.registered_tlds.length > 0 && (
                                                 <div className="flex flex-wrap gap-1.5 mt-2">
                                                     {result.registered_tlds.map((tld: string) => (
-                                                        <span key={tld} className="text-[10px] font-bold px-2 py-0.5 bg-indigo-100 text-indigo-700 rounded-full">.{tld}</span>
+                                                        <span key={tld} className="text-xs font-bold px-2 py-0.5 bg-indigo-100 text-indigo-700 rounded-full font-mono">.{tld}</span>
                                                     ))}
                                                 </div>
                                             )}
@@ -383,7 +384,7 @@ export default function InstantAppraisal() {
                                         <XCircle className="w-10 h-10 text-amber-500 p-1 bg-white rounded-full flex-shrink-0" />
                                     )}
                                     <div>
-                                        <div className="font-bold text-2xl mb-1">
+                                        <div className="font-bold text-3xl mb-1">
                                             {availability.available ? 'Available' : 'Taken'}
                                         </div>
                                         <div className="text-sm opacity-80 leading-relaxed">
@@ -443,7 +444,7 @@ export default function InstantAppraisal() {
 
                 {/* Disclaimer */}
                 <div className="mt-12 pt-8 border-t border-slate-200/60 text-center animate-in fade-in duration-700">
-                    <p className="text-[11px] text-slate-400 leading-relaxed max-w-2xl mx-auto px-4 font-medium uppercase tracking-tight">
+                    <p className="text-xs text-slate-400 leading-relaxed max-w-2xl mx-auto px-4 font-normal uppercase tracking-wide">
                         These are computer-generated estimates powered by Humbleworth technology. They are not professional appraisals or investment advice, and actual sale prices may vary widely. No warranties are provided; please refer to our <a href="/terms-of-service" className="underline hover:text-indigo-500 transition-colors">Terms of Service</a> for full details.
                     </p>
                 </div>
@@ -453,6 +454,6 @@ export default function InstantAppraisal() {
             <footer className="mt-auto py-12 text-slate-400 text-sm font-medium">
                 © 2026 CrushDomains. All rights reserved.
             </footer>
-        </div>
+        </div >
     );
 }

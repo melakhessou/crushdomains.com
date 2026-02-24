@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-    title: 'Domain Name Generator | Smart & Brandable Domain Ideas – CrushDomains',
-    description: 'Generate intelligent, brandable, and available .com domain names using keywords and niche-based AI logic. Find your next domain name with CrushDomains.',
+    title: 'Geo Domain Generator | Smart & Brandable Domain Ideas – CrushDomains',
+    description: 'Generate intelligent, location-based, and available .com domain names using keywords and geo-targeted AI logic. Find your next domain name with CrushDomains.',
 };
 
 export default function GeneratorLayout({

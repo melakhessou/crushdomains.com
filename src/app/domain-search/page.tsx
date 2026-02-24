@@ -4,6 +4,7 @@ import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import { Search, Loader2, ExternalLink, SlidersHorizontal, X, Zap } from 'lucide-react';
+import { PageTitle } from '@/components/ui/page-title';
 import { generateDomainList } from '@/lib/domain-generator';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -315,14 +316,15 @@ export default function DomainSearchPage() {
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10 md:py-20">
                 {/* ── Hero ────────────────────────────────────────────────── */}
-                <div className="text-center mb-12 space-y-4">
-                    <h1 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tight text-slate-900 leading-tight">
-                        Domain <span className="gradient-text">Search</span>
-                    </h1>
-                    <p className="text-base sm:text-lg text-slate-500 max-w-xl mx-auto font-medium">
+                <header className="text-center space-y-3 relative mb-12">
+                    <PageTitle className="flex items-center justify-center gap-3">
+                        <Search className="w-6 h-6 md:w-7 md:h-7 text-indigo-500 flex-shrink-0" />
+                        Domain Search
+                    </PageTitle>
+                    <p className="text-base text-slate-500 font-medium mx-auto max-w-2xl">
                         Generate domain ideas from keywords and check availability + pricing on Dynadot one by one.
                     </p>
-                </div>
+                </header>
 
                 {/* ── Search Form ─────────────────────────────────────────── */}
                 <div className="premium-glass rounded-3xl shadow-2xl p-6 sm:p-8 md:p-10 mb-10 border border-white">
@@ -357,8 +359,8 @@ export default function DomainSearchPage() {
                                         type="button"
                                         onClick={() => toggleTld(tld)}
                                         className={`px-4 py-2 rounded-xl text-sm font-bold transition-all border ${selectedTlds.includes(tld)
-                                                ? 'bg-indigo-50 text-indigo-600 border-indigo-200 shadow-sm'
-                                                : 'bg-white text-slate-400 border-slate-200 hover:border-slate-300'
+                                            ? 'bg-indigo-50 text-indigo-600 border-indigo-200 shadow-sm'
+                                            : 'bg-white text-slate-400 border-slate-200 hover:border-slate-300'
                                             }`}
                                     >
                                         .{tld}
@@ -373,8 +375,8 @@ export default function DomainSearchPage() {
                                 onClick={loading ? handleStop : handleSearch}
                                 disabled={!loading && !keywords.trim()}
                                 className={`flex-1 py-4 font-bold text-lg rounded-2xl transition-all active:scale-[0.98] flex items-center justify-center gap-3 ${loading
-                                        ? 'bg-rose-500 hover:bg-rose-600 text-white shadow-lg shadow-rose-200'
-                                        : 'btn-search text-white'
+                                    ? 'bg-rose-500 hover:bg-rose-600 text-white shadow-lg shadow-rose-200'
+                                    : 'btn-search text-white'
                                     }`}
                             >
                                 {loading ? (

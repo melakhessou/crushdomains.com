@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useMemo, useEffect, useCallback } from 'react';
+import { useState, useMemo, useEffect, useCallback, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import { RefreshCw, Gavel, SlidersHorizontal, X } from 'lucide-react';
+import { Search, Loader2, DollarSign, AlertTriangle, Sparkles, Info, TrendingUp, Globe, ArrowRight, AlertCircle, CheckCircle2, ShieldCheck, Zap, BarChart3, XCircle, ShoppingCart, Activity, CheckCircle, Briefcase, Gavel, SlidersHorizontal, X, RefreshCw } from 'lucide-react';
 import clsx from 'clsx';
 import type { Auction } from '@/app/api/auctions/route';
+import { PageTitle } from '@/components/ui/page-title';
 import { parsePatterns, domainMatchesPatterns } from '@/lib/domain-pattern';
-import { DynadotFilters, type FilterState, SUPPORTED_TLDS } from '@/components/DynadotFilters';
+import { DynadotFilters, FilterState, SUPPORTED_TLDS } from '@/components/DynadotFilters';
 import { ResultsTable, type SortBy, type SortDir, type PageSize } from '@/components/ResultsTable';
 
 const DYNADOT_AFF_LINK = 'https://www.dynadot.com/?rsc=crushdomains&rsctrn=crushdomains&rscreg=crushdomains&rsceh=crushdomains&rscsb=crushdomains&rscco=crushdomains&rscbo=crushdomains';
@@ -36,15 +37,16 @@ export function AuctionsPageClient({ auctions, generatedAt }: Props) {
     const router = useRouter();
 
     // ── Filter state ─────────────────────────────────────────────────────────
-    const [showFilters, setShowFilters] = useState(true);
+    const [showFilters, setShowFilters] = useState(false);
     const [filters, setFilters] = useState<FilterState>({
         selectedTlds: [],
         maxPrice: null,
         minBids: 0,
         search: '',
-        patternInput: ''
+        patternInput: '',
+        noNumbers: false,
+        noHyphens: false,
     });
-    const [patternHelpOpen, setPatternHelpOpen] = useState(false);
 
     // ── Load / Save Preferences ──────────────────────────────────────────────
     useEffect(() => {
@@ -74,12 +76,15 @@ export function AuctionsPageClient({ auctions, generatedAt }: Props) {
     const [pageSize, setPageSize] = useState<PageSize>(25);
     const [currentPage, setCurrentPage] = useState(1);
 
-    // ── Refresh ──────────────────────────────────────────────────────────────
+    // ── Refresh ──────────────────────────────────────────────────────────
     const [isRefreshing, setIsRefreshing] = useState(false);
+    const [isPending, startTransition] = useTransition();
 
     const handleRefresh = useCallback(() => {
         setIsRefreshing(true);
-        router.refresh();
+        startTransition(() => {
+            router.refresh();
+        });
         setTimeout(() => setIsRefreshing(false), 2000);
     }, [router]);
 
@@ -114,6 +119,16 @@ export function AuctionsPageClient({ auctions, generatedAt }: Props) {
         }
         if (patternRegexes.length > 0) {
             list = list.filter(a => domainMatchesPatterns(a.domain, patternRegexes));
+        }
+
+        // SLD based filters (ignoring TLD for checking numbers/hyphens)
+        if (filters.noNumbers || filters.noHyphens) {
+            list = list.filter(a => {
+                const sld = a.domain.split('.')[0];
+                if (filters.noNumbers && /\d/.test(sld)) return false;
+                if (filters.noHyphens && /-/.test(sld)) return false;
+                return true;
+            });
         }
 
         list.sort((a, b) => {
@@ -169,6 +184,8 @@ export function AuctionsPageClient({ auctions, generatedAt }: Props) {
         filters.minBids > 0,
         filters.search.trim() !== '',
         filters.patternInput.trim() !== '',
+        filters.noNumbers,
+        filters.noHyphens,
     ].filter(Boolean).length;
 
     const resetFilters = useCallback(() => {
@@ -177,7 +194,9 @@ export function AuctionsPageClient({ auctions, generatedAt }: Props) {
             maxPrice: null,
             minBids: 0,
             search: '',
-            patternInput: ''
+            patternInput: '',
+            noNumbers: false,
+            noHyphens: false,
         });
         resetPage();
     }, [resetPage]);
@@ -194,43 +213,40 @@ export function AuctionsPageClient({ auctions, generatedAt }: Props) {
             <div className="max-w-screen-2xl mx-auto px-4 md:px-8 py-8 space-y-6">
 
                 {/* ── Header ── */}
-                <header className="flex flex-col md:flex-row md:items-start justify-between gap-4">
-                    <div className="space-y-1">
-                        <h1 className="text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-violet-600 flex items-center gap-3 flex-wrap">
-                            <Gavel className="w-7 h-7 text-indigo-500 flex-shrink-0" />
-                            Expired Domain Auctions
-                        </h1>
-                        <p className="text-sm text-slate-500 font-medium max-w-xl">
-                            Best expired-domain auctions from{' '}
-                            <a href={DYNADOT_AFF_LINK} target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:text-indigo-700 font-semibold underline underline-offset-2">
-                                Dynadot
-                            </a>
-                            {' '}— filtered for deals.
-                        </p>
-                    </div>
-
-                    <div className="flex flex-wrap items-center gap-2">
+                <header className="text-center space-y-3 relative">
+                    <PageTitle className="flex items-center justify-center gap-3">
+                        <Gavel className="w-7 h-7 md:w-8 md:h-8 text-indigo-500 flex-shrink-0" />
+                        Expired Domain Auctions
+                    </PageTitle>
+                    <p className="text-lg text-slate-500 font-normal mx-auto max-w-2xl leading-relaxed">
+                        Best expired-domain auctions from{' '}
+                        <a href={DYNADOT_AFF_LINK} target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:text-indigo-700 font-semibold underline underline-offset-2">
+                            Dynadot
+                        </a>
+                        {' '}— filtered for deals.
+                    </p>
+                    <div className="pt-2 flex justify-center">
                         <button
                             onClick={handleRefresh}
                             disabled={isRefreshing}
-                            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white text-sm font-semibold rounded-xl shadow-sm shadow-indigo-200 transition-all active:scale-95"
+                            className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white text-base font-semibold rounded-xl shadow-sm shadow-indigo-200 transition-all active:scale-95"
                         >
-                            <RefreshCw className={clsx('w-4 h-4', isRefreshing && 'animate-spin')} />
-                            {isRefreshing ? 'Refreshing…' : 'Refresh'}
+                            <RefreshCw className={clsx('w-5 h-5', isRefreshing && 'animate-spin')} />
+                            {isRefreshing ? 'Refreshing…' : 'Refresh Now'}
                         </button>
                     </div>
                 </header>
 
                 {/* ── Status bar ── */}
-                <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500">
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full font-semibold">
+                <div className="flex flex-wrap items-center gap-3 text-sm text-slate-500">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full font-semibold">
                         <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                         Live
                     </span>
-                    <span className="inline-flex items-center gap-1 bg-white/60 border border-slate-200 px-2.5 py-1 rounded-full">
+                    <span className="inline-flex items-center gap-1 bg-white/60 border border-slate-200 px-3 py-1 rounded-full font-medium">
                         Fetched {fetchedLabel}
                     </span>
-                    <span className="bg-indigo-50 border border-indigo-200 text-indigo-700 px-2.5 py-1 rounded-full font-semibold">
+                    <span className="bg-indigo-50 border border-indigo-200 text-indigo-700 px-3 py-1 rounded-full font-semibold">
                         {filteredAndSorted.length} deals · {auctions.length} total
                     </span>
                 </div>
@@ -242,12 +258,12 @@ export function AuctionsPageClient({ auctions, generatedAt }: Props) {
                     <div className="flex items-center justify-between px-5 py-3 border-b border-slate-100">
                         <button
                             onClick={() => setShowFilters(!showFilters)}
-                            className="flex items-center gap-2 text-sm font-semibold text-slate-700 hover:text-indigo-600 transition-colors"
+                            className="flex items-center gap-2 text-base font-semibold text-slate-700 hover:text-indigo-600 transition-colors"
                         >
                             <SlidersHorizontal className="w-4 h-4" />
                             {showFilters ? 'Hide Filters' : 'Show Filters'}
                             {activeFilterCount > 0 && (
-                                <span className="bg-indigo-600 text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center">
+                                <span className="bg-indigo-600 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center">
                                     {activeFilterCount}
                                 </span>
                             )}
@@ -270,8 +286,6 @@ export function AuctionsPageClient({ auctions, generatedAt }: Props) {
                             onChange={handleFilterChange}
                             totalMatches={totalItems}
                             totalAvailable={auctions.length}
-                            patternHelpOpen={patternHelpOpen}
-                            setPatternHelpOpen={setPatternHelpOpen}
                             patternCount={patternRegexes.length}
                         />
                     )}
@@ -279,7 +293,7 @@ export function AuctionsPageClient({ auctions, generatedAt }: Props) {
                     {/* Results Table */}
                     <ResultsTable
                         auctions={pageItems}
-                        isLoading={auctions.length === 0}
+                        isLoading={auctions.length === 0 || isPending}
                         sortBy={sortBy}
                         sortDir={sortDir}
                         onSort={handleSort}

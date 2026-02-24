@@ -196,18 +196,28 @@ export async function GET(request: Request) {
         }
 
         if (dynadotData?.status !== 'success' && allRaw.length === 0) {
+            const isRateLimit = JSON.stringify(dynadotData).includes('Too many requests');
             const errMsg: string =
                 dynadotData?.GetOpenAuctionsResponse?.Error ??
                 dynadotData?.error ??
                 dynadotData?.Error ??
                 JSON.stringify(dynadotData);
+
             return NextResponse.json(
-                { status: 'error', message: `Dynadot error: ${errMsg}` },
-                { status: 502 }
+                {
+                    status: 'error',
+                    message: isRateLimit
+                        ? 'Dynadot API rate limit reached. Please wait a minute before refreshing.'
+                        : `Dynadot error: ${errMsg}`
+                },
+                { status: isRateLimit ? 429 : 502 }
             );
         }
 
-        // Normalise
+        // Whitelist of TLDs to keep
+        const WHITELIST_TLDS = ['com', 'net', 'io', 'org', 'co', 'ai', 'xyz'];
+
+        // Normalize and Filter
         allAuctions = allRaw.map((item) => {
             const r = item as Record<string, unknown>;
             const domain = (r.domain ?? r.Domain ?? '') as string;
@@ -233,7 +243,7 @@ export async function GET(request: Request) {
                 start_time_stamp: Number(r.start_time_stamp ?? r.StartTimeStamp ?? 0),
                 end_time_stamp: Number(r.end_time_stamp ?? r.EndTimeStamp ?? 0),
             };
-        }).filter(a => a.domain !== '');
+        }).filter(a => a.domain !== '' && WHITELIST_TLDS.includes(a.tld));
 
         fetchedAt = new Date().toISOString();
 

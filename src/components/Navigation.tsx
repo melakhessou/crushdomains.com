@@ -8,7 +8,7 @@ import clsx from 'clsx';
 
 const NAV_ITEMS = [
     { label: 'Expired Domains', href: '/', icon: LayoutDashboard },
-    { label: 'Domain Generator', href: '/generator', icon: Sparkles },
+    { label: 'Geo Domain Generator', href: '/generator', icon: Sparkles },
     { label: 'Domain Appraisal', href: '/instant-appraisal', icon: FileText },
     { label: 'Auctions', href: '/auctions', icon: Gavel },
     { label: 'Domain Search', href: '/domain-search', icon: Search },

@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect } from 'react';
+import { MapPin } from 'lucide-react';
+import { PageTitle } from '@/components/ui/page-title';
 
 export default function GeneratorPage() {
     useEffect(() => {
@@ -16,11 +18,7 @@ export default function GeneratorPage() {
         const filterAvailability = document.querySelector('#filter-availability') as HTMLSelectElement;
         const scoreValue = document.querySelector('#score-value') as HTMLSpanElement;
 
-        // Geo Mode Elements
-        const geoToggle = document.querySelector('#geo-mode-toggle') as HTMLInputElement;
         const geoOptions = document.querySelector('#geo-options') as HTMLDivElement;
-        const nicheContainer = document.querySelector('#niche-container') as HTMLDivElement;
-        const geoBadge = document.querySelector('#geo-badge') as HTMLDivElement;
 
         if (!form) return;
 
@@ -84,21 +82,6 @@ export default function GeneratorPage() {
             el.addEventListener('input', applyFilters);
         });
 
-        // --- Geo Mode Logic ---
-        if (geoToggle) {
-            geoToggle.addEventListener('change', () => {
-                const isGeo = geoToggle.checked;
-                if (isGeo) {
-                    geoOptions.classList.remove('hidden');
-                    nicheContainer.classList.add('hidden');
-                    geoBadge.classList.remove('hidden');
-                } else {
-                    geoOptions.classList.add('hidden');
-                    nicheContainer.classList.remove('hidden');
-                    geoBadge.classList.add('hidden');
-                }
-            });
-        }
 
         // --- Availability Check Logic ---
         async function processQueue() {
@@ -148,6 +131,18 @@ export default function GeneratorPage() {
                 statusEl.innerHTML = '<span class="flex items-center gap-1.5 px-2 py-0.5 bg-slate-50 text-slate-400 rounded-full text-[10px] font-bold border border-slate-100">🔴 Taken</span>';
             }
 
+            // Update Buy Button
+            const buyBtn = document.querySelector(`[data-buy-for="${domain}"]`) as HTMLAnchorElement;
+            if (buyBtn) {
+                if (available) {
+                    buyBtn.classList.remove('opacity-50', 'pointer-events-none');
+                    buyBtn.href = `https://www.dynadot.com/domain/search?domain=${domain}&aff=CRUSHDOMAINS&utm_source=crushdomains&utm_campaign=dynadot-ambassador`;
+                } else {
+                    buyBtn.classList.add('opacity-50', 'pointer-events-none');
+                    buyBtn.href = '#';
+                }
+            }
+
             // Re-apply filters in case "Available Only" or "Taken Only" is active
             if (filterAvailability.value !== 'all') {
                 applyFilters();
@@ -160,21 +155,13 @@ export default function GeneratorPage() {
             e.preventDefault();
 
             const formData = new FormData(form);
-            const isGeo = geoToggle?.checked;
-
             const payload: any = {
                 keyword1: formData.get('keyword1'),
-                keyword2: formData.get('keyword2') || undefined,
+                geoMode: true,
+                country: formData.get('country'),
+                locationType: formData.get('locationType'),
+                keywordPosition: formData.get('keywordPosition'),
             };
-
-            if (isGeo) {
-                payload.geoMode = true;
-                payload.country = formData.get('country');
-                payload.locationType = formData.get('locationType');
-                payload.keywordPosition = formData.get('keywordPosition');
-            } else {
-                payload.niche = formData.get('niche');
-            }
 
             if (!payload.keyword1) return;
 
@@ -296,53 +283,46 @@ export default function GeneratorPage() {
                     card.innerHTML = `
                         <div class="flex flex-col gap-1">
                             <div class="flex items-center gap-3">
-                                <span class="text-lg font-bold text-slate-800 group-hover:text-indigo-600 transition-colors">${d.domain}</span>
+                                <span class="text-xl font-semibold text-slate-800 group-hover:text-indigo-600 transition-colors font-mono">${d.domain}</span>
                                 <div data-status-for="${d.domain}" class="flex items-center">
                                     ${statusHtml}
                                 </div>
                             </div>
-                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">${d.style}</span>
+                            <span class="text-xs font-medium text-slate-400 uppercase tracking-widest leading-none">${d.style}</span>
                             ${geoInfoHtml}
                         </div>
-                        <div className="flex items-center gap-4">
-                            <div className="flex flex-col items-end">
-                                <span className="text-xl font-black ${getScoreColor(d.score)}">${d.score}</span>
-                                <div className="flex items-center justify-end gap-1.5 relative">
-                                    <span class="text-[10px] text-slate-400 font-bold uppercase">Domain Score</span>
+                        <div class="flex items-center gap-6">
+                            <div class="flex flex-col items-end gap-0.5">
+                                <span class="text-2xl font-bold leading-none ${getScoreColor(d.score)}">${d.score}</span>
+                                <div class="flex items-center justify-end gap-1.5 relative">
+                                    <span class="text-xs text-slate-400 font-semibold uppercase tracking-wider">Domain Score</span>
                                     <div class="tooltip-trigger relative flex items-center">
                                         <svg class="w-4 h-4 text-slate-400 cursor-help hover:text-indigo-500 transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <circle cx="12" cy="12" r="10" stroke-width="2"></circle>
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 16v-4m0-4h.01"></path>
                                         </svg>
-                                        <div class="tooltip-content absolute bottom-full right-0 mb-2 w-72 p-3 bg-slate-900 text-white text-xs leading-relaxed font-medium rounded-xl shadow-2xl opacity-0 invisible scale-95 transition-all duration-200 ease-out z-[100] pointer-events-none">
-                                            <strong class="text-indigo-300">Domain Score</strong> is a 0–100 metric that evaluates overall domain quality including memorability, readability, brand potential, and basic SEO factors.
-                                            <div class="absolute -bottom-1.5 right-3 w-3 h-3 bg-slate-900 transform rotate-45"></div>
+                                        <div class="tooltip-content absolute top-1/2 -translate-y-1/2 right-full mr-3 w-64 p-3 bg-slate-900 text-white text-[11px] leading-relaxed font-medium rounded-xl shadow-2xl opacity-0 invisible scale-95 transition-all duration-200 ease-out z-[100] pointer-events-none">
+                                            <strong class="text-indigo-300 block mb-1">Domain Score</strong>
+                                            Evaluates memorability, readability, and brand potential based on AI-driven criteria and niche relevance.
+                                            <div class="absolute top-1/2 -translate-y-1/2 -right-1.5 w-3 h-3 bg-slate-900 transform rotate-45"></div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                             
-                            <!-- Dynadot Button -->
                             <a 
-                                href="https://www.dynadot.com/domain/search?domain=${d.domain}&aff=CRUSHDOMAINS&utm_source=crushdomains&utm_campaign=dynadot-ambassador" 
+                                href="${status?.available ? `https://www.dynadot.com/domain/search?domain=${d.domain}&aff=CRUSHDOMAINS&utm_source=crushdomains&utm_campaign=dynadot-ambassador` : '#'}" 
+                                data-buy-for="${d.domain}"
                                 target="_blank" 
                                 rel="noopener noreferrer"
-                                class="hidden md:flex flex-col items-center justify-center px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl shadow-lg shadow-emerald-200 transition-all hover:scale-105 active:scale-95 group/btn"
-                                title="30% off via CrushDomains"
+                                class="hidden md:flex items-center justify-center gap-1.5 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold shadow-sm shadow-emerald-200 transition-all hover:scale-105 active:scale-95 group/btn ${status?.available ? '' : 'opacity-50 pointer-events-none'}"
                             >
-                                <div class="flex items-center gap-1.5">
-                                    <span class="font-bold text-sm">Buy @ Dynadot</span>
-                                    <svg viewBox="0 0 24 24" fill="none" class="w-4 h-4 text-white/90">
-                                        <path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                    </svg>
-                                </div>
-                                <span class="text-[10px] font-medium text-emerald-50 opacity-90">
-                                    ${d.domain.endsWith('.com') ? '$10.00' :
-                            d.domain.endsWith('.io') ? '$39.00' :
-                                d.domain.endsWith('.xyz') ? '$1.00' :
-                                    d.domain.endsWith('.net') ? '$12.00' : '$10.00'
-                        }
-                                </span>
+                                Buy @ Dynadot
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5 text-white/90">
+                                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                                    <polyline points="15 3 21 3 21 9"></polyline>
+                                    <line x1="10" y1="14" x2="21" y2="3"></line>
+                                </svg>
                             </a>
                         </div>
                     `;
@@ -397,52 +377,29 @@ export default function GeneratorPage() {
             `}} />
 
             <div className="max-w-4xl mx-auto px-6 py-12 md:py-24">
-                <div className="text-center mb-16 space-y-4">
-                    <h1 className="text-5xl md:text-6xl font-black tracking-tight text-slate-900 mb-6 leading-tight">
-                        Domain <span className="gradient-text">Generator</span>
-                    </h1>
-                    <p className="text-lg text-slate-500 max-w-xl mx-auto font-medium">
-                        Generate intelligent, brandable, and premium .com domains in seconds using our niche-optimized engine.
+                <header className="text-center space-y-4 mb-16">
+                    <PageTitle className="flex items-center justify-center gap-3">
+                        <MapPin className="w-7 h-7 md:w-8 md:h-8 text-indigo-500 flex-shrink-0" />
+                        Geo Domain Generator
+                    </PageTitle>
+                    <p className="max-w-2xl mx-auto text-lg text-slate-500 leading-relaxed font-normal">
+                        Generate intelligent, location-based, and premium .com domains in seconds using our geo-focused engine.
                     </p>
-                </div>
+                </header>
 
                 {/* Main Generator Form */}
                 <div className="premium-glass rounded-3xl shadow-2xl p-8 md:p-10 mb-12 border border-white">
                     <form id="generator-form" className="space-y-8">
                         {/* Top Row: Keywords */}
-                        <div className="grid md:grid-cols-2 gap-6">
-                            <div className="space-y-2">
-                                <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Main Keyword</label>
-                                <input name="keyword1" type="text" required placeholder="e.g. Dental" className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all text-slate-800 font-medium" />
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Secondary (Optional)</label>
-                                <input name="keyword2" type="text" placeholder="e.g. Pay" className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all text-slate-800 font-medium" />
-                            </div>
+                        <div className="space-y-2">
+                            <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Main Keyword</label>
+                            <input name="keyword1" type="text" required placeholder="e.g. Dental" className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all text-slate-800 font-medium" />
                         </div>
 
                         <hr className="border-slate-100" />
 
-                        {/* Geo Mode Toggle */}
-                        <div className="flex items-center justify-between">
-                            <label className="flex items-center gap-3 cursor-pointer group">
-                                <div className="relative">
-                                    <input type="checkbox" id="geo-mode-toggle" className="sr-only peer" />
-                                    <div className="w-14 h-8 bg-slate-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-7 after:w-7 after:transition-all peer-checked:bg-indigo-600"></div>
-                                </div>
-                                <span className="text-sm font-bold text-slate-600 group-hover:text-indigo-600 transition-colors uppercase tracking-widest">
-                                    Geo domain
-                                </span>
-                            </label>
-
-                            {/* Visual Hint for Geo Mode */}
-                            <div id="geo-badge" className="hidden px-3 py-1 bg-indigo-50 text-indigo-600 rounded-full text-[10px] font-bold uppercase tracking-widest border border-indigo-100">
-                                Geo Active
-                            </div>
-                        </div>
-
-                        {/* Geo Options (Hidden by default) */}
-                        <div id="geo-options" className="hidden grid md:grid-cols-3 gap-6 animate-in fade-in slide-in-from-top-4 duration-300">
+                        {/* Geo Options */}
+                        <div id="geo-options" className="grid md:grid-cols-3 gap-6 animate-in fade-in slide-in-from-top-4 duration-300">
                             <div className="space-y-2">
                                 <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Country</label>
                                 <div className="relative">
@@ -484,25 +441,7 @@ export default function GeneratorPage() {
                             </div>
                         </div>
 
-                        {/* Niche Category (Only show if Geo is OFF) */}
-                        <div id="niche-container" className="space-y-2 transition-all duration-300">
-                            <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Niche Category</label>
-                            <div className="relative">
-                                <select name="niche" className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none appearance-none cursor-pointer text-slate-800 font-medium">
-                                    <option value="Business">Business</option>
-                                    <option value="Tech">Tech</option>
-                                    <option value="Wellness / Spa">Wellness / Spa</option>
-                                    <option value="Finance">Finance</option>
-                                    <option value="Real Estate">Real Estate</option>
-                                    <option value="Auto">Auto</option>
-                                </select>
-                                <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"></path></svg>
-                                </div>
-                            </div>
-                        </div>
-
-                        <button id="generate-btn" type="submit" className="w-full py-5 btn-primary text-white font-bold text-lg rounded-2xl transition-all active:scale-[0.98] flex items-center justify-center gap-3">
+                        <button id="generate-btn" type="submit" className="w-full py-5 btn-primary text-white font-semibold text-xl rounded-2xl transition-all active:scale-[0.98] flex items-center justify-center gap-3">
                             Generate Domains
                         </button>
                     </form>
@@ -537,10 +476,10 @@ export default function GeneratorPage() {
 
                     <div className="flex items-center justify-between mb-8">
                         <div className="flex flex-col gap-1">
-                            <h2 className="text-2xl font-black text-slate-800">Domain Suggestions</h2>
-                            <span id="total-domains-count" className="text-sm font-bold text-indigo-600">Total domains generated: 0</span>
+                            <h2 className="text-2xl font-semibold text-slate-800">Domain Suggestions</h2>
+                            <span id="total-domains-count" className="text-base font-medium text-indigo-600">Total domains generated: 0</span>
                         </div>
-                        <span className="px-3 py-1 bg-white border border-slate-200 rounded-full text-[10px] font-bold text-slate-400 uppercase tracking-widest shadow-sm">Instant Filter Enabled</span>
+                        <span className="px-3 py-1 bg-white border border-slate-200 rounded-full text-xs font-semibold text-slate-400 uppercase tracking-widest shadow-sm">Instant Filter Enabled</span>
                     </div>
 
                     <div id="results-list" className="grid gap-3 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
@@ -565,7 +504,7 @@ export default function GeneratorPage() {
                 </div>
 
                 <footer className="mt-24 text-center">
-                    <p className="text-slate-400 text-sm font-medium">© 2026 Crush Domains • Premium Domain Engine</p>
+                    <p className="text-slate-400 text-base font-normal">© 2026 Crush Domains • Premium Domain Engine</p>
                 </footer>
             </div>
         </main>
