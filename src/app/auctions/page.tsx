@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { AuctionsPageClient } from './AuctionsPageClient';
-import type { Auction } from '@/app/api/auctions/route';
+import { getAuctions } from '@/lib/auctions-service';
 
 export const metadata: Metadata = {
     title: 'Dynadot Expired Auctions | CrushDomains',
@@ -16,26 +16,8 @@ export const metadata: Metadata = {
     robots: { index: true, follow: true },
 };
 
-type SuccessResponse = { status: 'success'; auctions: Auction[]; generatedAt: string };
-type ErrorResponse = { status: 'error'; message: string };
-type AuctionsResponse = SuccessResponse | ErrorResponse;
-
 export default async function AuctionsPage() {
-    const baseUrl =
-        process.env.NEXT_PUBLIC_BASE_URL ??
-        (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000');
-
-    let data: AuctionsResponse;
-
-    try {
-        const res = await fetch(`${baseUrl}/api/auctions`, { cache: 'no-store' });
-        data = (await res.json()) as AuctionsResponse;
-        if (!res.ok && data.status !== 'error') {
-            data = { status: 'error', message: `API returned HTTP ${res.status}` };
-        }
-    } catch {
-        data = { status: 'error', message: 'Could not reach the auctions API. Please try again.' };
-    }
+    const data = await getAuctions();
 
     if (data.status === 'error') {
         return (
