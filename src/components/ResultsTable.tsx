@@ -2,7 +2,7 @@
 
 import { Gavel, ArrowUpDown, ArrowUp, ArrowDown, ExternalLink, ChevronLeft, ChevronRight } from 'lucide-react';
 import clsx from 'clsx';
-import type { Auction } from '@/app/api/auctions/route';
+import type { Auction } from '@/lib/auctions-service';
 
 // ─── Types & Props ─────────────────────────────────────────────────────────────
 

@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect, useCallback, useTransition } from 'react'
 import { useRouter } from 'next/navigation';
 import { Search, Loader2, DollarSign, AlertTriangle, Sparkles, Info, TrendingUp, Globe, ArrowRight, AlertCircle, CheckCircle2, ShieldCheck, Zap, BarChart3, XCircle, ShoppingCart, Activity, CheckCircle, Briefcase, Gavel, SlidersHorizontal, X, RefreshCw } from 'lucide-react';
 import clsx from 'clsx';
-import type { Auction } from '@/app/api/auctions/route';
+import type { Auction } from '@/lib/auctions-service';
 import { PageTitle } from '@/components/ui/page-title';
 import { parsePatterns, domainMatchesPatterns } from '@/lib/domain-pattern';
 import { DynadotFilters, FilterState, SUPPORTED_TLDS } from '@/components/DynadotFilters';
