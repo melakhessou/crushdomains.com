@@ -26,8 +26,8 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Maximum 200 domains allowed per request' }, { status: 400 });
         }
 
-        // Concurrency limit = 5
-        const limit = pLimit(5);
+        // Concurrency limit = 3
+        const limit = pLimit(3);
 
         const tasks = domains.map((domain) =>
             limit(async (): Promise<BulkAppraisalResult> => {
@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
                     // Call the appraisal service
                     const result = await appraiseDomain(domain);
 
-                    // Attempt to extract granular data from Humbleworth raw response
+                    // Attempt to extract granular data from AI provider raw response
                     const valuations = result.raw?.valuations?.[0];
 
                     if (valuations) {

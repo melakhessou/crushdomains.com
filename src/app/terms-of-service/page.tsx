@@ -146,6 +146,10 @@ export default function TermsOfService() {
                                     <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 mt-2 flex-shrink-0" />
                                     <span>Users are strongly encouraged to use their own due diligence, consult multiple sources, and perform independent market research before making any domain purchase or investment.</span>
                                 </li>
+                                <li className="flex gap-3">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 mt-2 flex-shrink-0" />
+                                    <span>CrushDomains utilizes the **Humbleworth API** to provide automated valuation data. By using this service, you acknowledge that your request may be processed through third-party infrastructure.</span>
+                                </li>
                             </ul>
                         </section>
 

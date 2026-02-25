@@ -10,6 +10,7 @@ import { ValidatedInput } from '@/components/ui/ValidatedInput';
 import BuyDomainButton from '@/components/BuyDomainButton';
 import { Tooltip } from '@/components/ui/Tooltip';
 import { PageTitle } from '@/components/ui/page-title';
+import { CheckboxCaptcha } from '@/components/CheckboxCaptcha';
 
 interface AppraisalResult {
     domain: string;
@@ -51,14 +52,32 @@ export default function InstantAppraisal() {
     const [availability, setAvailability] = useState<AvailabilityResult | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [availabilityError, setAvailabilityError] = useState<string | null>(null);
+    const [lastRequestTime, setLastRequestTime] = useState<number>(0);
+    const [isHumanVerified, setIsHumanVerified] = useState(false);
+    const [showCaptchaError, setShowCaptchaError] = useState(false);
+    const [resetCaptcha, setResetCaptcha] = useState(0);
+
+    // Cooldown duration in ms
+    const COOLDOWN_MS = 5000;
 
     // Domain validation hook
     const handleAppraiseDomain = useCallback(async (cleanedDomain: string) => {
+        if (!isHumanVerified) {
+            setShowCaptchaError(true);
+            return;
+        }
+
+        setShowCaptchaError(false);
+
         setLoading(true);
         setError(null);
         setAvailabilityError(null);
         setResult(null);
         setAvailability(null);
+        setLastRequestTime(Date.now());
+        setIsHumanVerified(false);
+        setShowCaptchaError(false);
+        setResetCaptcha(prev => prev + 1);
 
         try {
             const encodedDomain = encodeURIComponent(cleanedDomain);
@@ -122,7 +141,7 @@ export default function InstantAppraisal() {
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [isHumanVerified]);
 
     const {
         register,
@@ -199,6 +218,19 @@ export default function InstantAppraisal() {
                         </button>
                     </form>
 
+                    {/* Always show Captcha */}
+                    <div className="mt-6">
+                        <CheckboxCaptcha
+                            onVerify={(v) => {
+                                setIsHumanVerified(v);
+                                if (v) setShowCaptchaError(false);
+                            }}
+                            reset={resetCaptcha > 0}
+                            key={resetCaptcha}
+                            showError={showCaptchaError}
+                        />
+                    </div>
+
                     {/* API Error Message */}
                     {error && (
                         <div className="mt-6 p-4 bg-red-50 border border-red-100 rounded-xl flex items-center gap-3 text-red-600 animate-in fade-in slide-in-from-top-2">
@@ -224,12 +256,6 @@ export default function InstantAppraisal() {
                                     <div className="text-6xl md:text-7xl font-bold text-slate-800 tracking-tighter">
                                         {result.market_price !== null ? `$${result.market_price.toLocaleString()}` : 'N/A'}
                                     </div>
-                                    {result.status === 'fallback_required' && (
-                                        <div className="text-amber-600 text-sm font-medium flex items-center gap-1 justify-center md:justify-start">
-                                            <AlertTriangle className="w-4 h-4" />
-                                            Estimation based on fallback logic
-                                        </div>
-                                    )}
                                     {result.status === 'ok' && (
                                         <div className="flex items-center justify-center md:justify-start gap-2">
                                             <span className="text-sm font-bold text-slate-400">USD Estimate</span>
@@ -445,7 +471,7 @@ export default function InstantAppraisal() {
                 {/* Disclaimer */}
                 <div className="mt-12 pt-8 border-t border-slate-200/60 text-center animate-in fade-in duration-700">
                     <p className="text-xs text-slate-400 leading-relaxed max-w-2xl mx-auto px-4 font-normal uppercase tracking-wide">
-                        These are computer-generated estimates powered by Humbleworth technology. They are not professional appraisals or investment advice, and actual sale prices may vary widely. No warranties are provided; please refer to our <a href="/terms-of-service" className="underline hover:text-indigo-500 transition-colors">Terms of Service</a> for full details.
+                        These are computer-generated estimates powered by CrushDomains AI technology. They are not professional appraisals or investment advice, and actual sale prices may vary widely. No warranties are provided; please refer to our <a href="/terms-of-service" className="underline hover:text-indigo-500 transition-colors">Terms of Service</a> for full details.
                     </p>
                 </div>
 

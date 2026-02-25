@@ -53,6 +53,9 @@ export async function GET(req: NextRequest) {
 
     try {
         const results = await runPipeline([domain]);
+        if (!results || results.length === 0) {
+            return NextResponse.json({ error: 'Failed to appraise domain' }, { status: 500 });
+        }
         return NextResponse.json(results[0]);
     } catch (error: any) {
         console.error('Appraisal API Error:', error);
@@ -74,18 +77,16 @@ async function runPipeline(domains: string[]): Promise<LegacyAppraisalResult[]> 
         const sld = parts[0];
         const tld = parts.length > 1 ? parts.slice(1).join('.') : '';
 
-        // 2. Parallel Execution: Core Appraisal + TLD Checks
-        const [appraisal, tldResult] = await Promise.allSettled([
+        const [appraisalResult, tldResult] = await Promise.allSettled([
             appraiseDomain(domain),
             checkTldRegistrations(sld)
         ]);
 
-        const appraisalValue = appraisal.status === 'fulfilled' ? appraisal.value : await import('../../../lib/appraisal-service').then(m => ({
-            source: 'CrushDomains',
-            value: 0,
-            confidence: 'Low',
-            raw: {}
-        } as any)); // Type casting for simplicity in error handling
+        if (appraisalResult.status === 'rejected') {
+            throw new Error(appraisalResult.reason.message || 'Appraisal service failed');
+        }
+
+        const appraisalValue = appraisalResult.value;
 
         // Fix type mismatch: tld-checker returns { tlds_registered_count, ... }
         let tldData = { tlds_registered_count: 0, registered_tlds: [] as string[] };
@@ -100,7 +101,7 @@ async function runPipeline(domains: string[]): Promise<LegacyAppraisalResult[]> 
         // Extract brand score details if available from raw fallback, otherwise ensure we have it for UI
         let brandScoreResult = appraisalValue.raw && appraisalValue.raw.brand_scoring ? appraisalValue.raw.brand_scoring : null;
 
-        // If missing (e.g. successful Humbleworth hit), calculate it now for the UI
+        // If missing (e.g. successful AI hit), calculate it now for the UI
         if (!brandScoreResult) {
             const { scoreBrandability } = await import('../../../lib/brand-score');
             brandScoreResult = scoreBrandability(sld);
