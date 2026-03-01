@@ -109,6 +109,8 @@ export async function POST(req: NextRequest) {
             city?: string;
             state?: string;
             population?: number;
+            locId?: number;
+            mainKeyword?: string;
         }
 
         const results: Set<DomainResult> = new Set();
@@ -123,7 +125,9 @@ export async function POST(req: NextRequest) {
                     results.add({
                         domain: finalDomain,
                         score: calculateScore(cleaned, style),
-                        style
+                        style,
+                        locId: 2840, // Default to US for standard domains
+                        mainKeyword: keyword1
                     });
                 }
             }
@@ -147,6 +151,8 @@ export async function POST(req: NextRequest) {
                         city: cityName,
                         state: cityData?.state ?? undefined,
                         population: cityData?.population ?? undefined,
+                        locId: cityData?.locId ?? 2840, // Use city locId or US default
+                        mainKeyword: keyword1
                     });
                 }
             }

@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, Suspense } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { Search, Loader2, DollarSign, AlertTriangle, Sparkles, Info, TrendingUp, Globe, ArrowRight, AlertCircle, CheckCircle2, ShieldCheck, Zap, BarChart3, XCircle, ShoppingCart, Activity, CheckCircle, Briefcase } from 'lucide-react';
 import clsx from 'clsx';
 import { toast } from 'sonner';
@@ -46,19 +47,16 @@ interface AvailabilityResult {
     error?: string;
 }
 
-export default function InstantAppraisal() {
+function InstantAppraisalContent() {
+    const searchParams = useSearchParams();
     const [loading, setLoading] = useState(false);
     const [result, setResult] = useState<AppraisalResult | null>(null);
     const [availability, setAvailability] = useState<AvailabilityResult | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [availabilityError, setAvailabilityError] = useState<string | null>(null);
-    const [lastRequestTime, setLastRequestTime] = useState<number>(0);
     const [isHumanVerified, setIsHumanVerified] = useState(false);
     const [showCaptchaError, setShowCaptchaError] = useState(false);
     const [resetCaptcha, setResetCaptcha] = useState(0);
-
-    // Cooldown duration in ms
-    const COOLDOWN_MS = 5000;
 
     // Domain validation hook
     const handleAppraiseDomain = useCallback(async (cleanedDomain: string) => {
@@ -74,7 +72,6 @@ export default function InstantAppraisal() {
         setAvailabilityError(null);
         setResult(null);
         setAvailability(null);
-        setLastRequestTime(Date.now());
         setIsHumanVerified(false);
         setShowCaptchaError(false);
         setResetCaptcha(prev => prev + 1);
@@ -150,10 +147,21 @@ export default function InstantAppraisal() {
         errorMessage,
         cleanedDomain,
         isSubmitting,
+        form
     } = useDomainValidation({
         onValidSubmit: handleAppraiseDomain,
-        showToasts: false, // We handle toasts manually above
+        showToasts: false,
     });
+
+    // Detect domain from query param
+    useEffect(() => {
+        const domainParam = searchParams.get('domain');
+        if (domainParam) {
+            form.setValue('domain', domainParam);
+            // We can't auto-trigger without captcha verification, 
+            // but the domain is now pre-filled for the user.
+        }
+    }, [searchParams, form]);
 
     // Helper to get brand score color
     const getBrandScoreColor = (label: string) => {
@@ -167,9 +175,7 @@ export default function InstantAppraisal() {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-slate-50 to-indigo-100 py-6 md:py-12 px-4 md:px-10 font-sans text-slate-800 flex flex-col items-center">
-
             <div className="max-w-4xl w-full space-y-6">
-
                 {/* Header */}
                 <header className="text-center space-y-3 relative">
                     <PageTitle className="flex items-center justify-center gap-3">
@@ -243,12 +249,10 @@ export default function InstantAppraisal() {
                 {/* Results */}
                 {(result || availability || availabilityError) && (
                     <div className="grid md:grid-cols-2 gap-6 animate-in fade-in slide-in-from-bottom-4">
-
                         {/* Main Value Card */}
                         {result && (
                             <div className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl border border-indigo-100 p-8 md:col-span-2 flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden">
                                 <div className="absolute top-0 right-0 p-32 bg-indigo-500/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
-
                                 <div className="space-y-4 text-center md:text-left z-10 w-full md:w-auto">
                                     <h3 className="text-slate-500 font-semibold uppercase tracking-wider text-xs flex items-center gap-2 justify-center md:justify-start">
                                         <DollarSign className="w-4 h-4" /> Market Value
@@ -262,10 +266,8 @@ export default function InstantAppraisal() {
                                         </div>
                                     )}
                                 </div>
-
                                 {/* Pricing Breakdown */}
                                 <div className="flex-1 grid grid-cols-2 gap-4 z-10 w-full md:w-auto">
-
                                     <div className="p-4 bg-indigo-50 rounded-xl border border-indigo-100 flex flex-col items-center md:items-start">
                                         <div className="text-xs font-bold text-indigo-400 uppercase tracking-widest mb-1 flex items-center gap-1">
                                             <TrendingUp className="w-3 h-3" /> Liquidity
@@ -275,7 +277,6 @@ export default function InstantAppraisal() {
                                         </div>
                                         <div className="text-xs text-indigo-400 font-medium">Fast sale price</div>
                                     </div>
-
                                     <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-100 flex flex-col items-center justify-between">
                                         <div className="text-xs font-bold text-emerald-400 uppercase tracking-widest mb-2 flex items-center gap-1">
                                             <ShoppingCart className="w-3 h-3" /> Retail Options
@@ -291,11 +292,9 @@ export default function InstantAppraisal() {
                                             Check availability & price
                                         </div>
                                     </div>
-
                                 </div>
                             </div>
                         )}
-
                         {/* Metadata & Brand Score */}
                         {result && (
                             <div className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl border border-slate-100 p-6 flex flex-col justify-between">
@@ -314,7 +313,6 @@ export default function InstantAppraisal() {
                                         </span>
                                     )}
                                 </div>
-
                                 <div className="space-y-4">
                                     {result.brand_score_result ? (
                                         <div className="grid grid-cols-2 gap-3">
@@ -326,11 +324,8 @@ export default function InstantAppraisal() {
                                                 { key: 'brandSimilarity', label: 'Brand Similarity', val: result.brand_score_result.breakdown.brandSimilarity, max: 30, min: -20, desc: "Checks for overlap with known brandable keywords and startup naming trends." },
                                                 { key: 'length', label: 'Length', val: result.brand_score_result.breakdown.length, max: 15, min: -10, desc: "Optimizes for 5-10 characters. Penalties for very long or very short names." },
                                             ].map((metric) => {
-                                                // Normalize to percentage 0-100 for bar
                                                 const pct = Math.max(0, Math.min(100, ((metric.val - metric.min) / (metric.max - metric.min)) * 100));
-                                                // Color based on value > 0 = good, < 0 = bad, roughly
                                                 const isPositive = metric.val > 0;
-
                                                 return (
                                                     <div key={metric.label} className="bg-slate-50 p-2 rounded-lg text-xs space-y-1 group hover:bg-slate-100 transition-colors">
                                                         <div className="flex justify-between font-semibold text-slate-600">
@@ -368,7 +363,6 @@ export default function InstantAppraisal() {
                                             </div>
                                         </>
                                     )}
-
                                     {result.tlds_registered_count !== undefined && (
                                         <div className="p-3 bg-indigo-50 rounded-lg border border-indigo-100 mt-2">
                                             <div className="flex justify-between items-center">
@@ -390,7 +384,6 @@ export default function InstantAppraisal() {
                                 </div>
                             </div>
                         )}
-
                         {/* Availability Card */}
                         <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-lg border border-white/50 p-6 flex flex-col justify-center min-h-[240px]">
                             <h4 className="font-semibold text-slate-700 mb-4 flex items-center gap-2">
@@ -432,11 +425,9 @@ export default function InstantAppraisal() {
                                 </div>
                             )}
                         </div>
-
                         {/* Methodology Card */}
-                        <div className="md:col-span-2 bg-gradient-to-r from-slate-800 to-slate-900 rounded-2xl p-8 text-white shadow-2xl relative overflow-hidden group">
+                        <div className="md:col-span-2 bg-gradient-r from-slate-800 to-slate-900 rounded-2xl p-8 text-white shadow-2xl relative overflow-hidden group">
                             <div className="absolute top-0 right-0 p-32 bg-indigo-500/10 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-indigo-500/20 transition-colors duration-700" />
-
                             <h4 className="text-indigo-400 font-bold uppercase tracking-[0.2em] text-xs mb-6 flex items-center gap-3">
                                 <span className="w-8 h-px bg-indigo-400/30" />
                                 How we value domains
@@ -474,12 +465,22 @@ export default function InstantAppraisal() {
                         These are computer-generated estimates powered by CrushDomains AI technology. They are not professional appraisals or investment advice, and actual sale prices may vary widely. No warranties are provided; please refer to our <a href="/terms-of-service" className="underline hover:text-indigo-500 transition-colors">Terms of Service</a> for full details.
                     </p>
                 </div>
-
             </div>
-
             <footer className="mt-auto py-12 text-slate-400 text-sm font-medium">
                 © 2026 CrushDomains. All rights reserved.
             </footer>
         </div >
+    );
+}
+
+export default function InstantAppraisal() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen flex items-center justify-center bg-slate-50">
+                <Loader2 className="w-10 h-10 animate-spin text-indigo-500" />
+            </div>
+        }>
+            <InstantAppraisalContent />
+        </Suspense>
     );
 }
