@@ -15,10 +15,11 @@ export interface DomainSearchResult {
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-// ─── Rate limiter (in-memory, per-instance) ──────────────────────────────────
+// ─── Rate limiter (promise-based queue) ───────────────────────────────────────
 
+let requestQueue: Promise<any> = Promise.resolve();
 let lastCallTs = 0;
-const MIN_INTERVAL_MS = 1_100; // 1.1s between calls (Dynadot rate limit safe)
+const MIN_INTERVAL_MS = 1_200; // 1.2s between calls (be extra safe)
 
 // ─── Static TLD pricing from Dynadot (approximate registration prices) ──────
 
@@ -38,8 +39,8 @@ const TLD_PRICES: Record<string, number> = {
 // ─── Upstash KV helpers (reuse pattern from auctions route) ──────────────────
 
 function kvCredentials() {
-    const url = process.env.UPSTASH_REDIS_REST_URL ?? process.env.KV_REST_API_URL;
-    const token = process.env.UPSTASH_REDIS_REST_TOKEN ?? process.env.KV_REST_API_TOKEN;
+    const url = (process.env.UPSTASH_REDIS_REST_URL ?? process.env.KV_REST_API_URL ?? '').trim();
+    const token = (process.env.UPSTASH_REDIS_REST_TOKEN ?? process.env.KV_REST_API_TOKEN ?? '').trim();
     return { url, token };
 }
 
@@ -78,9 +79,6 @@ async function setToKV(key: string, value: string, ttl: number): Promise<void> {
 const CACHE_TTL = 600; // 10 minutes
 
 // ─── GET handler — single domain search ───────────────────────────────────────
-// Query: ?domain=example.com
-// Dynadot search command: ONE domain per call, returns Available yes/no only.
-// Pricing is looked up from a static TLD price table.
 
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
@@ -93,7 +91,7 @@ export async function GET(request: Request) {
         );
     }
 
-    const apiKey = process.env.DYNA_DOT_API_KEY;
+    const apiKey = (process.env.DYNA_DOT_API_KEY || '').trim();
     if (!apiKey) {
         return NextResponse.json(
             { error: 'DYNA_DOT_API_KEY missing from environment.', result: null },
@@ -104,91 +102,101 @@ export async function GET(request: Request) {
     const tldParts = domain.split('.');
     const tld = tldParts.length > 1 ? tldParts[tldParts.length - 1] : '';
 
-    // ── Check KV cache first ────────────────────────────────────────────────────
+    // ── Check KV cache first (outside the lock) ─────────────────────────────────
     const cacheKey = `dsearch:${domain}`;
     const cached = await getFromKV(cacheKey);
     if (cached) {
         try {
             const parsed = JSON.parse(cached) as DomainSearchResult;
             return NextResponse.json({ result: parsed, cached: true });
-        } catch {
-            /* corrupt — fall through */
-        }
+        } catch { /* corrupt — fall through */ }
     }
 
-    // ── Rate limit — sleep to enforce interval ──────────────────────────────────
-    const now = Date.now();
-    const wait = MIN_INTERVAL_MS - (now - lastCallTs);
-    if (wait > 0) {
-        await new Promise(resolve => setTimeout(resolve, wait));
-    }
-    lastCallTs = Date.now();
-
-    // ── Call Dynadot Search API (single domain) ─────────────────────────────────
-    // Response: {"SearchResponse":{"ResponseCode":"0","SearchResults":[{"DomainName":"x.com","Status":"success","Available":"yes|no"}]}}
-    const dynadotUrl = new URL('https://api.dynadot.com/api3.json');
-    dynadotUrl.searchParams.set('key', apiKey);
-    dynadotUrl.searchParams.set('command', 'search');
-    dynadotUrl.searchParams.set('domain0', domain);
-
+    // ── Serialize and Rate Limit ────────────────────────────────────────────────
+    // We use a shared promise chain to ensure only ONE Dynadot call is in flight
+    // across all incoming requests handled by this instance.
     try {
-        const res = await fetch(dynadotUrl.toString(), {
-            cache: 'no-store',
-            signal: AbortSignal.timeout(15_000),
-        });
+        console.log(`[SearchDomain] Queueing check for: ${domain}`);
 
-        if (!res.ok) {
-            console.error(`[SearchDomain] Dynadot HTTP ${res.status}`);
-            return NextResponse.json(
-                { error: `Dynadot returned HTTP ${res.status}.`, result: null },
-                { status: 502 },
-            );
-        }
+        // requestQueue.catch(() => {}) ensures the chain NEVER breaks if a previous request fails
+        const result = await (requestQueue = requestQueue.catch(() => { }).then(async () => {
+            // Re-check KV inside the lock (deduplication)
+            const cachedInside = await getFromKV(cacheKey);
+            if (cachedInside) {
+                console.log(`[SearchDomain] Cache hit (inside lock): ${domain}`);
+                try {
+                    return JSON.parse(cachedInside) as DomainSearchResult;
+                } catch { /* ignore */ }
+            }
 
-        const rawText = await res.text();
-        // eslint-disable-next-line no-control-regex
-        const cleanText = rawText.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '');
-        const json = JSON.parse(cleanText);
+            // Enforce interval
+            const now = Date.now();
+            const wait = MIN_INTERVAL_MS - (now - lastCallTs);
+            if (wait > 0) {
+                console.log(`[SearchDomain] Waiting ${wait}ms for rate limit: ${domain}`);
+                await new Promise(resolve => setTimeout(resolve, wait));
+            }
 
-        const searchResults = json?.SearchResponse?.SearchResults;
+            console.log(`[SearchDomain] Calling Dynadot: ${domain}`);
 
-        if (!Array.isArray(searchResults) || searchResults.length === 0) {
-            const errMsg = json?.SearchResponse?.Error ?? 'Unexpected response from Dynadot.';
-            console.error('[SearchDomain] Dynadot error:', errMsg);
-            return NextResponse.json(
-                { error: `Dynadot: ${errMsg}`, result: null },
-                { status: 502 },
-            );
-        }
+            // Call Dynadot
+            const dynadotUrl = new URL('https://api.dynadot.com/api3.json');
+            dynadotUrl.searchParams.set('key', apiKey);
+            dynadotUrl.searchParams.set('command', 'search');
+            dynadotUrl.searchParams.set('domain0', domain);
 
-        const item = searchResults[0];
+            const res = await fetch(dynadotUrl.toString(), {
+                cache: 'no-store',
+                signal: AbortSignal.timeout(15_000),
+            });
 
-        if (item.Status !== 'success') {
-            return NextResponse.json(
-                { error: `Dynadot lookup failed for ${domain}: ${item.Status}`, result: null },
-                { status: 502 },
-            );
-        }
+            lastCallTs = Date.now();
 
-        const isAvailable = (item.Available ?? '').toLowerCase() === 'yes';
-        const price = isAvailable ? (TLD_PRICES[tld] ?? 9.99) : 0;
+            if (!res.ok) {
+                throw new Error(`Dynadot HTTP ${res.status}`);
+            }
 
-        const result: DomainSearchResult = {
-            domain,
-            available: isAvailable ? 'yes' : 'no',
-            price,
-            currency: 'USD',
-            tld,
-        };
+            const rawText = await res.text();
+            const cleanText = rawText.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '');
+            const json = JSON.parse(cleanText);
+            const searchResults = json?.SearchResponse?.SearchResults;
 
-        // Cache result
-        await setToKV(cacheKey, JSON.stringify(result), CACHE_TTL);
+            if (!Array.isArray(searchResults) || searchResults.length === 0) {
+                const errMsg = json?.SearchResponse?.Error ?? 'Unexpected response from Dynadot.';
+                console.error(`[SearchDomain] Dynadot API error for ${domain}:`, errMsg);
+                throw new Error(errMsg);
+            }
+
+            const item = searchResults[0];
+            if (item.Status !== 'success') {
+                console.error(`[SearchDomain] Dynadot Status error for ${domain}:`, item.Status);
+                throw new Error(`Lookup failed: ${item.Status}`);
+            }
+
+            const isAvailable = (item.Available ?? '').toLowerCase() === 'yes';
+            const price = isAvailable ? (TLD_PRICES[tld] ?? 9.99) : 0;
+
+            const finalResult: DomainSearchResult = {
+                domain,
+                available: isAvailable ? 'yes' : 'no',
+                price,
+                currency: 'USD',
+                tld,
+            };
+
+            console.log(`[SearchDomain] Result for ${domain}: ${finalResult.available}`);
+
+            // Cache result
+            await setToKV(cacheKey, JSON.stringify(finalResult), CACHE_TTL);
+            return finalResult;
+        }));
 
         return NextResponse.json({ result, cached: false });
-    } catch (err) {
-        console.error('[SearchDomain] Fetch error:', err);
+
+    } catch (err: any) {
+        console.error(`[SearchDomain] Error checking ${domain}:`, err.message);
         return NextResponse.json(
-            { error: 'Failed to reach Dynadot. Please try again.', result: null },
+            { error: err.message || 'Failed to check domain.', result: null },
             { status: 502 },
         );
     }

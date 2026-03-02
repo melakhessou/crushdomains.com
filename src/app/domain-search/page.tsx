@@ -22,7 +22,7 @@ interface DomainResult {
 
 const ALL_TLDS = ['com', 'net', 'io', 'org', 'xyz'];
 const DEFAULT_PRICE_MAX = 50;
-const CONCURRENT_CHECKS = 3;
+const CONCURRENT_CHECKS = 1;
 
 function dynadotAffiliateLink(domain: string) {
     return `https://www.dynadot.com/domain/search?domain=${encodeURIComponent(domain)}&aff=CRUSHDOMAINS&utm_source=crushdomains&utm_campaign=dynadot-ambassador`;
