@@ -1,30 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 /**
- * Placeholder function for domain availability.
- * In production, this would call a real provider like WhoisJSON, WhoisXMLAPI, etc.
+ * Checks domain availability by calling the internal check-domain API.
  */
 async function checkDomainAvailability(domain: string): Promise<boolean> {
-    const apiKey = process.env.DOMAIN_AVAILABILITY_API_KEY;
+    try {
+        // Use an absolute URL for the internal fetch in Next.js App Router
+        // Since this runs on the server, we use the local port or a relative path if supported
+        // In Next.js, it's often better to call the service logic directly, but for simplicity
+        // and consistency, we'll fetch the internal API route.
+        const origin = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+        const res = await fetch(`${origin}/api/check-domain?domain=${encodeURIComponent(domain)}`, {
+            cache: 'no-store'
+        });
 
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 800));
+        if (!res.ok) return false;
 
-    // Placeholder logic: 
-    // For now, let's treat domains with "available" in them as available, 
-    // or just return a stable result based on domain name length for demonstration.
-    if (domain.includes('available') || domain.length > 15) {
-        return true;
-    }
-
-    // Default to false for common domains to make it look "real"
-    const commonTaken = ['google.com', 'facebook.com', 'apple.com', 'amazon.com', 'microsoft.com'];
-    if (commonTaken.includes(domain.toLowerCase())) {
+        const data = await res.json();
+        return data.available === true;
+    } catch (error) {
+        console.error('[Availability Sync] Error:', error);
         return false;
     }
-
-    // Random-ish but deterministic based on domain name
-    return domain.length % 2 === 0;
 }
 
 export async function GET(req: NextRequest) {

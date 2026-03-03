@@ -87,6 +87,7 @@ export function ExpiredDomainsDashboard({ initialSearch = '', nicheTitle }: Dash
     const [onlyNumbers, setOnlyNumbers] = useState(false);
     const [onlyCharacters, setOnlyCharacters] = useState(false);
     const [noHyphens, setNoHyphens] = useState(false);
+    const [noNumbers, setNoNumbers] = useState(false);
 
     // Pagination
     const [currentPage, setCurrentPage] = useState(1);
@@ -96,7 +97,7 @@ export function ExpiredDomainsDashboard({ initialSearch = '', nicheTitle }: Dash
     // Reset page when filters change
     useEffect(() => {
         setCurrentPage(1);
-    }, [searchTerm, tldFilter, minLen, maxLen, startsWith, contains, endsWith, regexPattern, patternFilter, onlyNumbers, onlyCharacters, noHyphens]);
+    }, [searchTerm, tldFilter, minLen, maxLen, startsWith, contains, endsWith, regexPattern, patternFilter, onlyNumbers, onlyCharacters, noHyphens, noNumbers]);
 
     const handleFileUpload = (file: File) => {
         setIsParsing(true);
@@ -165,12 +166,13 @@ export function ExpiredDomainsDashboard({ initialSearch = '', nicheTitle }: Dash
             if (contains && !namePart.includes(contains.toLowerCase())) return false;
             if (endsWith && !namePart.endsWith(endsWith.toLowerCase())) return false;
             if (noHyphens && namePart.includes('-')) return false;
+            if (noNumbers && /\d/.test(namePart)) return false;
             if (onlyNumbers && !/^\d+$/.test(namePart)) return false;
             if (onlyCharacters && !/^[a-z]+$/.test(namePart)) return false;
 
             return true;
         });
-    }, [allDomains, searchTerm, regexPattern, patternFilter, tldFilter, minLen, maxLen, startsWith, contains, endsWith, onlyNumbers, onlyCharacters, noHyphens]);
+    }, [allDomains, searchTerm, regexPattern, patternFilter, tldFilter, minLen, maxLen, startsWith, contains, endsWith, onlyNumbers, onlyCharacters, noHyphens, noNumbers]);
 
     const paginatedDomains = useMemo(() => {
         const start = (currentPage - 1) * itemsPerPage;
@@ -214,7 +216,7 @@ export function ExpiredDomainsDashboard({ initialSearch = '', nicheTitle }: Dash
                 <header className="text-center space-y-3 relative">
                     <PageTitle className="flex items-center justify-center gap-3">
                         <Sparkles className="w-7 h-7 md:w-8 md:h-8 text-indigo-500 flex-shrink-0" />
-                        {nicheTitle || 'Expired Domains'}
+                        {nicheTitle || 'Filter Deleting Domains'}
                     </PageTitle>
                     <p className="text-lg text-slate-500 font-normal mx-auto max-w-2xl leading-relaxed">
                         {nicheTitle ? `${nicheTitle} Niche Dashboard` : 'Premium Domain Investor Dashboard'}
@@ -283,6 +285,32 @@ export function ExpiredDomainsDashboard({ initialSearch = '', nicheTitle }: Dash
                                 <div className="grid grid-cols-2 gap-3">
                                     <input type="number" placeholder="Min" className="w-full px-3 py-2 bg-slate-50/50 border border-slate-200 rounded-lg text-sm" value={minLen} onChange={(e) => setMinLen(e.target.value ? Number(e.target.value) : '')} />
                                     <input type="number" placeholder="Max" className="w-full px-3 py-2 bg-slate-50/50 border border-slate-200 rounded-lg text-sm" value={maxLen} onChange={(e) => setMaxLen(e.target.value ? Number(e.target.value) : '')} />
+                                </div>
+
+                                <div className="h-px bg-slate-200/50" />
+
+                                <div className="space-y-3">
+                                    <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Settings</label>
+                                    <div className="space-y-2">
+                                        <label className="flex items-center gap-2 cursor-pointer group">
+                                            <input
+                                                type="checkbox"
+                                                checked={noHyphens}
+                                                onChange={(e) => setNoHyphens(e.target.checked)}
+                                                className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                                            />
+                                            <span className="text-sm text-slate-600 group-hover:text-slate-900 transition-colors">No Hyphens</span>
+                                        </label>
+                                        <label className="flex items-center gap-2 cursor-pointer group">
+                                            <input
+                                                type="checkbox"
+                                                checked={noNumbers}
+                                                onChange={(e) => setNoNumbers(e.target.checked)}
+                                                className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                                            />
+                                            <span className="text-sm text-slate-600 group-hover:text-slate-900 transition-colors">No Numbers</span>
+                                        </label>
+                                    </div>
                                 </div>
                             </div>
                         </div>

@@ -15,8 +15,8 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Expired Domains for Sale | High-Quality Brandable Domains – CrushDomains',
-  description: 'Discover high-quality expired domains with strong SEO value, branding potential, and availability insights. Find premium expired domains on CrushDomains.',
+  title: 'Filter Deleting Domains for Sale | High-Quality Brandable Domains – CrushDomains',
+  description: 'Discover high-quality deleting domains with strong SEO value, branding potential, and availability insights. Find premium domain names on CrushDomains.',
 };
 
 export default function RootLayout({

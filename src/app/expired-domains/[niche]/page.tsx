@@ -8,8 +8,8 @@ type Props = {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const niche = params.niche.charAt(0).toUpperCase() + params.niche.slice(1);
     return {
-        title: `${niche} Expired Domains | Premium ${niche} Domain Names – CrushDomains`,
-        description: `Discover high-quality expired ${niche} domains. Find the best ${niche} domain names with strong SEO value and branding potential on CrushDomains.`,
+        title: `${niche} Filter Deleting Domains | Premium ${niche} Domain Names – CrushDomains`,
+        description: `Discover high-quality deleting ${niche} domains. Find the best ${niche} domain names with strong SEO value and branding potential on CrushDomains.`,
     };
 }
 

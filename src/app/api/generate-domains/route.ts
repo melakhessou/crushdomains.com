@@ -1,10 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GEO_DATA } from '@/lib/geo-data';
-import { USA_CITIES, type USACity } from '@/lib/usa-cities';
+import { USA_CITIES } from '@/lib/usa-cities';
+import { CANADA_CITIES } from '@/lib/canada-cities';
+import { AUSTRALIA_CITIES } from '@/lib/australia-cities';
+import { UK_CITIES } from '@/lib/uk-cities';
 
-// Build city lookup map for fast matching
-const cityLookupMap = new Map<string, USACity>();
-USA_CITIES.forEach(c => {
+// Build city lookup map for fast matching across all countries
+type GenericCity = { city: string; state: string; population: number; locId: number };
+const cityLookupMap = new Map<string, GenericCity>();
+
+[...USA_CITIES, ...CANADA_CITIES, ...AUSTRALIA_CITIES, ...UK_CITIES].forEach(c => {
     const key = c.city.toLowerCase().replace(/[^a-z]/g, '');
     if (!cityLookupMap.has(key)) cityLookupMap.set(key, c);
 });
@@ -116,7 +121,7 @@ export async function POST(req: NextRequest) {
         const results: Set<DomainResult> = new Set();
 
         // Reusable Helper for standard domains
-        const addResult = (domain: string, style: string) => {
+        const addResult = (domain: string, style: string, metadata?: Partial<DomainResult>) => {
             const cleaned = cleanDomain(domain);
             const maxLength = geoMode ? 25 : 15;
             if (cleaned.length >= 3 && cleaned.length <= maxLength) {
@@ -126,8 +131,9 @@ export async function POST(req: NextRequest) {
                         domain: finalDomain,
                         score: calculateScore(cleaned, style),
                         style,
-                        locId: 2840, // Default to US for standard domains
-                        mainKeyword: keyword1
+                        locId: metadata?.locId ?? 2840, // Default to US for standard domains
+                        mainKeyword: keyword1,
+                        ...metadata
                     });
                 }
             }
@@ -171,30 +177,32 @@ export async function POST(req: NextRequest) {
                 // Generate based on State / Province Names ONLY
                 geoData.states.forEach(state => {
                     const cleanName = cleanDomain(state.name);
+                    const metadata = { state: state.name };
 
                     if (keywordPosition === 'after') {
                         // State + Keyword
-                        addResult(`${cleanName}${k1}`, 'geo');
-                        if (k2) addResult(`${cleanName}${k2}`, 'geo');
+                        addResult(`${cleanName}${k1}`, 'geo', metadata);
+                        if (k2) addResult(`${cleanName}${k2}`, 'geo', metadata);
                     } else {
                         // Keyword + State
-                        addResult(`${k1}${cleanName}`, 'geo');
-                        if (k2) addResult(`${k2}${cleanName}`, 'geo');
+                        addResult(`${k1}${cleanName}`, 'geo', metadata);
+                        if (k2) addResult(`${k2}${cleanName}`, 'geo', metadata);
                     }
                 });
             } else if (locationType === 'Codes') {
                 // Generate based on State / Province Codes ONLY
                 geoData.states.forEach(state => {
                     const cleanCode = cleanDomain(state.code);
+                    const metadata = { state: state.name }; // Still show full state name in metadata
 
                     if (keywordPosition === 'after') {
                         // Code + Keyword
-                        addResult(`${cleanCode}${k1}`, 'geo-code');
-                        if (k2) addResult(`${cleanCode}${k2}`, 'geo-code');
+                        addResult(`${cleanCode}${k1}`, 'geo-code', metadata);
+                        if (k2) addResult(`${cleanCode}${k2}`, 'geo-code', metadata);
                     } else {
                         // Keyword + Code
-                        addResult(`${k1}${cleanCode}`, 'geo-code');
-                        if (k2) addResult(`${k2}${cleanCode}`, 'geo-code');
+                        addResult(`${k1}${cleanCode}`, 'geo-code', metadata);
+                        if (k2) addResult(`${k2}${cleanCode}`, 'geo-code', metadata);
                     }
                 });
             } else {
@@ -255,7 +263,7 @@ export async function POST(req: NextRequest) {
 
         const sortedResults = Array.from(results)
             .sort((a, b) => b.score - a.score)
-            .slice(0, 50);
+            .slice(0, 200);
 
         // Return response with total count
         const response = {

@@ -7,7 +7,7 @@ import { useState } from 'react';
 import clsx from 'clsx';
 
 const NAV_ITEMS = [
-    { label: 'Expired Domains', href: '/', icon: LayoutDashboard },
+    { label: 'Filter Deleting Domains', href: '/', icon: LayoutDashboard },
     { label: 'Geo Domain Generator', href: '/generator', icon: Sparkles },
     { label: 'Domain Appraisal', href: '/instant-appraisal', icon: FileText },
     { label: 'Auctions', href: '/auctions', icon: Gavel },

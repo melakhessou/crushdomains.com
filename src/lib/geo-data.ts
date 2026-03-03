@@ -1,4 +1,7 @@
 import { getUSACityNames } from './usa-cities';
+import { getCanadaCityNames } from './canada-cities';
+import { AUSTRALIA_CITIES, getAustraliaCityNames } from './australia-cities';
+import { UK_CITIES, getUKCityNames } from './uk-cities';
 
 export type GeoCountry = {
     cities: string[];
@@ -25,10 +28,7 @@ export const GEO_DATA: Record<string, GeoCountry> = {
         ]
     },
     Canada: {
-        cities: [
-            'Toronto', 'Montreal', 'Vancouver', 'Calgary', 'Edmonton', 'Ottawa', 'Winnipeg', 'Quebec City', 'Hamilton', 'Kitchener',
-            'London', 'Victoria', 'Halifax', 'Oshawa', 'Windsor', 'Saskatoon', 'Regina', 'St. John\'s', 'Barrie', 'Kelowna'
-        ],
+        cities: getCanadaCityNames(),
         states: [
             { name: 'Alberta', code: 'AB' }, { name: 'British Columbia', code: 'BC' }, { name: 'Manitoba', code: 'MB' },
             { name: 'New Brunswick', code: 'NB' }, { name: 'Newfoundland and Labrador', code: 'NL' }, { name: 'Nova Scotia', code: 'NS' },
@@ -36,10 +36,7 @@ export const GEO_DATA: Record<string, GeoCountry> = {
         ]
     },
     Australia: {
-        cities: [
-            'Sydney', 'Melbourne', 'Brisbane', 'Perth', 'Adelaide', 'Gold Coast', 'Canberra', 'Newcastle', 'Wollongong', 'Geelong',
-            'Hobart', 'Townsville', 'Cairns', 'Darwin', 'Toowoomba', 'Ballarat', 'Bendigo', 'Launceston', 'Mackay', 'Rockhampton'
-        ],
+        cities: getAustraliaCityNames(),
         states: [
             { name: 'New South Wales', code: 'NSW' }, { name: 'Victoria', code: 'VIC' }, { name: 'Queensland', code: 'QLD' },
             { name: 'Western Australia', code: 'WA' }, { name: 'South Australia', code: 'SA' }, { name: 'Tasmania', code: 'TAS' },
@@ -47,10 +44,7 @@ export const GEO_DATA: Record<string, GeoCountry> = {
         ]
     },
     UK: {
-        cities: [
-            'London', 'Birmingham', 'Manchester', 'Leeds', 'Glasgow', 'Southampton', 'Liverpool', 'Newcastle', 'Nottingham', 'Sheffield',
-            'Bristol', 'Belfast', 'Leicester', 'Edinburgh', 'Cardiff', 'Coventry', 'Bradford', 'Hull', 'Stoke', 'Wolverhampton'
-        ],
+        cities: getUKCityNames(),
         states: [
             { name: 'England', code: 'ENG' }, { name: 'Scotland', code: 'SCT' }, { name: 'Wales', code: 'WLS' }, { name: 'Northern Ireland', code: 'NIR' }
         ]

@@ -20,6 +20,7 @@ function GeneratorContent() {
     const [totalDomainsCount, setTotalDomainsCount] = useState(0);
     const [isGenerating, setIsGenerating] = useState(false);
     const [hasGenerated, setHasGenerated] = useState(false);
+    const [visibleCount, setVisibleCount] = useState(20);
 
     // Filters
     const [filterScore, setFilterScore] = useState(0);
@@ -140,6 +141,7 @@ function GeneratorContent() {
             setFilterScore(0);
             setFilterLength('');
             setFilterAvailability('all');
+            setVisibleCount(20);
 
             // Queue availability checks
             checkQueue.current = items.map((d: any) => d.domain);
@@ -320,13 +322,27 @@ function GeneratorContent() {
                             {filteredDomains.length === 0 ? (
                                 <p className="text-center text-slate-500 py-8 italic font-medium">No domains match your filters.</p>
                             ) : (
-                                filteredDomains.map((d) => (
-                                    <GeoDomainRow
-                                        key={d.domain}
-                                        item={d}
-                                        status={checkCache[d.domain]}
-                                    />
-                                ))
+                                <>
+                                    {filteredDomains.slice(0, visibleCount).map((d) => (
+                                        <GeoDomainRow
+                                            key={d.domain}
+                                            item={d}
+                                            status={checkCache[d.domain]}
+                                        />
+                                    ))}
+
+                                    {filteredDomains.length > visibleCount && (
+                                        <div className="mt-8 flex justify-center">
+                                            <button
+                                                onClick={() => setVisibleCount(prev => prev + 20)}
+                                                className="px-8 py-3 bg-white border border-slate-200 rounded-2xl text-slate-600 font-bold hover:bg-slate-50 hover:border-slate-300 transition-all flex items-center gap-2 shadow-sm"
+                                            >
+                                                Load More Results
+                                                <span className="text-slate-400 text-xs font-medium">({filteredDomains.length - visibleCount} remaining)</span>
+                                            </button>
+                                        </div>
+                                    )}
+                                </>
                             )}
                         </div>
 

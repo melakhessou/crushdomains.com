@@ -150,34 +150,26 @@ export async function GET(req: NextRequest) {
         // 4. Robust Availability Logic
         // Normalize status.status to an array. Domainr API typically returns a space-separated string.
         const rawStatus = statusObj.status || "";
-        // Ensure s is an array of strings
         const s: string[] = Array.isArray(rawStatus)
             ? rawStatus
             : rawStatus.split(/\s+/).filter(Boolean);
 
-        // Technical status blockers that indicate the domain is NOT available for registration.
-        // We include "active" because in EPP, "active" means the domain is registered.
-        // "inactive" is excluded from blockers but ALSO not sufficient for availability 
-        // (often means reserved/parked or in a transition state).
-        const BLOCKERS = [
-            "active",
-            "reserved",
-            "premium",
-            "marketed",
-            "pending",
-            "clientTransferProhibited", // EPP status implying registration
-            "serverTransferProhibited"  // EPP status implying registration
-        ];
-
         // Availability Logic:
-        // 1. MUST have "undelegated" status (primary signal for empty zone).
-        // 2. MUST NOT have any blocking status.
-        // Note: We intentionally ignore "inactive" because while it's not "active", it often flags 
-        // reserved names or transitional states. "undelegated" is the gold standard for fresh registration.
-        // Note: "summary" field is ignored as it masks the technical nuance we need.
-        const available =
-            s.includes("undelegated") &&
-            !BLOCKERS.some(b => s.includes(b));
+        // 1. Standard Availability: "undelegated" status (primary signal for empty zone).
+        // 2. Premium Availability: "marketed", "priced", "transferable", or "premium" (domain is for sale).
+        const isStandardAvailable = s.includes("undelegated");
+        const isPremiumAvailable = s.includes("marketed") || s.includes("priced") || s.includes("transferable") || s.includes("premium");
+
+        // 3. Must NOT have any definitive blocking status like "reserved" or "pending".
+        // Note: "active" is allowed IF it is also "marketed" or "priced" (Premium).
+        // If it is "active" but NOT for sale, it is taken.
+        const isBlocked = s.includes("reserved") ||
+            s.includes("pending") ||
+            (s.includes("active") && !isPremiumAvailable) ||
+            s.includes("clientTransferProhibited") ||
+            s.includes("serverTransferProhibited");
+
+        const available = (isStandardAvailable || isPremiumAvailable) && !isBlocked;
 
         // Confidence Level: 
         // "medium" if available (because WHOIS/DNS is never 100% strictly real-time guaranteed for purchases)
