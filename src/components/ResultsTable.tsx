@@ -203,7 +203,7 @@ export function ResultsTable({
                                 const price = parsePrice(auction.current_bid_price);
                                 const isUrgent = (auction.time_left_hours ?? Infinity) < 24;
                                 const appraisal = parseDynaAppraisal(auction.dyna_appraisal);
-                                const bidUrl = `https://www.dynadot.com/market/auction/${auction.domain}?r=crushdomains`;
+                                const bidUrl = `https://www.dynadot.com/market/auction/${auction.domain}?aff=CRUSHDOMAINS&utm_source=crushdomains&utm_campaign=dynadot-ambassador`;
                                 return (
                                     <tr key={auction.auction_id} className="border-b border-slate-100 hover:bg-indigo-50/30 transition-colors">
                                         <td className="px-3 py-3">

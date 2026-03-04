@@ -10,7 +10,7 @@ import { parsePatterns, domainMatchesPatterns } from '@/lib/domain-pattern';
 import { DynadotFilters, FilterState, SUPPORTED_TLDS } from '@/components/DynadotFilters';
 import { ResultsTable, type SortBy, type SortDir, type PageSize } from '@/components/ResultsTable';
 
-const DYNADOT_AFF_LINK = 'https://www.dynadot.com/?rsc=crushdomains&rsctrn=crushdomains&rscreg=crushdomains&rsceh=crushdomains&rscsb=crushdomains&rscco=crushdomains&rscbo=crushdomains';
+const DYNADOT_AFF_LINK = 'https://www.dynadot.com/domain/search?aff=CRUSHDOMAINS&utm_source=crushdomains&utm_campaign=dynadot-ambassador';
 const LS_KEY_TLDS = 'crush-auctions-tlds';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────

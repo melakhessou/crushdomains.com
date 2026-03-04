@@ -53,12 +53,12 @@ export function DomainTable({ domains }: DomainTableProps) {
                                 <td className="px-6 py-4 text-slate-500 font-mono text-sm">{d.deleteDate}</td>
                                 <td className="px-6 py-3.5 text-right">
                                     <a
-                                        href={`https://${d.domainName}`}
+                                        href={`https://www.dynadot.com/domain/search?domain=${d.domainName}&aff=CRUSHDOMAINS&utm_source=crushdomains&utm_campaign=dynadot-ambassador`}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-md transition-colors"
+                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-md transition-colors whitespace-nowrap"
                                     >
-                                        Visit <ExternalLink size={12} />
+                                        Place Backorder <ExternalLink size={12} />
                                     </a>
                                 </td>
                             </tr>

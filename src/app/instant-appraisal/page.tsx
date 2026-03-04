@@ -174,28 +174,26 @@ function InstantAppraisalContent() {
     const isFormLoading = loading || isSubmitting;
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-slate-50 to-indigo-100 py-6 md:py-12 px-4 md:px-10 font-sans text-slate-800 flex flex-col items-center">
-            <div className="max-w-4xl w-full space-y-6">
-                {/* Header */}
-                <header className="text-center space-y-3 relative">
-                    <PageTitle className="flex items-center justify-center gap-3">
-                        <Sparkles className="w-7 h-7 md:w-8 md:h-8 text-indigo-500" />
+        <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-slate-50 to-indigo-100 py-4 md:py-8 px-4 md:px-10 font-sans text-slate-800 flex flex-col items-center">
+            <div className="max-w-4xl w-full space-y-4">
+                <header className="text-center space-y-1 relative">
+                    <PageTitle className="flex items-center justify-center gap-2 !text-2xl md:!text-3xl">
+                        <Sparkles className="w-5 h-5 md:w-6 md:h-6 text-indigo-500" />
                         Domain Appraisal
                     </PageTitle>
-                    <p className="text-lg text-slate-500 font-normal max-w-2xl mx-auto leading-relaxed">
-                        Get a real-time market valuation using CrushDomains technology.
+                    <p className="text-sm text-slate-500 font-normal max-w-2xl mx-auto leading-tight">
+                        Real-time market valuation using AI.
                     </p>
-                    <div className="pt-2">
-                        <Link href="/bulk-appraisal" className="inline-flex items-center gap-1 text-sm font-medium text-indigo-600 hover:text-indigo-700 transition-colors">
-                            Need to appraise multiple domains? Use Bulk Appraisal
-                            <ArrowRight className="w-4 h-4" />
+                    <div className="pt-0">
+                        <Link href="/bulk-appraisal" className="inline-flex items-center gap-1 text-[11px] font-bold text-indigo-500 hover:text-indigo-600 transition-colors uppercase tracking-wider">
+                            Bulk Appraisal <ArrowRight className="w-3 h-3" />
                         </Link>
                     </div>
                 </header>
 
                 {/* Input Card */}
-                <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-xl border border-white/50 p-8">
-                    <form onSubmit={handleSubmit} className="flex flex-col md:flex-row gap-4">
+                <div className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl border border-white/50 p-4">
+                    <form onSubmit={handleSubmit} className="flex flex-col md:flex-row gap-3">
                         <div className="flex-1">
                             <ValidatedInput
                                 {...register('domain')}
@@ -204,7 +202,6 @@ function InstantAppraisalContent() {
                                 validationState={validationState}
                                 errorMessage={errorMessage}
                                 showCleanedValue={cleanedDomain}
-                                helperText="Supports: example.com, sub.example.io — auto-strips http/https/www"
                                 disabled={isFormLoading}
                             />
                         </div>
@@ -225,7 +222,7 @@ function InstantAppraisalContent() {
                     </form>
 
                     {/* Always show Captcha */}
-                    <div className="mt-6">
+                    <div className="mt-4">
                         <CheckboxCaptcha
                             onVerify={(v) => {
                                 setIsHumanVerified(v);
@@ -248,10 +245,10 @@ function InstantAppraisalContent() {
 
                 {/* Results */}
                 {(result || availability || availabilityError) && (
-                    <div className="grid md:grid-cols-2 gap-6 animate-in fade-in slide-in-from-bottom-4">
+                    <div className="grid md:grid-cols-2 gap-3 animate-in fade-in slide-in-from-bottom-4">
                         {/* Main Value Card */}
                         {result && (
-                            <div className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl border border-indigo-100 p-8 md:col-span-2 flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden">
+                            <div className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl border border-indigo-100 p-5 md:col-span-2 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
                                 <div className="absolute top-0 right-0 p-32 bg-indigo-500/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
                                 <div className="space-y-4 text-center md:text-left z-10 w-full md:w-auto">
                                     <h3 className="text-slate-500 font-semibold uppercase tracking-wider text-xs flex items-center gap-2 justify-center md:justify-start">

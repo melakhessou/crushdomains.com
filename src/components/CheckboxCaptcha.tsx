@@ -32,10 +32,10 @@ export function CheckboxCaptcha({ onVerify, reset, showError }: CheckboxCaptchaP
     };
 
     return (
-        <div className="p-4 bg-gray-50 rounded-xl border border-gray-200 flex flex-col gap-3 transition-opacity">
+        <div className="p-2 bg-gray-50/30 rounded-lg border border-gray-100 flex flex-col gap-1.5 transition-opacity">
             <div
                 onClick={handleCheck}
-                className={`flex items-center gap-4 p-4 bg-white border rounded-lg cursor-pointer transition-all ${verified ? 'border-green-200 bg-green-50/30' : 'border-gray-200 hover:border-indigo-300 hover:shadow-sm'
+                className={`flex items-center gap-3 p-2 bg-white border rounded-md cursor-pointer transition-all ${verified ? 'border-green-100 bg-green-50/20' : 'border-gray-100 hover:border-indigo-200'
                     }`}
             >
                 <div className={`w-6 h-6 rounded border-2 flex items-center justify-center transition-all ${verified ? 'bg-indigo-600 border-indigo-600' : 'bg-white border-gray-300'

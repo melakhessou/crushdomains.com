@@ -32,7 +32,7 @@ export const ValidatedInput = forwardRef<HTMLInputElement, ValidatedInputProps>(
         const isValidating = validationState === 'validating';
 
         return (
-            <div className="w-full space-y-2">
+            <div className="w-full space-y-1">
                 {label && (
                     <label className="block text-sm font-medium text-slate-700">
                         {label}
@@ -56,7 +56,7 @@ export const ValidatedInput = forwardRef<HTMLInputElement, ValidatedInputProps>(
                     <input
                         ref={ref}
                         className={clsx(
-                            "w-full py-3 bg-slate-50 border rounded-xl text-lg outline-none transition-all placeholder:text-slate-400",
+                            "w-full py-2 bg-slate-50 border rounded-xl text-lg outline-none transition-all placeholder:text-slate-400 font-medium",
                             icon ? "pl-12 pr-12" : "pl-4 pr-12",
                             // Border colors based on state
                             isValid && "border-emerald-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20",
