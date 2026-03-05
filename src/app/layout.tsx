@@ -17,6 +17,11 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: 'Filter Deleting Domains for Sale | High-Quality Brandable Domains – CrushDomains',
   description: 'Discover high-quality deleting domains with strong SEO value, branding potential, and availability insights. Find premium domain names on CrushDomains.',
+  verification: {
+    other: {
+      'impact-site-verification': '3931a728-8170-4624-a807-8ebd36a8e786',
+    },
+  },
 };
 
 export default function RootLayout({

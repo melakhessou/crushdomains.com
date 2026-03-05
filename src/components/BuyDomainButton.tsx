@@ -29,7 +29,7 @@ const getAffiliateLink = (registrar: string, domain: string) => {
     const links: Record<string, string> = {
         dynadot: `https://www.dynadot.com/domain/search?domain=${encodedDomain}&aff=CRUSHDOMAINS&utm_source=crushdomains&utm_campaign=dynadot-ambassador`,
         namecheap: `https://www.namecheap.com/domains/registration/results/?domain=${encodedDomain}&aff=YOUR_ID`,
-        spaceship: `https://www.spaceship.com/domain-search/?query=${encodedDomain}&aff=YOUR_ID`,
+        spaceship: `https://spaceship.sjv.io/c/7043229/2873271/21274?u=https%3A%2F%2Fwww.spaceship.com%2Fdomain-search%2F%3Fquery%3D${encodedDomain}`,
         godaddy: `https://uk.godaddy.com/domainsearch/find?checkAvail=1&domainToCheck=${encodedDomain}&aff=YOUR_ID`,
     };
     return links[registrar] || '#';

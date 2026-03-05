@@ -185,20 +185,20 @@ function GeneratorContent() {
                 .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
             `}} />
 
-            <div className="max-w-4xl mx-auto px-6 py-12 md:py-24">
-                <header className="text-center space-y-4 mb-16">
+            <div className="max-w-4xl mx-auto px-6 py-4 md:py-4">
+                <header className="text-center space-y-1 mb-4">
                     <PageTitle className="flex items-center justify-center gap-3">
-                        <MapPin className="w-7 h-7 md:w-8 md:h-8 text-indigo-500 flex-shrink-0" />
+                        <MapPin className="w-6 h-6 md:w-7 md:h-7 text-indigo-500 flex-shrink-0" />
                         Geo Domain Generator
                     </PageTitle>
-                    <p className="max-w-2xl mx-auto text-lg text-slate-500 leading-relaxed font-normal">
+                    <p className="max-w-2xl mx-auto text-xs text-slate-500 leading-relaxed font-normal">
                         Generate intelligent, location-based, and premium .com domains in seconds using our geo-focused engine.
                     </p>
                 </header>
 
                 {/* Main Generator Form */}
-                <div className="premium-glass rounded-3xl shadow-2xl p-8 md:p-10 mb-12 border border-white">
-                    <form onSubmit={handleSubmit} className="space-y-8">
+                <div className="premium-glass rounded-2xl shadow-xl p-4 md:p-5 mb-4 border border-white">
+                    <form onSubmit={handleSubmit} className="space-y-3">
                         <div className="space-y-2">
                             <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Keyword</label>
                             <input
@@ -207,20 +207,20 @@ function GeneratorContent() {
                                 type="text"
                                 required
                                 placeholder="e.g. Dental"
-                                className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all text-slate-800 font-medium"
+                                className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all text-slate-800 font-medium text-sm"
                             />
                         </div>
 
                         <hr className="border-slate-100" />
 
-                        <div className="grid md:grid-cols-3 gap-6">
+                        <div className="grid md:grid-cols-3 gap-3">
                             <div className="space-y-2">
                                 <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Country</label>
                                 <div className="relative">
                                     <select
                                         value={country}
                                         onChange={(e) => setCountry(e.target.value)}
-                                        className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none appearance-none cursor-pointer text-slate-800 font-medium"
+                                        className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none appearance-none cursor-pointer text-slate-800 font-medium text-sm"
                                     >
                                         <option value="USA">USA</option>
                                         <option value="Canada">Canada</option>
@@ -236,7 +236,7 @@ function GeneratorContent() {
                                     <select
                                         value={locationType}
                                         onChange={(e) => setLocationType(e.target.value)}
-                                        className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none appearance-none cursor-pointer text-slate-800 font-medium"
+                                        className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none appearance-none cursor-pointer text-slate-800 font-medium text-sm"
                                     >
                                         <option value="Cities">Cities</option>
                                         <option value="States">States / Provinces</option>
@@ -251,7 +251,7 @@ function GeneratorContent() {
                                     <select
                                         value={keywordPosition}
                                         onChange={(e) => setKeywordPosition(e.target.value)}
-                                        className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none appearance-none cursor-pointer text-slate-800 font-medium"
+                                        className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none appearance-none cursor-pointer text-slate-800 font-medium text-sm"
                                     >
                                         <option value="after">City + Keyword</option>
                                         <option value="before">Keyword + City</option>
@@ -264,7 +264,7 @@ function GeneratorContent() {
                         <button
                             disabled={isGenerating}
                             type="submit"
-                            className="w-full py-5 btn-primary text-white font-semibold text-xl rounded-2xl transition-all active:scale-[0.98] flex items-center justify-center gap-3 disabled:opacity-70"
+                            className="w-full py-3 btn-primary text-white font-semibold text-lg rounded-xl transition-all active:scale-[0.98] flex items-center justify-center gap-3 disabled:opacity-70"
                         >
                             {isGenerating ? 'Generating...' : 'Generate Domains'}
                         </button>
@@ -275,11 +275,11 @@ function GeneratorContent() {
                 {hasGenerated && (
                     <div className="animate-in fade-in slide-in-from-bottom-8 duration-700">
                         {/* Advanced Filter Bar */}
-                        <div className="bg-white/50 border border-slate-100 rounded-2xl p-6 mb-8 shadow-sm">
+                        <div className="bg-white/50 border border-slate-100 rounded-xl p-3 mb-3 shadow-sm">
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                <div className="space-y-3">
+                                <div className="space-y-2">
                                     <div className="flex justify-between">
-                                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Min Score: <span className="text-indigo-600">{filterScore}</span></label>
+                                        <label className="text-[9px] font-black uppercase tracking-widest text-slate-400">Min Score: <span className="text-indigo-600">{filterScore}</span></label>
                                     </div>
                                     <input
                                         value={filterScore}
@@ -287,16 +287,16 @@ function GeneratorContent() {
                                         type="range" min="0" max="100" step="5" className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
                                     />
                                 </div>
-                                <div className="space-y-3">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Max Length</label>
+                                <div className="space-y-2">
+                                    <label className="text-[9px] font-black uppercase tracking-widest text-slate-400">Max Length</label>
                                     <input
                                         value={filterLength}
                                         onChange={(e) => setFilterLength(e.target.value)}
                                         type="number" placeholder="e.g. 10" className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl outline-none focus:border-indigo-400 text-sm font-bold text-slate-700"
                                     />
                                 </div>
-                                <div className="space-y-3">
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Availability</label>
+                                <div className="space-y-2">
+                                    <label className="text-[9px] font-black uppercase tracking-widest text-slate-400">Availability</label>
                                     <select
                                         value={filterAvailability}
                                         onChange={(e) => setFilterAvailability(e.target.value)}
@@ -310,15 +310,15 @@ function GeneratorContent() {
                             </div>
                         </div>
 
-                        <div className="flex items-center justify-between mb-8">
-                            <div className="flex flex-col gap-1">
-                                <h2 className="text-2xl font-semibold text-slate-800">Domain Suggestions</h2>
-                                <span className="text-base font-medium text-indigo-600">Total domains generated: {totalDomainsCount}</span>
+                        <div className="flex items-center justify-between mb-2">
+                            <div className="flex flex-col gap-0.5">
+                                <h2 className="text-xl font-semibold text-slate-800">Domain Suggestions</h2>
+                                <span className="text-xs font-medium text-indigo-600">Total domains generated: {totalDomainsCount}</span>
                             </div>
-                            <span className="px-3 py-1 bg-white border border-slate-200 rounded-full text-xs font-semibold text-slate-400 uppercase tracking-widest shadow-sm">Instant Filter Enabled</span>
+                            <span className="px-3 py-1 bg-white border border-slate-200 rounded-full text-[9px] font-semibold text-slate-400 uppercase tracking-widest shadow-sm">Instant Filter Enabled</span>
                         </div>
 
-                        <div className="grid gap-3 max-h-[800px] overflow-y-auto pr-2 custom-scrollbar">
+                        <div className="grid gap-2 max-h-[800px] overflow-y-auto pr-2 custom-scrollbar">
                             {filteredDomains.length === 0 ? (
                                 <p className="text-center text-slate-500 py-8 italic font-medium">No domains match your filters.</p>
                             ) : (

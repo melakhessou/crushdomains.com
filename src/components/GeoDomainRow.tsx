@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { ExternalLink, Droplets, BarChart3, Users, Archive } from 'lucide-react';
+import BuyDomainButton from '@/components/BuyDomainButton';
 
 export type GeoDomain = {
     domain: string;
@@ -162,18 +163,11 @@ export function GeoDomainRow({ item, status }: GeoDomainRowProps) {
                     <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">Score</span>
                 </div>
 
-                <a
-                    href={buyUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={`flex items-center justify-center gap-1.5 px-4 py-2 text-white rounded-xl text-xs font-bold transition-all group/btn ${status?.available
-                            ? 'bg-emerald-500 hover:bg-emerald-600 shadow-sm shadow-emerald-200 hover:scale-105 active:scale-95'
-                            : 'bg-slate-300 cursor-not-allowed border border-slate-200 text-slate-500 shadow-none pointer-events-none'
-                        }`}
-                >
-                    Buy @ Dynadot
-                    <ExternalLink className={`w-3.5 h-3.5 ${status?.available ? 'text-white/90' : 'text-slate-400'}`} />
-                </a>
+                <BuyDomainButton
+                    domain={domain}
+                    disabled={!status?.available}
+                    className="h-9 px-4 text-xs font-bold rounded-xl"
+                />
             </div>
         </div>
     );

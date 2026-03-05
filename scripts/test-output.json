@@ -1,86 +1,72 @@
 [
   {
     "domain": "example.com",
-    "fallback_price": 270,
+    "fallback_price": 230,
     "signals": {
       "length": 7,
       "tld": ".com",
       "keyword_detected": null,
-      "penalty": 0,
-      "pronounce_bonus": 20,
-      "structure_bonus": 20
+      "penalty": 0
     }
   },
   {
     "domain": "coolshop.com",
-    "fallback_price": 360,
+    "fallback_price": 320,
     "signals": {
       "length": 8,
       "tld": ".com",
       "keyword_detected": "shop",
-      "penalty": 0,
-      "pronounce_bonus": 20,
-      "structure_bonus": 20
+      "penalty": 0
     }
   },
   {
     "domain": "my-app.net",
-    "fallback_price": 230,
+    "fallback_price": 210,
     "signals": {
       "length": 6,
       "tld": ".net",
       "keyword_detected": "app",
-      "penalty": -25,
-      "pronounce_bonus": 0,
-      "structure_bonus": 20
+      "penalty": -25
     }
   },
   {
     "domain": "app123.io",
-    "fallback_price": 250,
+    "fallback_price": 230,
     "signals": {
       "length": 6,
       "tld": ".io",
       "keyword_detected": "app",
-      "penalty": -40,
-      "pronounce_bonus": 0,
-      "structure_bonus": 20
+      "penalty": -40
     }
   },
   {
     "domain": "short.ai",
-    "fallback_price": 210,
+    "fallback_price": 190,
     "signals": {
       "length": 5,
       "tld": ".ai",
       "keyword_detected": null,
-      "penalty": 0,
-      "pronounce_bonus": 0,
-      "structure_bonus": 20
+      "penalty": 0
     }
   },
   {
     "domain": "supercalifragilistic.com",
-    "fallback_price": 215,
+    "fallback_price": 175,
     "signals": {
       "length": 20,
       "tld": ".com",
       "keyword_detected": null,
-      "penalty": 0,
-      "pronounce_bonus": 20,
-      "structure_bonus": 20
+      "penalty": 0
     }
   },
   {
     "domain": "123456.com",
-    "fallback_price": 250,
+    "fallback_price": 230,
     "signals": {
       "length": 6,
       "tld": ".com",
       "keyword_detected": null,
-      "penalty": -40,
-      "pronounce_bonus": 0,
-      "structure_bonus": 20
+      "penalty": -40
     }
   }
 ]
