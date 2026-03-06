@@ -3,24 +3,24 @@ import { NextRequest, NextResponse } from 'next/server';
 /**
  * Checks domain availability by calling the internal check-domain API.
  */
-async function checkDomainAvailability(domain: string): Promise<boolean> {
+async function checkDomainAvailability(domain: string): Promise<{ available: boolean; rawStatuses: string[]; status: string } | null> {
     try {
-        // Use an absolute URL for the internal fetch in Next.js App Router
-        // Since this runs on the server, we use the local port or a relative path if supported
-        // In Next.js, it's often better to call the service logic directly, but for simplicity
-        // and consistency, we'll fetch the internal API route.
         const origin = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
         const res = await fetch(`${origin}/api/check-domain?domain=${encodeURIComponent(domain)}`, {
             cache: 'no-store'
         });
 
-        if (!res.ok) return false;
+        if (!res.ok) return null;
 
         const data = await res.json();
-        return data.available === true;
+        return {
+            available: data.available === true,
+            rawStatuses: data.rawStatuses || [],
+            status: data.status || ''
+        };
     } catch (error) {
         console.error('[Availability Sync] Error:', error);
-        return false;
+        return null;
     }
 }
 
@@ -33,12 +33,14 @@ export async function GET(req: NextRequest) {
     }
 
     try {
-        const available = await checkDomainAvailability(domain);
+        const result = await checkDomainAvailability(domain);
 
         return NextResponse.json({
             success: true,
             domain,
-            available
+            available: result?.available ?? false,
+            rawStatuses: result?.rawStatuses ?? [],
+            status: result?.status ?? ''
         });
     } catch (error) {
         console.error('[Availability API] Error:', error);
@@ -59,12 +61,14 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Domain is required' }, { status: 400 });
         }
 
-        const available = await checkDomainAvailability(domain);
+        const result = await checkDomainAvailability(domain);
 
         return NextResponse.json({
             success: true,
             domain,
-            available
+            available: result?.available ?? false,
+            rawStatuses: result?.rawStatuses ?? [],
+            status: result?.status ?? ''
         });
     } catch (error) {
         return NextResponse.json({

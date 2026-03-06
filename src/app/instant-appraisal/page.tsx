@@ -44,6 +44,8 @@ interface AvailabilityResult {
     success: boolean;
     domain: string;
     available: boolean;
+    rawStatuses?: string[];
+    status?: string;
     error?: string;
 }
 
@@ -400,8 +402,22 @@ function InstantAppraisalContent() {
                                         <XCircle className="w-10 h-10 text-amber-500 p-1 bg-white rounded-full flex-shrink-0" />
                                     )}
                                     <div>
-                                        <div className="font-bold text-3xl mb-1">
-                                            {availability.available ? 'Available' : 'Taken'}
+                                        <div className="flex items-center gap-3 mb-1">
+                                            <div className="font-bold text-3xl">
+                                                {availability.available ? 'Available' : 'Taken'}
+                                            </div>
+                                            <div className="flex gap-1.5">
+                                                {(availability.rawStatuses?.some(s => ['marketed', 'priced', 'premium', 'transferable'].includes(s))) && (
+                                                    <span className="px-2 py-0.5 bg-indigo-600 text-white text-[10px] font-bold rounded-md uppercase tracking-wider">
+                                                        Premium
+                                                    </span>
+                                                )}
+                                                {(availability.rawStatuses?.includes('parked') || availability.status?.toLowerCase().includes('parked')) && (
+                                                    <span className="px-2 py-0.5 bg-amber-500 text-white text-[10px] font-bold rounded-md uppercase tracking-wider">
+                                                        Parked
+                                                    </span>
+                                                )}
+                                            </div>
                                         </div>
                                         <div className="text-sm opacity-80 leading-relaxed">
                                             {availability.available

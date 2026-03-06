@@ -157,7 +157,7 @@ export async function GET(req: NextRequest) {
         // Availability Logic:
         // 1. Standard Availability: "undelegated" status (primary signal for empty zone).
         // 2. Premium Availability: "marketed", "priced", "transferable", or "premium" (domain is for sale).
-        const isStandardAvailable = s.includes("undelegated");
+        const isStandardAvailable = s.includes("undelegated") || s.includes("inactive");
         const isPremiumAvailable = s.includes("marketed") || s.includes("priced") || s.includes("transferable") || s.includes("premium");
 
         // 3. Must NOT have any definitive blocking status like "reserved" or "pending".

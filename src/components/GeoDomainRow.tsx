@@ -85,7 +85,7 @@ export function GeoDomainRow({ item, status }: GeoDomainRowProps) {
     const effectiveLocId = locId || 2840; // Default to US if not provided
 
     // URLs
-    const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodedMapsQuery}`;
+    const googleMapsUrl = `https://www.google.com/search?sz=0&tbs=lf:1,lf_ui:14&q=${encodedMapsQuery}&udm=1`;
     const archiveUrl = `https://web.archive.org/web/*/https://${domain}/`;
 
     const getScoreColor = (score: number) => {

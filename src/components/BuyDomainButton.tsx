@@ -95,11 +95,12 @@ const REGISTRARS: Registrar[] = [
 
 interface BuyDomainButtonProps {
     domain: string;
+    label?: string; // Optional custom text for the button
     className?: string; // Allow external styling overrides
     disabled?: boolean;
 }
 
-export default function BuyDomainButton({ domain, className, disabled = false }: BuyDomainButtonProps) {
+export default function BuyDomainButton({ domain, label = 'Buy Domain', className, disabled = false }: BuyDomainButtonProps) {
     const [isOpen, setIsOpen] = useState(false);
 
     // Prevent opening if disabled
@@ -170,7 +171,7 @@ export default function BuyDomainButton({ domain, className, disabled = false }:
                 )}
                 disabled={disabled}
             >
-                <span>Buy Domain</span>
+                <span>{label}</span>
                 <ChevronDown
                     className={cn(
                         "w-4 h-4 transition-transform duration-200",
@@ -189,7 +190,7 @@ export default function BuyDomainButton({ domain, className, disabled = false }:
                             {...getFloatingProps()}
                             className={cn(
                                 "z-[9999] min-w-[16rem]", // High z-index to stay on top
-                                "bg-white dark:bg-zinc-900 rounded-xl shadow-xl ring-1 ring-black/5 dark:ring-white/10",
+                                "bg-zinc-900 text-white rounded-xl shadow-xl ring-1 ring-white/10",
                                 "focus:outline-none"
                             )}
                         >
@@ -206,7 +207,7 @@ export default function BuyDomainButton({ domain, className, disabled = false }:
                                             onClick={() => handleTrackClick(registrar.name, affiliateLink)}
                                             className={cn(
                                                 "flex items-center justify-between w-full p-3 group",
-                                                "rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-800",
+                                                "rounded-lg hover:bg-zinc-800",
                                                 "transition-colors duration-150"
                                             )}
                                         >
@@ -214,20 +215,19 @@ export default function BuyDomainButton({ domain, className, disabled = false }:
                                                 {/* Icon Wrapper */}
                                                 <div className={cn(
                                                     "flex items-center justify-center w-8 h-8 rounded-full",
-                                                    "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400",
-                                                    "group-hover:bg-white group-hover:shadow-sm group-hover:text-blue-600",
+                                                    "bg-zinc-800 text-zinc-400 font-bold",
+                                                    "group-hover:bg-zinc-700 group-hover:text-blue-400",
                                                     "transition-all duration-200"
                                                 )}>
                                                     {registrar.icon}
                                                 </div>
 
                                                 <div className="flex flex-col items-start">
-                                                    <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+                                                    <span className="text-sm font-semibold text-zinc-100">
                                                         {registrar.name}
                                                     </span>
-                                                    {/* Badge display fixed: check logic */}
                                                     {registrar.badge && (
-                                                        <span className="text-[10px] uppercase tracking-wider font-bold text-emerald-600 dark:text-emerald-400">
+                                                        <span className="text-[10px] uppercase tracking-wider font-bold text-emerald-400">
                                                             {registrar.badge}
                                                         </span>
                                                     )}
@@ -241,8 +241,8 @@ export default function BuyDomainButton({ domain, className, disabled = false }:
                             </div>
 
                             {/* Footer / Disclaimer */}
-                            <div className="px-3 py-2 border-t border-zinc-100 dark:border-zinc-800">
-                                <p className="text-[10px] text-center text-zinc-400">
+                            <div className="px-3 py-2 border-t border-zinc-800">
+                                <p className="text-[10px] text-center text-zinc-500 font-medium">
                                     Affiliate links support our tool
                                 </p>
                             </div>
