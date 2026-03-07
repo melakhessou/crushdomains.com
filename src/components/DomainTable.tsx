@@ -1,20 +1,53 @@
-import { ExternalLink } from 'lucide-react';
+import { ExternalLink, Calendar, Gavel, FileText } from 'lucide-react';
+import { NamejetDomain, NamejetSource } from '@/lib/namejet-parser';
+import clsx from 'clsx';
 
-export interface Domain {
-    domainName: string;
-    tld: string;
-    length: number;
-    deleteDate: string;
-}
+export type { NamejetDomain };
 
 interface DomainTableProps {
-    domains: Domain[];
+    domains: NamejetDomain[];
+}
+
+function SourceBadge({ source }: { source: NamejetSource }) {
+    const styles: Record<NamejetSource, string> = {
+        deleting: 'bg-rose-50 text-rose-700 border-rose-100',
+        preorder: 'bg-amber-50 text-amber-700 border-amber-100',
+        live: 'bg-emerald-50 text-emerald-700 border-emerald-100'
+    };
+
+    const labels: Record<NamejetSource, string> = {
+        deleting: 'Deleting',
+        preorder: 'Preorder',
+        live: 'Live Auction'
+    };
+
+    return (
+        <span className={clsx('inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border uppercase tracking-wider', styles[source])}>
+            {labels[source]}
+        </span>
+    );
+}
+
+function formatDate(date: Date | null): string {
+    if (!date) return '—';
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+    const hh = String(date.getHours()).padStart(2, '0');
+    const min = String(date.getMinutes()).padStart(2, '0');
+
+    // If it's midnight, just show date
+    if (date.getHours() === 0 && date.getMinutes() === 0) {
+        return `${yyyy}-${mm}-${dd}`;
+    }
+    return `${yyyy}-${mm}-${dd} ${hh}:${min}`;
 }
 
 export function DomainTable({ domains }: DomainTableProps) {
     if (domains.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center py-24 text-slate-400">
+                <FileText className="w-12 h-12 mb-4 opacity-20" />
                 <p className="text-xl font-semibold text-slate-500">No domains found matching your criteria.</p>
                 <p className="text-base font-normal">Try adjusting your filters.</p>
             </div>
@@ -22,43 +55,56 @@ export function DomainTable({ domains }: DomainTableProps) {
     }
 
     return (
-        <div className="flex flex-col h-full bg-white shadow-sm rounded-lg overflow-hidden">
-            <div className="flex-1 overflow-auto">
+        <div className="flex flex-col h-full bg-white shadow-sm rounded-lg overflow-hidden border border-slate-100">
+            {/* ── Desktop Table ── */}
+            <div className="hidden md:block flex-1 overflow-auto">
                 <table className="w-full text-base text-left text-slate-600">
                     <thead className="text-xs text-slate-500 uppercase bg-slate-50/80 border-b border-slate-100 font-semibold tracking-widest sticky top-0 backdrop-blur-sm z-10">
                         <tr>
                             <th scope="col" className="px-6 py-4">Domain</th>
-                            <th scope="col" className="px-6 py-4">Length</th>
-                            <th scope="col" className="px-6 py-4">TLD</th>
-                            <th scope="col" className="px-6 py-4">Delete Date</th>
+                            <th scope="col" className="px-6 py-4">Type</th>
+                            <th scope="col" className="px-6 py-4">Bid</th>
+                            <th scope="col" className="px-6 py-4">
+                                <span className="flex items-center gap-1.5"><Calendar size={14} /> Closing Date</span>
+                            </th>
                             <th scope="col" className="px-6 py-4 text-right">Action</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                         {domains.map((d, i) => (
                             <tr key={`${d.domainName}-${i}`} className="bg-white/50 hover:bg-indigo-50/30 transition-colors duration-150">
-                                <td className="px-6 py-4 font-semibold text-slate-900 whitespace-nowrap text-lg">
-                                    {d.domainName.split('.')[0]}<span className="text-slate-400 font-normal">.{d.tld}</span>
+                                <td className="px-6 py-4">
+                                    <div className="flex flex-col">
+                                        <span className="font-semibold text-slate-900 text-lg">
+                                            {d.domainName.split('.')[0]}<span className="text-slate-400 font-normal">.{d.tld}</span>
+                                        </span>
+                                        <span className="text-[10px] text-slate-400 font-mono uppercase">Length: {d.length}</span>
+                                    </div>
                                 </td>
                                 <td className="px-6 py-3.5">
-                                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-600">
-                                        {d.length}
-                                    </span>
+                                    <SourceBadge source={d.source} />
                                 </td>
                                 <td className="px-6 py-3.5">
-                                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-100">
-                                        .{d.tld}
-                                    </span>
+                                    {d.currentBid !== null ? (
+                                        <span className="inline-flex items-center gap-1 font-mono font-bold text-slate-700">
+                                            <Gavel size={12} className="text-slate-400" />
+                                            ${d.currentBid.toLocaleString()}
+                                        </span>
+                                    ) : (
+                                        <span className="text-slate-300">—</span>
+                                    )}
                                 </td>
-                                <td className="px-6 py-4 text-slate-500 font-mono text-sm">{d.deleteDate}</td>
+                                <td className="px-6 py-4 text-slate-500 font-mono text-sm whitespace-nowrap">
+                                    {formatDate(d.closingDate)}
+                                </td>
                                 <td className="px-6 py-3.5 text-right">
                                     <a
-                                        href={`https://www.dynadot.com/domain/search?domain=${d.domainName}&aff=CRUSHDOMAINS&utm_source=crushdomains&utm_campaign=dynadot-ambassador`}
+                                        href={`https://www.namejet.com/store/basic.action?dom=${d.domainName}`}
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-md transition-colors whitespace-nowrap"
                                     >
-                                        Place Backorder <ExternalLink size={12} />
+                                        Bid / Backorder <ExternalLink size={12} />
                                     </a>
                                 </td>
                             </tr>
@@ -66,6 +112,57 @@ export function DomainTable({ domains }: DomainTableProps) {
                     </tbody>
                 </table>
             </div>
+
+            {/* ── Mobile Card List ── */}
+            <div className="md:hidden flex-1 overflow-auto divide-y divide-slate-100 bg-slate-50/30">
+                {domains.map((d, i) => (
+                    <div key={`${d.domainName}-${i}`} className="p-4 bg-white space-y-4">
+                        <div className="flex items-start justify-between gap-3">
+                            <div className="flex flex-col min-w-0 flex-1">
+                                <span className="font-bold text-slate-900 text-lg leading-tight break-all">
+                                    {d.domainName.split('.')[0]}<span className="text-slate-400 font-normal">.{d.tld}</span>
+                                </span>
+                                <div className="flex flex-wrap items-center gap-2 mt-1.5">
+                                    <SourceBadge source={d.source} />
+                                    <span className="text-[10px] text-slate-400 font-mono font-bold uppercase py-0.5 px-1.5 bg-slate-100/50 rounded border border-slate-100">
+                                        LEN: {d.length}
+                                    </span>
+                                </div>
+                            </div>
+                            {d.currentBid !== null && (
+                                <div className="text-right shrink-0">
+                                    <span className="block text-[10px] text-slate-400 font-bold uppercase tracking-tighter">Current Bid</span>
+                                    <span className="font-mono font-black text-indigo-600 text-lg leading-none">
+                                        ${d.currentBid.toLocaleString()}
+                                    </span>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-3 border-t border-slate-50">
+                            <div>
+                                <span className="block text-[10px] text-slate-400 font-bold uppercase tracking-tighter flex items-center gap-1">
+                                    <Calendar size={10} /> Closing Date
+                                </span>
+                                <span className="text-xs font-mono text-slate-600 font-bold">
+                                    {formatDate(d.closingDate)}
+                                </span>
+                            </div>
+                            <div className="flex-1 sm:max-w-[200px]">
+                                <a
+                                    href={`https://www.namejet.com/store/basic.action?dom=${d.domainName}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="w-full py-2.5 text-center text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-lg shadow-indigo-200 transition-all flex items-center justify-center gap-2"
+                                >
+                                    Bid / Backorder <ExternalLink size={12} />
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
         </div>
     );
 }
+

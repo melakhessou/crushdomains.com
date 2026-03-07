@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-import Papa from 'papaparse';
 import { FileUpload } from '@/components/FileUpload';
-import { DomainTable, Domain } from '@/components/DomainTable';
-import { Search, Download, Sparkles, AlertCircle, ChevronLeft, ChevronRight, Copy } from 'lucide-react';
+import { DomainTable, NamejetDomain } from '@/components/DomainTable';
+import { parseNamejetCsv, NamejetSource } from '@/lib/namejet-parser';
+import { Search, Download, Sparkles, AlertCircle, ChevronLeft, ChevronRight, Copy, Filter } from 'lucide-react';
 import { PageTitle } from '@/components/ui/page-title';
 import clsx from 'clsx';
 
@@ -64,7 +64,7 @@ interface DashboardProps {
 }
 
 export function ExpiredDomainsDashboard({ initialSearch = '', nicheTitle }: DashboardProps) {
-    const [allDomains, setAllDomains] = useState<Domain[]>([]);
+    const [allDomains, setAllDomains] = useState<NamejetDomain[]>([]);
     const [isParsing, setIsParsing] = useState(false);
     const [lastUpdated, setLastUpdated] = useState<string | null>(null);
 
@@ -73,6 +73,7 @@ export function ExpiredDomainsDashboard({ initialSearch = '', nicheTitle }: Dash
     const [tldFilter, setTldFilter] = useState('');
     const [minLen, setMinLen] = useState<number | ''>('');
     const [maxLen, setMaxLen] = useState<number | ''>('');
+    const [sourceFilter, setSourceFilter] = useState<NamejetSource | 'all'>('all');
 
     // Advanced Filters - Allowlist
     const [startsWith, setStartsWith] = useState('');
@@ -97,49 +98,29 @@ export function ExpiredDomainsDashboard({ initialSearch = '', nicheTitle }: Dash
     // Reset page when filters change
     useEffect(() => {
         setCurrentPage(1);
-    }, [searchTerm, tldFilter, minLen, maxLen, startsWith, contains, endsWith, regexPattern, patternFilter, onlyNumbers, onlyCharacters, noHyphens, noNumbers]);
+    }, [searchTerm, tldFilter, minLen, maxLen, startsWith, contains, endsWith, regexPattern, patternFilter, onlyNumbers, onlyCharacters, noHyphens, noNumbers, sourceFilter]);
 
     const handleFileUpload = (file: File) => {
         setIsParsing(true);
-        Papa.parse(file, {
-            header: true,
-            skipEmptyLines: true,
-            complete: (results) => {
-                const findValue = (row: any, ...targets: string[]) => {
-                    const keys = Object.keys(row);
-                    for (const target of targets) {
-                        const normalizedTarget = target.toLowerCase().trim();
-                        const key = keys.find(k => k.toLowerCase().trim() === normalizedTarget);
-                        if (key) return row[key];
-                    }
-                    return '';
-                };
-
-                const parsed: Domain[] = results.data.map((row: any) => {
-                    const domainName = findValue(row, 'Domain', 'domain', 'Domain Name');
-                    if (!domainName) return null;
-                    const parts = domainName.split('.');
-                    const tld = parts.length > 1 ? parts.pop() : '';
-                    const name = parts.join('.');
-
-                    return {
-                        domainName: domainName,
-                        tld: tld || '',
-                        length: name.length,
-                        deleteDate: findValue(row, 'Join By Date (ET)', 'PreReleaseDate', 'delete_date', 'Date'),
-                    };
-                }).filter((d: any): d is Domain => d !== null);
-
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const content = e.target?.result as string;
+            try {
+                const parsed = parseNamejetCsv(content);
                 setAllDomains(parsed);
                 setLastUpdated(new Date().toLocaleTimeString());
+            } catch (error) {
+                console.error('Error parsing NameJet CSV:', error);
+                alert('Failed to parse CSV file. Please ensure it is a valid NameJet format.');
+            } finally {
                 setIsParsing(false);
-            },
-            error: (error) => {
-                console.error('Error parsing CSV:', error);
-                setIsParsing(false);
-                alert('Failed to parse CSV file.');
             }
-        });
+        };
+        reader.onerror = () => {
+            setIsParsing(false);
+            alert('Error reading file.');
+        };
+        reader.readAsText(file);
     };
 
     const filteredDomains = useMemo(() => {
@@ -170,9 +151,11 @@ export function ExpiredDomainsDashboard({ initialSearch = '', nicheTitle }: Dash
             if (onlyNumbers && !/^\d+$/.test(namePart)) return false;
             if (onlyCharacters && !/^[a-z]+$/.test(namePart)) return false;
 
+            if (sourceFilter !== 'all' && d.source !== sourceFilter) return false;
+
             return true;
         });
-    }, [allDomains, searchTerm, regexPattern, patternFilter, tldFilter, minLen, maxLen, startsWith, contains, endsWith, onlyNumbers, onlyCharacters, noHyphens, noNumbers]);
+    }, [allDomains, searchTerm, regexPattern, patternFilter, tldFilter, minLen, maxLen, startsWith, contains, endsWith, onlyNumbers, onlyCharacters, noHyphens, noNumbers, sourceFilter]);
 
     const paginatedDomains = useMemo(() => {
         const start = (currentPage - 1) * itemsPerPage;
@@ -191,8 +174,16 @@ export function ExpiredDomainsDashboard({ initialSearch = '', nicheTitle }: Dash
 
     const handleExport = () => {
         if (filteredDomains.length === 0) return;
-        const csv = Papa.unparse(filteredDomains);
-        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        // Simple CSV export
+        const headers = ['Domain', 'Type', 'Bid', 'Closing Date'];
+        const rows = filteredDomains.map(d => [
+            d.domainName,
+            d.source,
+            d.currentBid || '',
+            d.closingDate ? d.closingDate.toISOString() : ''
+        ]);
+        const csvContent = [headers, ...rows].map(e => e.join(",")).join("\n");
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
@@ -211,12 +202,12 @@ export function ExpiredDomainsDashboard({ initialSearch = '', nicheTitle }: Dash
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-slate-50 to-indigo-100 p-6 md:p-10 font-sans text-slate-800">
+        <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-slate-50 to-indigo-100 p-4 md:p-10 font-sans text-slate-800">
             <div className="max-w-7xl mx-auto space-y-8">
                 <header className="text-center space-y-3 relative">
                     <PageTitle className="flex items-center justify-center gap-3">
                         <Sparkles className="w-7 h-7 md:w-8 md:h-8 text-indigo-500 flex-shrink-0" />
-                        {nicheTitle || 'Filter Deleting Domains'}
+                        {nicheTitle || 'Filter Expiring / Deleting Domains'}
                     </PageTitle>
                     <p className="text-lg text-slate-500 font-normal mx-auto max-w-2xl leading-relaxed">
                         {nicheTitle ? `${nicheTitle} Niche Dashboard` : 'Premium Domain Investor Dashboard'}
@@ -230,9 +221,9 @@ export function ExpiredDomainsDashboard({ initialSearch = '', nicheTitle }: Dash
                     )}
                 </header>
 
-                <div className="grid gap-8 lg:grid-cols-[320px_1fr]">
+                <div className="grid gap-8 lg:grid-cols-[300px_1fr]">
                     <aside className="space-y-6">
-                        <div className="p-6 bg-white/80 backdrop-blur-xl rounded-2xl shadow-xl border border-white/50 space-y-6 sticky top-6 max-h-[calc(100vh-3rem)] overflow-y-auto custom-scrollbar">
+                        <div className="p-6 bg-white/80 backdrop-blur-xl rounded-2xl shadow-xl border border-white/50 space-y-6 lg:sticky lg:top-6 lg:max-h-[calc(100vh-3rem)] overflow-y-auto custom-scrollbar">
                             <div>
                                 <label className="block text-sm font-semibold text-slate-700 mb-3">Data Source</label>
                                 <FileUpload onFileSelect={handleFileUpload} />
@@ -255,6 +246,27 @@ export function ExpiredDomainsDashboard({ initialSearch = '', nicheTitle }: Dash
                                             value={searchTerm}
                                             onChange={(e) => setSearchTerm(e.target.value)}
                                         />
+                                    </div>
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-2">
+                                        <Filter size={12} /> Source Type
+                                    </label>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        {(['all', 'deleting', 'preorder', 'live'] as const).map((s) => (
+                                            <button
+                                                key={s}
+                                                onClick={() => setSourceFilter(s)}
+                                                className={clsx(
+                                                    "px-2 py-2 rounded-lg text-xs font-bold transition-all border",
+                                                    sourceFilter === s
+                                                        ? "bg-indigo-600 text-white border-indigo-600 shadow-sm"
+                                                        : "bg-slate-50 text-slate-500 border-slate-200 hover:border-indigo-300 hover:text-indigo-600"
+                                                )}
+                                            >
+                                                {s === 'all' ? 'All' : s.charAt(0).toUpperCase() + s.slice(1)}
+                                            </button>
+                                        ))}
                                     </div>
                                 </div>
                                 {/* ... existing patterns, regex, TLD, length filters ... */}
@@ -318,17 +330,17 @@ export function ExpiredDomainsDashboard({ initialSearch = '', nicheTitle }: Dash
 
                     <main>
 
-                        <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-xl border border-white/50 overflow-hidden flex flex-col h-full min-h-[800px]">
-                            <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-white/50">
+                        <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-xl border border-white/50 overflow-hidden flex flex-col h-full min-h-[600px] sm:min-h-[800px]">
+                            <div className="p-4 border-b border-slate-100 flex flex-wrap justify-between items-center bg-white/50 gap-3">
                                 <div className="flex items-baseline gap-2">
                                     <h2 className="text-xl font-semibold text-slate-800">Results</h2>
                                     <span className="text-base font-normal text-slate-400">({totalItems})</span>
                                 </div>
-                                <div className="flex items-center gap-3">
-                                    <button onClick={handleCopy} disabled={totalItems === 0} className={clsx("flex items-center gap-2 px-3 py-2 text-sm font-semibold rounded-lg border", copied ? "bg-emerald-50 text-emerald-600 border-emerald-200" : "bg-white text-slate-600 border-slate-200")}>
+                                <div className="flex items-center gap-2 sm:gap-3 ml-auto sm:ml-0">
+                                    <button onClick={handleCopy} disabled={totalItems === 0} className={clsx("flex items-center gap-2 px-3 py-2 text-xs sm:text-sm font-semibold rounded-lg border", copied ? "bg-emerald-50 text-emerald-600 border-emerald-200" : "bg-white text-slate-600 border-slate-200")}>
                                         <Copy size={16} /> {copied ? 'Copied' : 'Copy'}
                                     </button>
-                                    <button onClick={handleExport} disabled={totalItems === 0} className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-lg">
+                                    <button onClick={handleExport} disabled={totalItems === 0} className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-xs sm:text-sm font-semibold rounded-lg">
                                         <Download size={16} /> Export
                                     </button>
                                 </div>
@@ -336,11 +348,11 @@ export function ExpiredDomainsDashboard({ initialSearch = '', nicheTitle }: Dash
 
 
                             {/* Pagination Toolbar */}
-                            <div className="px-4 py-3 border-b border-slate-100 bg-white/50 flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-slate-500">
+                            <div className="px-4 py-2 sm:py-3 border-b border-slate-100 bg-white/50 flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-4 text-xs sm:text-sm text-slate-500">
                                 <div className="flex items-center gap-2">
-                                    <span>Rows per page:</span>
+                                    <span>Rows:</span>
                                     <select
-                                        className="bg-white border border-slate-200 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                                        className="bg-white border border-slate-200 rounded px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
                                         value={itemsPerPage}
                                         onChange={(e) => {
                                             setItemsPerPage(Number(e.target.value));
@@ -356,7 +368,7 @@ export function ExpiredDomainsDashboard({ initialSearch = '', nicheTitle }: Dash
 
                                 <div className="flex items-center gap-4">
                                     <span>
-                                        {startItem}-{endItem} of {totalItems}
+                                        {startItem}-{endItem} <span className="hidden xs:inline">of {totalItems}</span>
                                     </span>
                                     <div className="flex items-center gap-1">
                                         <button

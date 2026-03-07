@@ -9,10 +9,37 @@ export default function AuctionsLoading() {
             </div>
 
             {/* ── Central Spinner ── */}
-            <div className="absolute inset-0 flex flex-col items-center justify-center z-40 bg-white/10 backdrop-blur-[1px]">
-                <div className="bg-white/80 p-8 rounded-3xl shadow-2xl border border-white/50 flex flex-col items-center gap-4">
-                    <Loader2 className="w-12 h-12 text-indigo-600 animate-spin" />
-                    <span className="text-indigo-900 font-bold tracking-tight text-center">Loading auctions...</span>
+            <div className="fixed inset-0 flex flex-col items-center justify-center z-40 bg-white/20 backdrop-blur-[2px]">
+                <style dangerouslySetInnerHTML={{
+                    __html: `
+                    .custom-loader {
+                        --d: 22px;
+                        width: 4px;
+                        height: 4px;
+                        border-radius: 50%;
+                        color: #6366f1;
+                        box-shadow: 
+                            calc(1*var(--d))      calc(0*var(--d))     0 0,
+                            calc(0.707*var(--d))  calc(0.707*var(--d)) 0 1px,
+                            calc(0*var(--d))      calc(1*var(--d))     0 2px,
+                            calc(-0.707*var(--d)) calc(0.707*var(--d)) 0 3px,
+                            calc(-1*var(--d))     calc(0*var(--d))     0 4px,
+                            calc(-0.707*var(--d)) calc(-0.707*var(--d))0 5px,
+                            calc(0*var(--d))      calc(-1*var(--d))    0 6px;
+                        animation: l27 1s infinite steps(8);
+                    }
+                    @keyframes l27 {
+                        100% {transform: rotate(1turn)}
+                    }
+                `}} />
+                <div className="bg-white/90 p-12 rounded-[40px] shadow-[0_32px_64px_-16px_rgba(99,102,241,0.2)] border border-white flex flex-col items-center gap-12 max-w-[90vw]">
+                    <div className="relative flex items-center justify-center w-24 h-24">
+                        <div className="custom-loader"></div>
+                    </div>
+                    <div className="space-y-2 text-center">
+                        <h3 className="text-xl font-extrabold text-indigo-950 tracking-tight">Loading Auctions</h3>
+                        <p className="text-sm text-indigo-500/80 font-medium">Fetching the latest domain data...</p>
+                    </div>
                 </div>
             </div>
 
