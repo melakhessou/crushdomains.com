@@ -1,28 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-
-/**
- * Checks domain availability by calling the internal check-domain API.
- */
-async function checkDomainAvailability(domain: string): Promise<{ available: boolean; rawStatuses: string[]; status: string } | null> {
-    try {
-        const origin = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-        const res = await fetch(`${origin}/api/check-domain?domain=${encodeURIComponent(domain)}`, {
-            cache: 'no-store'
-        });
-
-        if (!res.ok) return null;
-
-        const data = await res.json();
-        return {
-            available: data.available === true,
-            rawStatuses: data.rawStatuses || [],
-            status: data.status || ''
-        };
-    } catch (error) {
-        console.error('[Availability Sync] Error:', error);
-        return null;
-    }
-}
+import { checkDomainAvailability } from '@/lib/availability';
 
 export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
