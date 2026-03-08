@@ -164,11 +164,35 @@ app.get('/health', (req, res) => res.status(200).send('OK'));
 
 // Standardize response output
 function formatResponse(data) {
-    const status = data.status?.[0];
+    const statusObj = data.status?.[0];
+    if (!statusObj) return { available: false, status: 'unknown' };
+
+    // 4. Robust Availability Logic (Synced with Next.js API)
+    const rawStatus = statusObj.status || "";
+    const s = Array.isArray(rawStatus)
+        ? rawStatus
+        : rawStatus.split(/\s+/).filter(Boolean);
+
+    // Availability Logic:
+    // 1. Standard Availability: "undelegated" status (primary signal for empty zone).
+    // 2. Premium Availability: "marketed", "priced", "transferable", or "premium" (domain is for sale).
+    const isStandardAvailable = s.includes("undelegated") || s.includes("inactive");
+    const isPremiumAvailable = s.includes("marketed") || s.includes("priced") || s.includes("transferable") || s.includes("premium");
+
+    // 3. Must NOT have any definitive blocking status like "reserved" or "pending".
+    const isBlocked = s.includes("reserved") ||
+        s.includes("pending") ||
+        (s.includes("active") && !isPremiumAvailable) ||
+        s.includes("clientTransferProhibited") ||
+        s.includes("serverTransferProhibited");
+
+    const available = (isStandardAvailable || isPremiumAvailable) && !isBlocked;
+
     return {
-        domain: status?.domain,
-        available: status?.summary === 'undelegated' || status?.summary === 'inactive',
-        status: status?.summary
+        domain: statusObj.domain,
+        available,
+        rawStatuses: s,
+        status: statusObj.summary // Legacy field
     };
 }
 
