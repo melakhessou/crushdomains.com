@@ -26,7 +26,7 @@ export default function LandingPage() {
             <Globe className="w-6 h-6 md:w-7 md:h-7 text-indigo-500 flex-shrink-0" />
             Domain Name Registration
           </h1>
-          <p className="max-w-2xl mx-auto text-[11px] text-slate-500 leading-relaxed font-normal uppercase tracking-wider">
+          <p className="max-w-2xl mx-auto text-xs text-slate-500 leading-relaxed font-normal uppercase tracking-wider">
             Search and register domains with CrushDomains powered by our partners.
           </p>
         </header>
@@ -35,7 +35,7 @@ export default function LandingPage() {
         <div className="premium-glass rounded-2xl shadow-xl p-4 md:p-6 border border-white max-w-xl mx-auto w-full animate-in fade-in slide-in-from-bottom-4 duration-700">
           <div className="space-y-4">
             <div className="space-y-2">
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Domain Name</label>
+              <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Domain Name</label>
               <div className="relative group">
                 <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
                   <Search className="w-4 h-4 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />

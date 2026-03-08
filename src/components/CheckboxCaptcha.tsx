@@ -55,7 +55,7 @@ export function CheckboxCaptcha({ onVerify, reset, showError }: CheckboxCaptchaP
                     </span>
                     <div className="flex flex-col items-end opacity-50">
                         <ShieldCheck className="w-5 h-5 text-gray-400" />
-                        <span className="text-[8px] text-gray-400 uppercase tracking-widest font-bold">CrushCaptcha</span>
+                        <span className="text-xs text-gray-400 uppercase tracking-widest font-bold">CrushCaptcha</span>
                     </div>
                 </div>
             </div>

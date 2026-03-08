@@ -227,7 +227,7 @@ export default function BuyDomainButton({ domain, label = 'Buy Domain', classNam
                                                         {registrar.name}
                                                     </span>
                                                     {registrar.badge && (
-                                                        <span className="text-[10px] uppercase tracking-wider font-bold text-emerald-400">
+                                                        <span className="text-xs uppercase tracking-wider font-bold text-emerald-400">
                                                             {registrar.badge}
                                                         </span>
                                                     )}
@@ -242,7 +242,7 @@ export default function BuyDomainButton({ domain, label = 'Buy Domain', classNam
 
                             {/* Footer / Disclaimer */}
                             <div className="px-3 py-2 border-t border-zinc-800">
-                                <p className="text-[10px] text-center text-zinc-500 font-medium">
+                                <p className="text-xs text-center text-zinc-500 font-medium">
                                     Affiliate links support our tool
                                 </p>
                             </div>

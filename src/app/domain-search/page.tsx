@@ -237,7 +237,7 @@ function DomainSearchContent() {
                     onChange={e => setPriceMax(parseInt(e.target.value))}
                     className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
                 />
-                <div className="flex justify-between text-[10px] font-bold text-slate-400">
+                <div className="flex justify-between text-xs font-bold text-slate-400">
                     <span>$1</span>
                     <span>$50</span>
                 </div>
@@ -357,7 +357,7 @@ function DomainSearchContent() {
                                 placeholder="e.g. crypto ai fitness"
                                 className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all text-slate-800 font-medium text-base"
                             />
-                            <p className="text-[11px] text-slate-400 ml-1 font-medium">
+                            <p className="text-xs text-slate-400 ml-1 font-medium">
                                 Space-separated keywords. We combine them into 50–100 domain candidates and check each via Dynadot.
                             </p>
                         </div>
@@ -417,7 +417,7 @@ function DomainSearchContent() {
                                         style={{ width: `${pct}%` }}
                                     />
                                 </div>
-                                <div className="flex justify-between text-[10px] font-bold text-slate-400">
+                                <div className="flex justify-between text-xs font-bold text-slate-400">
                                     <span>{progress.checked} checked</span>
                                     <span>{pct}%</span>
                                 </div>
@@ -472,7 +472,7 @@ function DomainSearchContent() {
                                         </span>
                                     </div>
                                     {loading && (
-                                        <span className="flex items-center gap-2 px-3 py-1.5 bg-indigo-50 border border-indigo-200 rounded-full text-[10px] font-bold text-indigo-600 uppercase tracking-widest animate-pulse">
+                                        <span className="flex items-center gap-2 px-3 py-1.5 bg-indigo-50 border border-indigo-200 rounded-full text-xs font-bold text-indigo-600 uppercase tracking-widest animate-pulse">
                                             <Loader2 className="w-3 h-3 animate-spin" />
                                             Checking...
                                         </span>
@@ -491,10 +491,10 @@ function DomainSearchContent() {
                                             <table className="w-full">
                                                 <thead>
                                                     <tr className="border-b border-slate-100">
-                                                        <th className="text-left px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">Domain</th>
-                                                        <th className="text-left px-4 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">Status</th>
-                                                        <th className="text-left px-4 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">Price</th>
-                                                        <th className="text-right px-6 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400">Action</th>
+                                                        <th className="text-left px-6 py-4 text-xs font-black uppercase tracking-widest text-slate-400">Domain</th>
+                                                        <th className="text-left px-4 py-4 text-xs font-black uppercase tracking-widest text-slate-400">Status</th>
+                                                        <th className="text-left px-4 py-4 text-xs font-black uppercase tracking-widest text-slate-400">Price</th>
+                                                        <th className="text-right px-6 py-4 text-xs font-black uppercase tracking-widest text-slate-400">Action</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -509,19 +509,19 @@ function DomainSearchContent() {
                                                             </td>
                                                             <td className="px-4 py-4">
                                                                 {r.available === 'pending' ? (
-                                                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 shimmer rounded-full text-[10px] font-bold text-slate-400 border border-slate-100">
+                                                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 shimmer rounded-full text-xs font-bold text-slate-400 border border-slate-100">
                                                                         ⏳ Pending
                                                                     </span>
                                                                 ) : r.available === 'yes' ? (
-                                                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 text-emerald-600 rounded-full text-[10px] font-bold border border-emerald-100">
+                                                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 text-emerald-600 rounded-full text-xs font-bold border border-emerald-100">
                                                                         🟢 Available
                                                                     </span>
                                                                 ) : r.available === 'error' ? (
-                                                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-50 text-amber-500 rounded-full text-[10px] font-bold border border-amber-100">
+                                                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-50 text-amber-500 rounded-full text-xs font-bold border border-amber-100">
                                                                         ⚠️ Error
                                                                     </span>
                                                                 ) : (
-                                                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-50 text-slate-400 rounded-full text-[10px] font-bold border border-slate-100">
+                                                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-50 text-slate-400 rounded-full text-xs font-bold border border-slate-100">
                                                                         🔴 Taken
                                                                     </span>
                                                                 )}
@@ -567,19 +567,19 @@ function DomainSearchContent() {
                                                         <div className="flex flex-col gap-1.5 min-w-0">
                                                             <span className="text-sm font-bold text-slate-800 truncate">{r.domain}</span>
                                                             {r.available === 'pending' ? (
-                                                                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 shimmer rounded-full text-[10px] font-bold text-slate-400 border border-slate-100 w-fit">
+                                                                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 shimmer rounded-full text-xs font-bold text-slate-400 border border-slate-100 w-fit">
                                                                     ⏳ Checking...
                                                                 </span>
                                                             ) : r.available === 'yes' ? (
-                                                                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-emerald-50 text-emerald-600 rounded-full text-[10px] font-bold border border-emerald-100 w-fit">
+                                                                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-emerald-50 text-emerald-600 rounded-full text-xs font-bold border border-emerald-100 w-fit">
                                                                     🟢 Available
                                                                 </span>
                                                             ) : r.available === 'error' ? (
-                                                                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-amber-50 text-amber-500 rounded-full text-[10px] font-bold border border-amber-100 w-fit">
+                                                                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-amber-50 text-amber-500 rounded-full text-xs font-bold border border-amber-100 w-fit">
                                                                     ⚠️ Error
                                                                 </span>
                                                             ) : (
-                                                                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-slate-50 text-slate-400 rounded-full text-[10px] font-bold border border-slate-100 w-fit">
+                                                                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-slate-50 text-slate-400 rounded-full text-xs font-bold border border-slate-100 w-fit">
                                                                     🔴 Taken
                                                                 </span>
                                                             )}
@@ -606,7 +606,7 @@ function DomainSearchContent() {
                                 )}
 
                                 {/* Disclaimer */}
-                                <p className="mt-8 text-[10px] text-slate-400 text-center font-medium">
+                                <p className="mt-8 text-xs text-slate-400 text-center font-medium">
                                     Prices and availability sourced from Dynadot. Affiliate links support CrushDomains. See{' '}
                                     <a href="/terms-of-service" className="underline hover:text-indigo-500 transition-colors">
                                         Terms of Service

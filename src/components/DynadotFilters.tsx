@@ -130,7 +130,7 @@ export function DynadotFilters({
                             <button
                                 onClick={() => onChange({ ...filters, noNumbers: !filters.noNumbers })}
                                 className={clsx(
-                                    "px-3 py-1.5 rounded-xl text-[10px] font-bold border transition-all uppercase tracking-wider",
+                                    "px-3 py-1.5 rounded-xl text-xs font-bold border transition-all uppercase tracking-wider",
                                     filters.noNumbers
                                         ? "bg-amber-100 text-amber-700 border-amber-200 shadow-sm"
                                         : "bg-white text-slate-600 border-slate-200 hover:border-slate-300"
@@ -188,12 +188,12 @@ export function DynadotFilters({
                                         ['D-G', 'Repeating Digits'],
                                     ].map(([sym, desc]) => (
                                         <div key={sym} className="flex items-center gap-1.5">
-                                            <code className="bg-slate-800 px-1 rounded text-indigo-400 font-bold text-[10px]">{sym}</code>
-                                            <span className="text-slate-300 text-[10px]">{desc}</span>
+                                            <code className="bg-slate-800 px-1 rounded text-indigo-400 font-bold text-xs">{sym}</code>
+                                            <span className="text-slate-300 text-xs">{desc}</span>
                                         </div>
                                     ))}
                                 </div>
-                                <p className="text-[10px] text-slate-400 border-t border-slate-700/50 pt-1.5 leading-tight">
+                                <p className="text-xs text-slate-400 border-t border-slate-700/50 pt-1.5 leading-tight">
                                     Separate patterns with spaces (logical OR). Matches only the domain name part.
                                 </p>
                             </div>

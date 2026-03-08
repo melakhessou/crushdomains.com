@@ -185,11 +185,11 @@ export default function BulkAppraisalPage() {
                 {results.length === 0 && (
                     <>
                         <header className="text-center mb-12 space-y-3 relative">
-                            <PageTitle className="flex items-center justify-center gap-3">
+                            <PageTitle className="flex items-center justify-center gap-3 !text-3xl md:!text-4xl">
                                 <Sparkles className="w-7 h-7 md:w-8 md:h-8 text-indigo-500 flex-shrink-0" />
                                 Bulk Valuation
                             </PageTitle>
-                            <p className="text-lg text-slate-500 font-normal mx-auto max-w-2xl leading-relaxed">
+                            <p className="text-base md:text-lg text-slate-500 font-normal mx-auto max-w-2xl leading-relaxed">
                                 Analyze up to 200 domains at once using Crushdomains Valuation.
                             </p>
                             {/* Loading State in Header if processing but no results yet */}
@@ -375,7 +375,7 @@ export default function BulkAppraisalPage() {
                                                 key={col.id}
                                                 onClick={() => handleSort(col.id as SortField)}
                                                 className={clsx(
-                                                    "p-4 text-xs font-semibold text-slate-400 cursor-pointer hover:bg-slate-100 transition-colors select-none tracking-widest",
+                                                    "p-4 text-xs font-bold text-slate-400 cursor-pointer hover:bg-slate-100 transition-colors select-none tracking-wider",
                                                     col.id !== 'domain' && "text-right"
                                                 )}
                                             >

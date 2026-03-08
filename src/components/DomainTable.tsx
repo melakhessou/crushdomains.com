@@ -22,7 +22,7 @@ function SourceBadge({ source }: { source: NamejetSource }) {
     };
 
     return (
-        <span className={clsx('inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border uppercase tracking-wider', styles[source])}>
+        <span className={clsx('inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold border uppercase tracking-wider', styles[source])}>
             {labels[source]}
         </span>
     );
@@ -78,7 +78,7 @@ export function DomainTable({ domains }: DomainTableProps) {
                                         <span className="font-semibold text-slate-900 text-lg">
                                             {d.domainName.split('.')[0]}<span className="text-slate-400 font-normal">.{d.tld}</span>
                                         </span>
-                                        <span className="text-[10px] text-slate-400 font-mono uppercase">Length: {d.length}</span>
+                                        <span className="text-xs text-slate-400 font-mono uppercase">Length: {d.length}</span>
                                     </div>
                                 </td>
                                 <td className="px-6 py-3.5">
@@ -124,14 +124,14 @@ export function DomainTable({ domains }: DomainTableProps) {
                                 </span>
                                 <div className="flex flex-wrap items-center gap-2 mt-1.5">
                                     <SourceBadge source={d.source} />
-                                    <span className="text-[10px] text-slate-400 font-mono font-bold uppercase py-0.5 px-1.5 bg-slate-100/50 rounded border border-slate-100">
+                                    <span className="text-xs text-slate-400 font-mono font-bold uppercase py-0.5 px-1.5 bg-slate-100/50 rounded border border-slate-100">
                                         LEN: {d.length}
                                     </span>
                                 </div>
                             </div>
                             {d.currentBid !== null && (
                                 <div className="text-right shrink-0">
-                                    <span className="block text-[10px] text-slate-400 font-bold uppercase tracking-tighter">Current Bid</span>
+                                    <span className="block text-xs text-slate-400 font-bold uppercase tracking-tight">Current Bid</span>
                                     <span className="font-mono font-black text-indigo-600 text-lg leading-none">
                                         ${d.currentBid.toLocaleString()}
                                     </span>
@@ -141,10 +141,10 @@ export function DomainTable({ domains }: DomainTableProps) {
 
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-3 border-t border-slate-50">
                             <div>
-                                <span className="block text-[10px] text-slate-400 font-bold uppercase tracking-tighter flex items-center gap-1">
-                                    <Calendar size={10} /> Closing Date
+                                <span className="block text-xs text-slate-400 font-bold uppercase tracking-tight flex items-center gap-1">
+                                    <Calendar size={12} /> Closing Date
                                 </span>
-                                <span className="text-xs font-mono text-slate-600 font-bold">
+                                <span className="text-sm font-mono text-slate-600 font-bold">
                                     {formatDate(d.closingDate)}
                                 </span>
                             </div>
