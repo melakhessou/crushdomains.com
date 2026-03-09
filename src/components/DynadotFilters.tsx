@@ -125,30 +125,32 @@ export function DynadotFilters({
                     </div>
 
                     <div className="space-y-1">
-                        <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Quick Filters</label>
-                        <div className="flex gap-2">
-                            <button
-                                onClick={() => onChange({ ...filters, noNumbers: !filters.noNumbers })}
-                                className={clsx(
-                                    "px-3 py-1.5 rounded-xl text-xs font-bold border transition-all uppercase tracking-wider",
-                                    filters.noNumbers
-                                        ? "bg-amber-100 text-amber-700 border-amber-200 shadow-sm"
-                                        : "bg-white text-slate-600 border-slate-200 hover:border-slate-300"
-                                )}
-                            >
-                                No Numbers
-                            </button>
-                            <button
-                                onClick={() => onChange({ ...filters, noHyphens: !filters.noHyphens })}
-                                className={clsx(
-                                    "px-3 py-1.5 rounded-xl text-xs font-bold border transition-all uppercase tracking-wider",
-                                    filters.noHyphens
-                                        ? "bg-amber-100 text-amber-700 border-amber-200 shadow-sm"
-                                        : "bg-white text-slate-600 border-slate-200 hover:border-slate-300"
-                                )}
-                            >
-                                No Hyphens
-                            </button>
+                        <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">SETTINGS</label>
+                        <div className="flex flex-col gap-1.5 pt-0.5">
+                            <label className="flex items-center gap-2 cursor-pointer group">
+                                <div className="relative flex items-center justify-center">
+                                    <input
+                                        type="checkbox"
+                                        checked={filters.noHyphens}
+                                        onChange={() => onChange({ ...filters, noHyphens: !filters.noHyphens })}
+                                        className="peer appearance-none w-4 h-4 border border-slate-300 rounded bg-white checked:bg-indigo-600 checked:border-indigo-600 transition-all cursor-pointer"
+                                    />
+                                    <Check className="absolute w-3 h-3 text-white opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none" />
+                                </div>
+                                <span className="text-sm text-slate-600 group-hover:text-indigo-600 transition-colors">No Hyphens</span>
+                            </label>
+                            <label className="flex items-center gap-2 cursor-pointer group">
+                                <div className="relative flex items-center justify-center">
+                                    <input
+                                        type="checkbox"
+                                        checked={filters.noNumbers}
+                                        onChange={() => onChange({ ...filters, noNumbers: !filters.noNumbers })}
+                                        className="peer appearance-none w-4 h-4 border border-slate-300 rounded bg-white checked:bg-indigo-600 checked:border-indigo-600 transition-all cursor-pointer"
+                                    />
+                                    <Check className="absolute w-3 h-3 text-white opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none" />
+                                </div>
+                                <span className="text-sm text-slate-600 group-hover:text-indigo-600 transition-colors">No Numbers</span>
+                            </label>
                         </div>
                     </div>
                 </div>
