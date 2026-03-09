@@ -3,7 +3,7 @@
 import { useState, useCallback, useMemo, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
-import { Search, Loader2, ExternalLink, SlidersHorizontal, X, Zap } from 'lucide-react';
+import { Search, Loader2, ExternalLink, SlidersHorizontal, X, Zap, Copy } from 'lucide-react';
 import { PageTitle } from '@/components/ui/page-title';
 import { generateDomainList } from '@/lib/domain-generator';
 import BuyDomainButton from '@/components/BuyDomainButton';
@@ -504,8 +504,33 @@ function DomainSearchContent() {
                                                             className={`border-b border-slate-50 hover:bg-indigo-50/30 transition-colors ${i % 2 === 0 ? 'bg-white' : 'bg-slate-50/30'
                                                                 }`}
                                                         >
-                                                            <td className="px-6 py-4">
-                                                                <span className="text-sm font-bold text-slate-800">{r.domain}</span>
+                                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                                <div className="flex items-center gap-2">
+                                                                    <button
+                                                                        onClick={async (e) => {
+                                                                            e.preventDefault();
+                                                                            e.stopPropagation();
+                                                                            try {
+                                                                                await navigator.clipboard.writeText(r.domain);
+                                                                                const btn = e.currentTarget;
+                                                                                const originalInner = btn.innerHTML;
+                                                                                btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check text-emerald-500"><path d="M20 6 9 17l-5-5"/></svg>';
+                                                                                setTimeout(() => {
+                                                                                    btn.innerHTML = originalInner;
+                                                                                }, 2000);
+                                                                            } catch (err) {
+                                                                                console.error('Failed to copy: ', err);
+                                                                            }
+                                                                        }}
+                                                                        className="p-1 hover:bg-slate-100 rounded-md transition-colors text-slate-400 hover:text-indigo-600 group"
+                                                                        title="Copy domain"
+                                                                    >
+                                                                        <Copy size={14} className="group-hover:scale-110 transition-transform" />
+                                                                    </button>
+                                                                    <span className="text-lg font-bold text-slate-900 font-mono tracking-tight">
+                                                                        {r.domain}
+                                                                    </span>
+                                                                </div>
                                                             </td>
                                                             <td className="px-4 py-4">
                                                                 {r.available === 'pending' ? (

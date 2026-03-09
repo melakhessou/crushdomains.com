@@ -1,7 +1,7 @@
 "use client";
 
-import React from 'react';
-import { ExternalLink, Droplets, BarChart3, Users, Archive } from 'lucide-react';
+import React, { useState } from 'react';
+import { ExternalLink, Droplets, BarChart3, Users, Archive, Copy, Check } from 'lucide-react';
 import BuyDomainButton from '@/components/BuyDomainButton';
 
 export type GeoDomain = {
@@ -16,6 +16,36 @@ export type GeoDomain = {
     state?: string;
     locId?: number;
 };
+
+function CopyButton({ text }: { text: string }) {
+    const [copied, setCopied] = useState(false);
+
+    const handleCopy = async (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        try {
+            await navigator.clipboard.writeText(text);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        } catch (err) {
+            console.error('Failed to copy text: ', err);
+        }
+    };
+
+    return (
+        <button
+            onClick={handleCopy}
+            className="p-1 hover:bg-slate-100 rounded-md transition-colors text-slate-400 hover:text-indigo-600 relative group shrink-0"
+            title="Copy domain"
+        >
+            {copied ? (
+                <Check size={14} className="text-emerald-500" />
+            ) : (
+                <Copy size={14} className="group-hover:scale-110 transition-transform" />
+            )}
+        </button>
+    );
+}
 
 interface VolumeButtonProps {
     keyword: string;
@@ -102,7 +132,8 @@ export function GeoDomainRow({ item, status }: GeoDomainRowProps) {
     return (
         <div className="flex flex-col md:flex-row md:items-center justify-between p-4 bg-white border border-slate-100 rounded-xl hover:border-indigo-200 transition-all hover:shadow-md group gap-4">
             <div className="flex flex-col gap-1 min-w-0 flex-1">
-                <div className="flex items-center gap-3 overflow-hidden">
+                <div className="flex items-center gap-2 overflow-hidden">
+                    <CopyButton text={domain} />
                     <span className="text-xl font-semibold text-slate-800 group-hover:text-indigo-600 transition-colors font-mono truncate">
                         {domain}
                     </span>

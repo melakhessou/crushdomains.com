@@ -1,7 +1,8 @@
 'use client';
 
-import { Gavel, ArrowUpDown, ArrowUp, ArrowDown, ExternalLink, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Gavel, ArrowUpDown, ArrowUp, ArrowDown, ExternalLink, ChevronLeft, ChevronRight, Copy, Check } from 'lucide-react';
 import clsx from 'clsx';
+import { useState } from 'react';
 import type { Auction } from '@/lib/auctions-service';
 
 // ─── Types & Props ─────────────────────────────────────────────────────────────
@@ -9,6 +10,36 @@ import type { Auction } from '@/lib/auctions-service';
 export type SortBy = 'domain' | 'endTime' | 'price' | 'bids' | 'visitors' | 'links' | 'age' | 'appraisal';
 export type SortDir = 'asc' | 'desc';
 export type PageSize = 25 | 50 | 100 | 200;
+
+function CopyButton({ text }: { text: string }) {
+    const [copied, setCopied] = useState(false);
+
+    const handleCopy = async (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        try {
+            await navigator.clipboard.writeText(text);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        } catch (err) {
+            console.error('Failed to copy text: ', err);
+        }
+    };
+
+    return (
+        <button
+            onClick={handleCopy}
+            className="p-1 hover:bg-slate-100/50 rounded-md transition-colors text-slate-400 hover:text-indigo-600 relative group shrink-0"
+            title="Copy domain"
+        >
+            {copied ? (
+                <Check size={12} className="text-emerald-500" />
+            ) : (
+                <Copy size={12} className="group-hover:scale-110 transition-transform" />
+            )}
+        </button>
+    );
+}
 
 interface Props {
     auctions: Auction[];
@@ -212,15 +243,18 @@ export function ResultsTable({
                                             </span>
                                         </td>
                                         <td className="px-3 py-3 font-semibold text-slate-800 max-w-[200px]">
-                                            <a
-                                                href={bidUrl}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="hover:text-indigo-600 transition-colors truncate block"
-                                                title={auction.domain}
-                                            >
-                                                {auction.domain}
-                                            </a>
+                                            <div className="flex items-center gap-1.5 min-w-0">
+                                                <CopyButton text={auction.domain} />
+                                                <a
+                                                    href={bidUrl}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="hover:text-indigo-600 transition-colors truncate block flex-1"
+                                                    title={auction.domain}
+                                                >
+                                                    {auction.domain}
+                                                </a>
+                                            </div>
                                         </td>
                                         <td className={clsx('px-3 py-3 text-xs font-medium whitespace-nowrap', isUrgent ? 'text-red-500' : 'text-slate-500')}>
                                             {isUrgent && '⏰ '}{auction.time_left}

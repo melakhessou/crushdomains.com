@@ -1,11 +1,42 @@
-import { ExternalLink, Calendar, Gavel, FileText } from 'lucide-react';
+import { ExternalLink, Calendar, Gavel, FileText, Copy, Check } from 'lucide-react';
 import { NamejetDomain, NamejetSource } from '@/lib/namejet-parser';
 import clsx from 'clsx';
+import { useState } from 'react';
 
 export type { NamejetDomain };
 
 interface DomainTableProps {
     domains: NamejetDomain[];
+}
+
+function CopyButton({ text }: { text: string }) {
+    const [copied, setCopied] = useState(false);
+
+    const handleCopy = async (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        try {
+            await navigator.clipboard.writeText(text);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        } catch (err) {
+            console.error('Failed to copy text: ', err);
+        }
+    };
+
+    return (
+        <button
+            onClick={handleCopy}
+            className="p-1 hover:bg-slate-100 rounded-md transition-colors text-slate-400 hover:text-indigo-600 relative group"
+            title="Copy domain"
+        >
+            {copied ? (
+                <Check size={14} className="text-emerald-500" />
+            ) : (
+                <Copy size={14} className="group-hover:scale-110 transition-transform" />
+            )}
+        </button>
+    );
 }
 
 function SourceBadge({ source }: { source: NamejetSource }) {
@@ -74,11 +105,14 @@ export function DomainTable({ domains }: DomainTableProps) {
                         {domains.map((d, i) => (
                             <tr key={`${d.domainName}-${i}`} className="bg-white/50 hover:bg-indigo-50/30 transition-colors duration-150">
                                 <td className="px-6 py-4">
-                                    <div className="flex flex-col">
-                                        <span className="font-semibold text-slate-900 text-lg">
-                                            {d.domainName.split('.')[0]}<span className="text-slate-400 font-normal">.{d.tld}</span>
-                                        </span>
-                                        <span className="text-xs text-slate-400 font-mono uppercase">Length: {d.length}</span>
+                                    <div className="flex items-center gap-2">
+                                        <CopyButton text={d.domainName} />
+                                        <div className="flex flex-col">
+                                            <span className="font-semibold text-slate-900 text-lg">
+                                                {d.domainName.split('.')[0]}<span className="text-slate-400 font-normal">.{d.tld}</span>
+                                            </span>
+                                            <span className="text-xs text-slate-400 font-mono uppercase">Length: {d.length}</span>
+                                        </div>
                                     </div>
                                 </td>
                                 <td className="px-6 py-3.5">
@@ -118,15 +152,18 @@ export function DomainTable({ domains }: DomainTableProps) {
                 {domains.map((d, i) => (
                     <div key={`${d.domainName}-${i}`} className="p-4 bg-white space-y-4">
                         <div className="flex items-start justify-between gap-3">
-                            <div className="flex flex-col min-w-0 flex-1">
-                                <span className="font-bold text-slate-900 text-lg leading-tight break-all">
-                                    {d.domainName.split('.')[0]}<span className="text-slate-400 font-normal">.{d.tld}</span>
-                                </span>
-                                <div className="flex flex-wrap items-center gap-2 mt-1.5">
-                                    <SourceBadge source={d.source} />
-                                    <span className="text-xs text-slate-400 font-mono font-bold uppercase py-0.5 px-1.5 bg-slate-100/50 rounded border border-slate-100">
-                                        LEN: {d.length}
+                            <div className="flex items-start gap-2 min-w-0 flex-1">
+                                <CopyButton text={d.domainName} />
+                                <div className="flex flex-col min-w-0 flex-1">
+                                    <span className="font-bold text-slate-900 text-lg leading-tight break-all">
+                                        {d.domainName.split('.')[0]}<span className="text-slate-400 font-normal">.{d.tld}</span>
                                     </span>
+                                    <div className="flex flex-wrap items-center gap-2 mt-1.5">
+                                        <SourceBadge source={d.source} />
+                                        <span className="text-xs text-slate-400 font-mono font-bold uppercase py-0.5 px-1.5 bg-slate-100/50 rounded border border-slate-100">
+                                            LEN: {d.length}
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                             {d.currentBid !== null && (
@@ -162,7 +199,7 @@ export function DomainTable({ domains }: DomainTableProps) {
                     </div>
                 ))}
             </div>
-        </div>
+        </div >
     );
 }
 

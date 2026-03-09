@@ -96,7 +96,7 @@ export function ExpiredDomainsDashboard({ initialSearch = '', nicheTitle }: Dash
     const [itemsPerPage, setItemsPerPage] = useState(50);
 
     // Layout state
-    const [showFilters, setShowFilters] = useState(false);
+    const [showFilters, setShowFilters] = useState(true);
     const [copied, setCopied] = useState(false);
 
     // Reset page when filters change
