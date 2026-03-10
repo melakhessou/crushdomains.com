@@ -59,6 +59,98 @@ export default function LandingPage() {
           </div>
         </div>
 
+        {/* SEO FAQ Section */}
+        <section className="mt-16 animate-in fade-in slide-in-from-bottom-8 duration-700">
+          <div className="text-center mb-8">
+            <h2 className="text-xl md:text-2xl font-bold text-slate-800">Frequently Asked Questions</h2>
+            <p className="text-sm text-slate-500 mt-2">Everything you need to know about domain registration and our tools.</p>
+          </div>
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-sm">
+              <h3 className="font-bold text-slate-800 text-base mb-2">What is a domain name?</h3>
+              <p className="text-sm text-slate-600 leading-relaxed">
+                A domain name is your website's address on the internet (like crushdomains.com).
+                It helps users find your site easily instead of typing an IP address. We help investors find
+                premium names for their portfolios.
+              </p>
+            </div>
+            <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-sm">
+              <h3 className="font-bold text-slate-800 text-base mb-2">What tools do you offer for domain investors?</h3>
+              <p className="text-sm text-slate-600 leading-relaxed">
+                CrushDomains offers an advanced AI domain appraisal tool, a geo-domain generator for local SEO,
+                and a powerful filter for finding valuable expiring domains from NameJet and other lists.
+              </p>
+            </div>
+            <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-sm">
+              <h3 className="font-bold text-slate-800 text-base mb-2">How accurate is the domain appraisal?</h3>
+              <p className="text-sm text-slate-600 leading-relaxed">
+                Our appraisal tool uses AI alongside market liquidity data, brand strength analysis, and historical
+                sales to provide a realistic estimate of a domain's retail and auction value.
+              </p>
+            </div>
+            <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-sm">
+              <h3 className="font-bold text-slate-800 text-base mb-2">Can I register domains directly here?</h3>
+              <p className="text-sm text-slate-600 leading-relaxed">
+                Yes! When you search for a domain or find one in our tools, we provide direct links to
+                register it securely through our trusted registrar partners at the best possible prices.
+              </p>
+            </div>
+          </div>
+
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: JSON.stringify({
+                "@context": "https://schema.org",
+                "@type": "FAQPage",
+                "mainEntity": [
+                  {
+                    "@type": "Question",
+                    "name": "What is a domain name?",
+                    "acceptedAnswer": {
+                      "@type": "Answer",
+                      "text": "A domain name is your website's address on the internet (like crushdomains.com). It helps users find your site easily instead of typing an IP address. We help investors find premium names for their portfolios."
+                    }
+                  },
+                  {
+                    "@type": "Question",
+                    "name": "What tools do you offer for domain investors?",
+                    "acceptedAnswer": {
+                      "@type": "Answer",
+                      "text": "CrushDomains offers an advanced AI domain appraisal tool, a geo-domain generator for local SEO, and a powerful filter for finding valuable expiring domains from NameJet and other lists."
+                    }
+                  },
+                  {
+                    "@type": "Question",
+                    "name": "How accurate is the domain appraisal?",
+                    "acceptedAnswer": {
+                      "@type": "Answer",
+                      "text": "Our appraisal tool uses AI alongside market liquidity data, brand strength analysis, and historical sales to provide a realistic estimate of a domain's retail and auction value."
+                    }
+                  },
+                  {
+                    "@type": "Question",
+                    "name": "Can I register domains directly here?",
+                    "acceptedAnswer": {
+                      "@type": "Answer",
+                      "text": "Yes! When you search for a domain or find one in our tools, we provide direct links to register it securely through our trusted registrar partners at the best possible prices."
+                    }
+                  }
+                ]
+              })
+            }}
+          />
+        </section>
+
+        {/* Sponsored Ad Banner */}
+        <div className="flex justify-center">
+          <a rel="sponsored"
+            href="https://spaceship.sjv.io/c/7043229/1825519/21274" target="_top" id="1825519">
+            <img src="//a.impactradius-go.com/display-ad/21274-1825519" alt="" width="668" height="105" />
+          </a>
+          <img height="0" width="0" src="https://imp.pxf.io/i/7043229/1825519/21274" style={{ position: 'absolute', visibility: 'hidden' }} />
+        </div>
+
         <footer className="pt-12 text-center">
           <p className="text-slate-400 text-sm font-medium">
             © 2026 Crush Domains • Premium Domain Engine

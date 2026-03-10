@@ -364,6 +364,69 @@ function GeneratorContent() {
                     </div>
                 )}
 
+                {/* SEO FAQ Section */}
+                <section className="mt-16 bg-white/50 backdrop-blur-xl rounded-2xl shadow-xl p-6 md:p-8 border border-white">
+                    <div className="text-center mb-6">
+                        <h2 className="text-xl md:text-2xl font-bold text-slate-800">Geo Domain Generator FAQs</h2>
+                    </div>
+                    <div className="space-y-4">
+                        <div className="bg-slate-50 rounded-xl p-4 border border-slate-100">
+                            <h3 className="font-bold text-slate-800 text-sm mb-1.5">What is a geo domain?</h3>
+                            <p className="text-sm text-slate-600 leading-relaxed">
+                                A geo domain strictly combines a location (like a city or state) with a specific service or industry keyword (e.g., ChicagoPlumbing.com or DenverDentist.com). These domains are highly brandable and perform exceptionally well in local search results.
+                            </p>
+                        </div>
+                        <div className="bg-slate-50 rounded-xl p-4 border border-slate-100">
+                            <h3 className="font-bold text-slate-800 text-sm mb-1.5">Are geo domains good for local SEO?</h3>
+                            <p className="text-sm text-slate-600 leading-relaxed">
+                                Yes. Having the target city and service directly in the domain name gives you an instant relevance signal to search engines. It also clearly communicates to your local customers exactly what you do and where you are, increasing click-through rates.
+                            </p>
+                        </div>
+                        <div className="bg-slate-50 rounded-xl p-4 border border-slate-100">
+                            <h3 className="font-bold text-slate-800 text-sm mb-1.5">Can I buy the domains I generate here?</h3>
+                            <p className="text-sm text-slate-600 leading-relaxed">
+                                Absolutely. Once you find an available domain you like, simply click the "Register" button to secure it immediately through our registrar partners before someone else does.
+                            </p>
+                        </div>
+                    </div>
+
+                    <script
+                        type="application/ld+json"
+                        dangerouslySetInnerHTML={{
+                            __html: JSON.stringify({
+                                "@context": "https://schema.org",
+                                "@type": "FAQPage",
+                                "mainEntity": [
+                                    {
+                                        "@type": "Question",
+                                        "name": "What is a geo domain?",
+                                        "acceptedAnswer": {
+                                            "@type": "Answer",
+                                            "text": "A geo domain strictly combines a location (like a city or state) with a specific service or industry keyword (e.g., ChicagoPlumbing.com or DenverDentist.com). These domains are highly brandable and perform exceptionally well in local search results."
+                                        }
+                                    },
+                                    {
+                                        "@type": "Question",
+                                        "name": "Are geo domains good for local SEO?",
+                                        "acceptedAnswer": {
+                                            "@type": "Answer",
+                                            "text": "Yes. Having the target city and service directly in the domain name gives you an instant relevance signal to search engines. It also clearly communicates to your local customers exactly what you do and where you are, increasing click-through rates."
+                                        }
+                                    },
+                                    {
+                                        "@type": "Question",
+                                        "name": "Can I buy the domains I generate here?",
+                                        "acceptedAnswer": {
+                                            "@type": "Answer",
+                                            "text": "Absolutely. Once you find an available domain you like, simply click the \"Register\" button to secure it immediately through our registrar partners before someone else does."
+                                        }
+                                    }
+                                ]
+                            })
+                        }}
+                    />
+                </section>
+
                 <footer className="mt-24 text-center">
                     <p className="text-slate-400 text-base font-normal">© 2026 Crush Domains • Premium Domain Engine</p>
                 </footer>

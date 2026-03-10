@@ -479,6 +479,83 @@ function InstantAppraisalContent() {
                         Computer-generated estimates powered by CrushDomains AI. Not professional advice. Actual prices vary. <a href="/terms-of-service" className="underline hover:text-indigo-500 transition-colors">Terms</a>.
                     </p>
                 </div>
+
+                {/* SEO FAQ Section */}
+                <section className="mt-12 bg-white/60 backdrop-blur-xl rounded-2xl shadow-xl p-6 md:p-8 border border-white max-w-4xl w-full mx-auto">
+                    <div className="text-center mb-6">
+                        <h2 className="text-xl md:text-2xl font-bold text-slate-800">Domain Appraisal FAQs</h2>
+                    </div>
+                    <div className="grid md:grid-cols-2 gap-4">
+                        <div className="bg-white rounded-xl p-4 border border-slate-100 shadow-sm">
+                            <h3 className="font-bold text-slate-800 text-sm mb-1.5">How does the free domain appraisal work?</h3>
+                            <p className="text-sm text-slate-600 leading-relaxed">
+                                Our tool evaluates multiple factors including domain length, TLD extension (.com vs others), keyword popularity, brandability scores (like pronounceability), and recent comparable market sales to generate an estimated value.
+                            </p>
+                        </div>
+                        <div className="bg-white rounded-xl p-4 border border-slate-100 shadow-sm">
+                            <h3 className="font-bold text-slate-800 text-sm mb-1.5">What is domain liquidity?</h3>
+                            <p className="text-sm text-slate-600 leading-relaxed">
+                                Domain liquidity refers to the estimated wholesale price a domain could quickly sell for to another investor (often at auction), whereas the Market Value is the higher retail price an end-user business might pay over time.
+                            </p>
+                        </div>
+                        <div className="bg-white rounded-xl p-4 border border-slate-100 shadow-sm">
+                            <h3 className="font-bold text-slate-800 text-sm mb-1.5">Are automated domain appraisals accurate?</h3>
+                            <p className="text-sm text-slate-600 leading-relaxed">
+                                Automated appraisals provide a solid baseline and market context, but they are estimates. The true value of a domain is ultimately what a buyer is willing to pay. We suggest using our valuation as a starting point for negotiations.
+                            </p>
+                        </div>
+                        <div className="bg-white rounded-xl p-4 border border-slate-100 shadow-sm">
+                            <h3 className="font-bold text-slate-800 text-sm mb-1.5">Can I appraise multiple domains at once?</h3>
+                            <p className="text-sm text-slate-600 leading-relaxed">
+                                Yes! You can use our Bulk Appraisal tool (linked at the top of this page) to upload a list of domains or a CSV file from marketplaces like NameJet and evaluate up to 200 domains instantly.
+                            </p>
+                        </div>
+                    </div>
+
+                    <script
+                        type="application/ld+json"
+                        dangerouslySetInnerHTML={{
+                            __html: JSON.stringify({
+                                "@context": "https://schema.org",
+                                "@type": "FAQPage",
+                                "mainEntity": [
+                                    {
+                                        "@type": "Question",
+                                        "name": "How does the free domain appraisal work?",
+                                        "acceptedAnswer": {
+                                            "@type": "Answer",
+                                            "text": "Our tool evaluates multiple factors including domain length, TLD extension (.com vs others), keyword popularity, brandability scores (like pronounceability), and recent comparable market sales to generate an estimated value."
+                                        }
+                                    },
+                                    {
+                                        "@type": "Question",
+                                        "name": "What is domain liquidity?",
+                                        "acceptedAnswer": {
+                                            "@type": "Answer",
+                                            "text": "Domain liquidity refers to the estimated wholesale price a domain could quickly sell for to another investor (often at auction), whereas the Market Value is the higher retail price an end-user business might pay over time."
+                                        }
+                                    },
+                                    {
+                                        "@type": "Question",
+                                        "name": "Are automated domain appraisals accurate?",
+                                        "acceptedAnswer": {
+                                            "@type": "Answer",
+                                            "text": "Automated appraisals provide a solid baseline and market context, but they are estimates. The true value of a domain is ultimately what a buyer is willing to pay. We suggest using our valuation as a starting point for negotiations."
+                                        }
+                                    },
+                                    {
+                                        "@type": "Question",
+                                        "name": "Can I appraise multiple domains at once?",
+                                        "acceptedAnswer": {
+                                            "@type": "Answer",
+                                            "text": "Yes! You can use our Bulk Appraisal tool to upload a list of domains or a CSV file from marketplaces like NameJet and evaluate up to 200 domains instantly."
+                                        }
+                                    }
+                                ]
+                            })
+                        }}
+                    />
+                </section>
             </div>
             <footer className="mt-auto py-6 text-slate-400 text-xs font-medium">
                 © 2026 CrushDomains. All rights reserved.

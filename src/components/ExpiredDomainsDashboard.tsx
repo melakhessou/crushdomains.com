@@ -423,6 +423,83 @@ export function ExpiredDomainsDashboard({ initialSearch = '', nicheTitle }: Dash
                         </div>
                     </div>
                 </div>
+
+                {/* SEO FAQ Section */}
+                <section className="mt-16 bg-white/60 backdrop-blur-xl rounded-2xl shadow-xl p-6 md:p-8 border border-white max-w-5xl mx-auto">
+                    <div className="text-center mb-6">
+                        <h2 className="text-xl md:text-2xl font-bold text-slate-800">Domain Filtering FAQs</h2>
+                    </div>
+                    <div className="grid md:grid-cols-2 gap-4">
+                        <div className="bg-white rounded-xl p-4 border border-slate-100 shadow-sm">
+                            <h3 className="font-bold text-slate-800 text-sm mb-1.5">What is a deleting or expiring domain?</h3>
+                            <p className="text-sm text-slate-600 leading-relaxed">
+                                When a domain owner fails to renew their domain name, it goes through an expiration process. If it's not renewed during the grace period, it "drops" or deletes, becoming available for anyone else to register or catch via auction platforms like NameJet.
+                            </p>
+                        </div>
+                        <div className="bg-white rounded-xl p-4 border border-slate-100 shadow-sm">
+                            <h3 className="font-bold text-slate-800 text-sm mb-1.5">How do I use this domain filter tool?</h3>
+                            <p className="text-sm text-slate-600 leading-relaxed">
+                                Simply upload a CSV file from NameJet or a similar domain auction marketplace. Our tool will parse the data and allow you to filter thousands of domains by length, keywords, extension, and pattern (like CVCV) instantly in your browser.
+                            </p>
+                        </div>
+                        <div className="bg-white rounded-xl p-4 border border-slate-100 shadow-sm">
+                            <h3 className="font-bold text-slate-800 text-sm mb-1.5">What are CVCV domain patterns?</h3>
+                            <p className="text-sm text-slate-600 leading-relaxed">
+                                CVCV stands for Consonant-Vowel-Consonant-Vowel (like "Data" or "Nomi"). These 4-letter patterns are highly prized by domain investors because they are usually highly pronounceable and brandable. You can use our Pattern filter to find these specific structures.
+                            </p>
+                        </div>
+                        <div className="bg-white rounded-xl p-4 border border-slate-100 shadow-sm">
+                            <h3 className="font-bold text-slate-800 text-sm mb-1.5">Is my CSV data kept private?</h3>
+                            <p className="text-sm text-slate-600 leading-relaxed">
+                                Yes! Our domain parsing and filtering engine runs entirely in your local browser. Your uploaded CSV lists are never sent to our servers, ensuring your proprietary research remains 100% private to you.
+                            </p>
+                        </div>
+                    </div>
+
+                    <script
+                        type="application/ld+json"
+                        dangerouslySetInnerHTML={{
+                            __html: JSON.stringify({
+                                "@context": "https://schema.org",
+                                "@type": "FAQPage",
+                                "mainEntity": [
+                                    {
+                                        "@type": "Question",
+                                        "name": "What is a deleting or expiring domain?",
+                                        "acceptedAnswer": {
+                                            "@type": "Answer",
+                                            "text": "When a domain owner fails to renew their domain name, it goes through an expiration process. If it's not renewed during the grace period, it \"drops\" or deletes, becoming available for anyone else to register or catch via auction platforms like NameJet."
+                                        }
+                                    },
+                                    {
+                                        "@type": "Question",
+                                        "name": "How do I use this domain filter tool?",
+                                        "acceptedAnswer": {
+                                            "@type": "Answer",
+                                            "text": "Simply upload a CSV file from NameJet or a similar domain auction marketplace. Our tool will parse the data and allow you to filter thousands of domains by length, keywords, extension, and pattern (like CVCV) instantly in your browser."
+                                        }
+                                    },
+                                    {
+                                        "@type": "Question",
+                                        "name": "What are CVCV domain patterns?",
+                                        "acceptedAnswer": {
+                                            "@type": "Answer",
+                                            "text": "CVCV stands for Consonant-Vowel-Consonant-Vowel (like \"Data\" or \"Nomi\"). These 4-letter patterns are highly prized by domain investors because they are usually highly pronounceable and brandable. You can use our Pattern filter to find these specific structures."
+                                        }
+                                    },
+                                    {
+                                        "@type": "Question",
+                                        "name": "Is my CSV data kept private?",
+                                        "acceptedAnswer": {
+                                            "@type": "Answer",
+                                            "text": "Yes! Our domain parsing and filtering engine runs entirely in your local browser. Your uploaded CSV lists are never sent to our servers, ensuring your proprietary research remains 100% private to you."
+                                        }
+                                    }
+                                ]
+                            })
+                        }}
+                    />
+                </section>
             </div>
         </div>
     );

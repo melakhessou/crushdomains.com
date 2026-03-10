@@ -1,29 +1,41 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { ArrowLeft, Sparkles, Clock, Calendar, User, Share2, Twitter, Linkedin, Facebook, Copy, Check } from 'lucide-react';
+import { notFound } from 'next/navigation';
+import { ArrowLeft, Sparkles } from 'lucide-react';
 import { PageTitle } from '@/components/ui/page-title';
+import { getPostBySlug, getAllPosts } from '@/lib/blog';
+import { marked } from 'marked';
 
 type Props = {
     params: { slug: string };
 };
 
-// Simulated post data
-const GET_POST = (slug: string) => ({
-    title: slug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
-    content: `This is a sample article about ${slug.replace(/-/g, ' ')}. It covers the essential strategies and insights required to excel in this niche of domain investing.`,
-    date: 'Feb 1, 2026'
-});
+export async function generateStaticParams() {
+    const posts = getAllPosts();
+    return posts.map((post) => ({
+        slug: post.slug,
+    }));
+}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-    const post = GET_POST(params.slug);
+    const post = getPostBySlug(params.slug);
+    if (!post) {
+        return { title: 'Post Not Found | CrushDomains' };
+    }
     return {
         title: `${post.title} | Blog – CrushDomains`,
-        description: `Read our guide on ${post.title}. Learn expert tips and strategies on CrushDomains blog.`,
+        description: post.excerpt,
     };
 }
 
-export default function BlogPost({ params }: Props) {
-    const post = GET_POST(params.slug);
+export default async function BlogPost({ params }: Props) {
+    const post = getPostBySlug(params.slug);
+
+    if (!post) {
+        notFound();
+    }
+
+    const htmlContent = marked.parse(post.content);
 
     return (
         <main className="min-h-screen bg-slate-50 py-20 px-6">
@@ -35,7 +47,7 @@ export default function BlogPost({ params }: Props) {
                 <article className="bg-white p-10 md:p-16 rounded-[40px] border border-slate-100 shadow-2xl">
                     <header className="mb-12">
                         <div className="flex items-center gap-4 mb-6">
-                            <span className="text-xs font-bold text-indigo-500 uppercase tracking-widest bg-indigo-50 px-3 py-1 rounded-full">Investing</span>
+                            <span className="text-xs font-bold text-indigo-500 uppercase tracking-widest bg-indigo-50 px-3 py-1 rounded-full">Guides</span>
                             <span className="text-sm text-slate-400 font-medium">{post.date}</span>
                         </div>
                         <PageTitle className="text-4xl md:text-5xl font-black text-slate-900 leading-tight">
@@ -43,14 +55,10 @@ export default function BlogPost({ params }: Props) {
                         </PageTitle>
                     </header>
 
-                    <div className="prose prose-slate lg:prose-xl max-w-none text-slate-600 leading-relaxed font-medium">
-                        <p className="mb-8">{post.content}</p>
-                        <p className="mb-8">In the fast-paced world of digital real estate, choosing the right domain is more than just a creative exercise—it's a strategic business decision. A high-quality domain serves as the foundation for your brand's online presence, influencing everything from SEO rankings to user trust.</p>
-                        <div className="p-8 bg-indigo-50/50 rounded-3xl border border-indigo-100 mb-8 italic">
-                            "A domain name is your identity on the internet. Make sure it's a strong one."
-                        </div>
-                        <p>We'll be updating this blog regularly with more deep dives into domain strategies. Stay tuned for our upcoming guide on the impact of new gTLDs on the global market.</p>
-                    </div>
+                    <div
+                        className="prose prose-slate prose-indigo lg:prose-xl max-w-none text-slate-600 leading-relaxed font-medium"
+                        dangerouslySetInnerHTML={{ __html: htmlContent }}
+                    />
                 </article>
 
                 <footer className="mt-16 text-center">
