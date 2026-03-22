@@ -56,12 +56,12 @@ export const ValidatedInput = forwardRef<HTMLInputElement, ValidatedInputProps>(
                     <input
                         ref={ref}
                         className={clsx(
-                            "w-full py-2 bg-slate-50 border rounded-xl text-lg outline-none transition-all placeholder:text-slate-400 font-medium",
+                            "w-full py-2 bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 border rounded-xl text-lg outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500 font-medium",
                             icon ? "pl-12 pr-12" : "pl-4 pr-12",
                             // Border colors based on state
                             isValid && "border-emerald-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20",
                             isInvalid && "border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-500/20",
-                            !isValid && !isInvalid && "border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20",
+                            !isValid && !isInvalid && "border-slate-200 dark:border-slate-800 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20",
                             className
                         )}
                         {...props}
@@ -83,9 +83,9 @@ export const ValidatedInput = forwardRef<HTMLInputElement, ValidatedInputProps>(
 
                 {/* Cleaned domain preview */}
                 {showCleanedValue && validationState !== 'idle' && validationState !== 'invalid' && (
-                    <p className="text-xs text-slate-500 flex items-center gap-1">
+                    <p className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1">
                         <span className="font-medium">Will check:</span>
-                        <code className="px-1.5 py-0.5 bg-slate-100 rounded text-indigo-600 font-mono">
+                        <code className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded text-indigo-600 dark:text-indigo-400 font-mono">
                             {showCleanedValue}
                         </code>
                     </p>

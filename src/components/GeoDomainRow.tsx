@@ -35,7 +35,7 @@ function CopyButton({ text }: { text: string }) {
     return (
         <button
             onClick={handleCopy}
-            className="p-1 hover:bg-slate-100 rounded-md transition-colors text-slate-400 hover:text-indigo-600 relative group shrink-0"
+            className="p-1 hover:bg-slate-100 rounded-md transition-colors text-slate-400 dark:text-slate-500 hover:text-indigo-600 relative group shrink-0"
             title="Copy domain"
         >
             {copied ? (
@@ -130,36 +130,36 @@ export function GeoDomainRow({ item, status }: GeoDomainRowProps) {
         : '#';
 
     return (
-        <div className="flex flex-col md:flex-row md:items-center justify-between p-4 bg-white border border-slate-100 rounded-xl hover:border-indigo-200 transition-all hover:shadow-md group gap-4">
+        <div className="flex flex-col md:flex-row md:items-center justify-between p-4 bg-white dark:bg-slate-950 border border-slate-100 dark:border-slate-800/60 rounded-xl hover:border-indigo-200 transition-all hover:shadow-md group gap-4">
             <div className="flex flex-col gap-1 min-w-0 flex-1">
                 <div className="flex items-center gap-2 overflow-hidden">
                     <CopyButton text={domain} />
-                    <span className="text-xl font-semibold text-slate-800 group-hover:text-indigo-600 transition-colors font-mono truncate">
+                    <span className="text-xl font-semibold text-slate-800 dark:text-slate-200 group-hover:text-indigo-600 transition-colors font-mono truncate">
                         {domain}
                     </span>
                     <div className="shrink-0">
                         {status === undefined ? (
-                            <span className="flex items-center gap-1.5 px-2 py-0.5 bg-slate-50 text-slate-400 rounded-full text-[10px] font-bold border border-slate-100 animate-pulse">Checking...</span>
+                            <span className="flex items-center gap-1.5 px-2 py-0.5 bg-slate-50 dark:bg-slate-900 text-slate-400 dark:text-slate-500 rounded-full text-[10px] font-bold border border-slate-100 dark:border-slate-800/60 animate-pulse">Checking...</span>
                         ) : status === null ? (
                             <span className="text-rose-400 text-[10px] font-bold">Error</span>
                         ) : status.available ? (
                             <span className="flex items-center gap-1.5 px-2 py-0.5 bg-emerald-50 text-emerald-600 rounded-full text-[10px] font-bold border border-emerald-100">🟢 Available</span>
                         ) : (
-                            <span className="flex items-center gap-1.5 px-2 py-0.5 bg-slate-50 text-slate-400 rounded-full text-[10px] font-bold border border-slate-100">🔴 Taken</span>
+                            <span className="flex items-center gap-1.5 px-2 py-0.5 bg-slate-50 dark:bg-slate-900 text-slate-400 dark:text-slate-500 rounded-full text-[10px] font-bold border border-slate-100 dark:border-slate-800/60">🔴 Taken</span>
                         )}
                     </div>
                 </div>
 
                 {/* Geo Details */}
                 <div className="flex flex-wrap items-center gap-2 mt-1">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{item.style}</span>
+                    <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">{item.style}</span>
                     {city && (
-                        <span className="flex items-center gap-1 px-2 py-0.5 bg-indigo-50 text-indigo-600 rounded-full text-[9px] font-bold border border-indigo-100">
+                        <span className="flex items-center gap-1 px-2 py-0.5 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 rounded-full text-[9px] font-bold border border-indigo-100">
                             📍 {city}{item.state ? `, ${item.state}` : ''}
                         </span>
                     )}
                     {item.population && (
-                        <span className="text-[9px] font-bold text-slate-500">👥 {item.population.toLocaleString()}</span>
+                        <span className="text-[9px] font-bold text-slate-500 dark:text-slate-400">👥 {item.population.toLocaleString()}</span>
                     )}
                 </div>
 
@@ -181,7 +181,7 @@ export function GeoDomainRow({ item, status }: GeoDomainRowProps) {
                         href={archiveUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 rounded-md bg-slate-200 px-2.5 py-1 text-xs font-semibold text-slate-800 shadow-sm hover:bg-slate-300 transition-colors"
+                        className="inline-flex items-center gap-1.5 rounded-md bg-slate-200 dark:bg-slate-800 px-2.5 py-1 text-xs font-semibold text-slate-800 dark:text-slate-200 shadow-sm hover:bg-slate-300 transition-colors"
                     >
                         <Archive className="w-3 h-3" /> Archive
                     </a>
@@ -191,7 +191,7 @@ export function GeoDomainRow({ item, status }: GeoDomainRowProps) {
             <div className="flex flex-row md:flex-col items-center md:items-end gap-6 md:gap-2 shrink-0">
                 <div className="flex flex-col items-center md:items-end">
                     <span className={`text-2xl font-bold leading-none ${getScoreColor(item.score)}`}>{item.score}</span>
-                    <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">Score</span>
+                    <span className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider mt-1">Score</span>
                 </div>
 
                 <BuyDomainButton

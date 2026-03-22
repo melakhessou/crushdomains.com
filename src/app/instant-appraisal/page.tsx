@@ -167,23 +167,23 @@ function InstantAppraisalContent() {
 
     // Helper to get brand score color
     const getBrandScoreColor = (label: string) => {
-        if (label === 'Premium') return { bg: 'bg-indigo-600', text: 'text-indigo-100', badge: 'bg-indigo-100 text-indigo-700' };
+        if (label === 'Premium') return { bg: 'bg-indigo-600', text: 'text-indigo-100', badge: 'bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700' };
         if (label === 'Strong') return { bg: 'bg-emerald-500', text: 'text-emerald-100', badge: 'bg-emerald-100 text-emerald-700' };
         if (label === 'Average') return { bg: 'bg-amber-500', text: 'text-amber-100', badge: 'bg-amber-100 text-amber-700' };
-        return { bg: 'bg-slate-400', text: 'text-slate-100', badge: 'bg-slate-100 text-slate-600' };
+        return { bg: 'bg-slate-400', text: 'text-slate-100', badge: 'bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-400' };
     };
 
     const isFormLoading = loading || isSubmitting;
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-slate-50 to-indigo-100 py-2 md:py-4 px-4 md:px-10 font-sans text-slate-800 flex flex-col items-center">
+        <div className="min-h-screen bg-gradient-to-br from-indigo-50 dark:from-slate-950 via-slate-50 dark:via-slate-900 to-indigo-100 dark:to-indigo-950/20 py-2 md:py-4 px-4 md:px-10 font-sans text-slate-800 dark:text-slate-200 flex flex-col items-center">
             <div className="max-w-4xl w-full space-y-3">
                 <header className="text-center space-y-1 relative">
                     <PageTitle className="flex items-center justify-center gap-2 !text-2xl md:!text-3xl">
                         <Sparkles className="w-5 h-5 md:w-6 md:h-6 text-indigo-500" />
                         Domain Appraisal
                     </PageTitle>
-                    <p className="text-sm text-slate-500 font-normal max-w-2xl mx-auto leading-relaxed">
+                    <p className="text-sm text-slate-500 dark:text-slate-400 font-normal max-w-2xl mx-auto leading-relaxed">
                         Real-time market valuation using AI.
                     </p>
                     <div className="pt-1">
@@ -194,7 +194,7 @@ function InstantAppraisalContent() {
                 </header>
 
                 {/* Input Card */}
-                <div className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl border border-white/50 p-3">
+                <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl rounded-2xl shadow-xl border border-white/50 dark:border-slate-800/50 p-3">
                     <form onSubmit={handleSubmit} className="flex flex-col md:flex-row gap-2">
                         <div className="flex-1">
                             <ValidatedInput
@@ -251,24 +251,24 @@ function InstantAppraisalContent() {
                     <div className="grid md:grid-cols-2 gap-3 animate-in fade-in slide-in-from-bottom-4">
                         {/* Main Value Card */}
                         {result && (
-                            <div className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl border border-indigo-100 p-4 md:col-span-2 flex flex-col md:flex-row items-center justify-between gap-4 relative overflow-hidden">
+                            <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl rounded-2xl shadow-xl border border-indigo-100 dark:border-slate-800/50 p-4 md:col-span-2 flex flex-col md:flex-row items-center justify-between gap-4 relative overflow-hidden">
                                 <div className="absolute top-0 right-0 p-32 bg-indigo-500/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
                                 <div className="space-y-1 text-center md:text-left z-10 w-full md:w-auto">
-                                    <h3 className="text-slate-500 font-semibold uppercase tracking-wider text-xs flex items-center gap-2 justify-center md:justify-start">
+                                    <h3 className="text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider text-xs flex items-center gap-2 justify-center md:justify-start">
                                         <DollarSign className="w-3.5 h-3.5" /> Market Value
                                     </h3>
-                                    <div className="text-4xl md:text-5xl font-bold text-slate-800 tracking-tighter">
+                                    <div className="text-4xl md:text-5xl font-bold text-slate-800 dark:text-slate-200 tracking-tighter">
                                         {result.market_price !== null ? `$${result.market_price.toLocaleString()}` : 'N/A'}
                                     </div>
                                     {result.status === 'ok' && (
                                         <div className="flex items-center justify-center md:justify-start gap-2">
-                                            <span className="text-sm font-bold text-slate-400">USD Estimate</span>
+                                            <span className="text-sm font-bold text-slate-400 dark:text-slate-500">USD Estimate</span>
                                         </div>
                                     )}
                                 </div>
                                 {/* Pricing Breakdown */}
                                 <div className="flex-1 grid grid-cols-2 gap-3 z-10 w-full md:w-auto">
-                                    <div className="p-3 bg-indigo-50 rounded-xl border border-indigo-100 flex flex-col items-center md:items-start">
+                                    <div className="p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl border border-indigo-100 dark:border-indigo-500/20 flex flex-col items-center md:items-start">
                                         <div className="text-xs font-bold text-indigo-400 uppercase tracking-widest mb-1 flex items-center gap-1">
                                             <TrendingUp className="w-3.5 h-3.5" /> Liquidity
                                         </div>
@@ -277,7 +277,7 @@ function InstantAppraisalContent() {
                                         </div>
                                         <div className="text-xs text-indigo-400 font-medium">Fast sale price</div>
                                     </div>
-                                    <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-100 flex flex-col items-center justify-between">
+                                    <div className="p-4 bg-emerald-50 dark:bg-emerald-500/10 rounded-xl border border-emerald-100 dark:border-emerald-500/20 flex flex-col items-center justify-between">
                                         <div className="text-xs font-bold text-emerald-400 uppercase tracking-widest mb-2 flex items-center gap-1">
                                             <ShoppingCart className="w-3 h-3" /> Retail Options
                                         </div>
@@ -297,9 +297,9 @@ function InstantAppraisalContent() {
                         )}
                         {/* Metadata & Brand Score */}
                         {result && (
-                            <div className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl border border-slate-100 p-4 flex flex-col justify-between">
+                            <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl rounded-2xl shadow-xl border border-slate-100 dark:border-slate-800/60 p-4 flex flex-col justify-between">
                                 <div className="flex items-center justify-between mb-4">
-                                    <h4 className="font-bold text-slate-700 text-sm flex items-center gap-2">
+                                    <h4 className="font-bold text-slate-700 dark:text-slate-300 text-sm flex items-center gap-2">
                                         <Activity className="w-4 h-4 text-indigo-500" />
                                         Domain Strength
                                     </h4>
@@ -327,17 +327,17 @@ function InstantAppraisalContent() {
                                                 const pct = Math.max(0, Math.min(100, ((metric.val - metric.min) / (metric.max - metric.min)) * 100));
                                                 const isPositive = metric.val > 0;
                                                 return (
-                                                    <div key={metric.label} className="bg-slate-50 p-2 rounded-lg text-xs space-y-1 group hover:bg-slate-100 transition-colors">
-                                                        <div className="flex justify-between font-semibold text-slate-600">
+                                                    <div key={metric.label} className="bg-slate-50 dark:bg-slate-900 p-2 rounded-lg text-xs space-y-1 group hover:bg-slate-100 transition-colors">
+                                                        <div className="flex justify-between font-semibold text-slate-600 dark:text-slate-400">
                                                             <Tooltip content={metric.desc}>
                                                                 <span className="cursor-help border-b border-dotted border-slate-400 hover:text-indigo-600 hover:border-indigo-600 transition-all flex items-center gap-1">
                                                                     {metric.label}
-                                                                    <Info className="w-3 h-3 text-slate-400" />
+                                                                    <Info className="w-3 h-3 text-slate-400 dark:text-slate-500" />
                                                                 </span>
                                                             </Tooltip>
                                                             <span className={isPositive ? 'text-emerald-600' : 'text-amber-600'}>{metric.val > 0 ? '+' : ''}{metric.val}</span>
                                                         </div>
-                                                        <div className="h-1.5 w-full bg-slate-200 rounded-full overflow-hidden">
+                                                        <div className="h-1.5 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
                                                             <div
                                                                 className={clsx("h-full rounded-full", isPositive ? "bg-emerald-400" : "bg-amber-400")}
                                                                 style={{ width: `${pct}%` }}
@@ -349,33 +349,33 @@ function InstantAppraisalContent() {
                                         </div>
                                     ) : (
                                         <>
-                                            <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
-                                                <span className="text-sm font-medium text-slate-500">Length</span>
-                                                <span className="font-bold text-slate-700">{result.length} characters</span>
+                                            <div className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-900 rounded-lg">
+                                                <span className="text-sm font-medium text-slate-500 dark:text-slate-400">Length</span>
+                                                <span className="font-bold text-slate-700 dark:text-slate-300">{result.length} characters</span>
                                             </div>
-                                            <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
-                                                <span className="text-sm font-medium text-slate-500">Extension</span>
-                                                <span className="font-bold text-slate-700">.{result.tld}</span>
+                                            <div className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-900 rounded-lg">
+                                                <span className="text-sm font-medium text-slate-500 dark:text-slate-400">Extension</span>
+                                                <span className="font-bold text-slate-700 dark:text-slate-300">.{result.tld}</span>
                                             </div>
-                                            <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
-                                                <span className="text-sm font-medium text-slate-500">Word Count</span>
-                                                <span className="font-bold text-slate-700">~{result.word_count}</span>
+                                            <div className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-900 rounded-lg">
+                                                <span className="text-sm font-medium text-slate-500 dark:text-slate-400">Word Count</span>
+                                                <span className="font-bold text-slate-700 dark:text-slate-300">~{result.word_count}</span>
                                             </div>
                                         </>
                                     )}
                                     {result.tlds_registered_count !== undefined && (
-                                        <div className="p-3 bg-indigo-50 rounded-lg border border-indigo-100 mt-2">
+                                        <div className="p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg border border-indigo-100 dark:border-indigo-500/20 mt-2">
                                             <div className="flex justify-between items-center">
-                                                <span className="text-sm font-medium text-indigo-600 flex items-center gap-1.5">
+                                                <span className="text-sm font-medium text-indigo-600 dark:text-indigo-400 flex items-center gap-1.5">
                                                     <Globe className="w-3.5 h-3.5" />
                                                     Registered TLDs
                                                 </span>
-                                                <span className="font-bold text-indigo-900">{result.tlds_registered_count} / 10</span>
+                                                <span className="font-bold text-indigo-900 dark:text-indigo-200">{result.tlds_registered_count} / 10</span>
                                             </div>
                                             {result.registered_tlds && result.registered_tlds.length > 0 && (
                                                 <div className="flex flex-wrap gap-1.5 mt-2">
                                                     {result.registered_tlds.map((tld: string) => (
-                                                        <span key={tld} className="text-xs font-bold px-2 py-0.5 bg-indigo-100 text-indigo-700 rounded-full font-mono">.{tld}</span>
+                                                        <span key={tld} className="text-xs font-bold px-2 py-0.5 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 rounded-full font-mono">.{tld}</span>
                                                     ))}
                                                 </div>
                                             )}
@@ -385,8 +385,8 @@ function InstantAppraisalContent() {
                             </div>
                         )}
                         {/* Availability Card */}
-                        <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-lg border border-white/50 p-4 flex flex-col justify-center min-h-[180px]">
-                            <h4 className="font-semibold text-slate-700 text-sm mb-3 flex items-center gap-2">
+                        <div className="bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl rounded-2xl shadow-lg border border-white/50 dark:border-slate-800/50 p-4 flex flex-col justify-center min-h-[180px]">
+                            <h4 className="font-semibold text-slate-700 dark:text-slate-300 text-sm mb-3 flex items-center gap-2">
                                 <Search className="w-3.5 h-3.5 text-indigo-500" />
                                 Availability Status
                             </h4>
@@ -394,13 +394,13 @@ function InstantAppraisalContent() {
                                 <div className={clsx(
                                     "p-6 rounded-xl flex items-center gap-4 border transition-all duration-500 flex-1",
                                     availability.available
-                                        ? "bg-emerald-50 border-emerald-100 text-emerald-800 shadow-emerald-100"
-                                        : "bg-amber-50 border-amber-100 text-amber-800 shadow-amber-100"
+                                        ? "bg-emerald-50 border-emerald-100 text-emerald-800 shadow-emerald-100 dark:bg-emerald-500/10 dark:border-emerald-500/20 dark:text-emerald-400 dark:shadow-emerald-900/20"
+                                        : "bg-amber-50 border-amber-100 text-amber-800 shadow-amber-100 dark:bg-amber-500/10 dark:border-amber-500/20 dark:text-amber-400 dark:shadow-amber-900/20"
                                 )}>
                                     {availability.available ? (
-                                        <CheckCircle className="w-10 h-10 text-emerald-500 p-1 bg-white rounded-full flex-shrink-0" />
+                                        <CheckCircle className="w-10 h-10 text-emerald-500 p-1 bg-white dark:bg-slate-950 rounded-full flex-shrink-0" />
                                     ) : (
-                                        <XCircle className="w-10 h-10 text-amber-500 p-1 bg-white rounded-full flex-shrink-0" />
+                                        <XCircle className="w-10 h-10 text-amber-500 p-1 bg-white dark:bg-slate-950 rounded-full flex-shrink-0" />
                                     )}
                                     <div>
                                         <div className="flex items-center gap-3 mb-1">
@@ -428,12 +428,12 @@ function InstantAppraisalContent() {
                                     </div>
                                 </div>
                             ) : availabilityError ? (
-                                <div className="p-4 bg-slate-50 border border-slate-100 rounded-xl flex items-center gap-3 text-slate-500">
+                                <div className="p-4 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800/60 rounded-xl flex items-center gap-3 text-slate-500 dark:text-slate-400">
                                     <Info className="w-5 h-5" />
                                     <span className="text-sm">{availabilityError}</span>
                                 </div>
                             ) : (
-                                <div className="flex-1 flex flex-col items-center justify-center text-slate-400 gap-3">
+                                <div className="flex-1 flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 gap-3">
                                     <Loader2 className="w-8 h-8 animate-spin text-indigo-200" />
                                     <span className="text-sm font-medium">Checking global registries...</span>
                                 </div>
@@ -452,21 +452,21 @@ function InstantAppraisalContent() {
                                         <Briefcase className="w-4 h-4 text-indigo-400" />
                                     </div>
                                     <h5 className="font-bold text-base">Market Consensus</h5>
-                                    <p className="text-slate-400 text-[11px] leading-tight">Values derived from liquidity and retail data.</p>
+                                    <p className="text-slate-400 dark:text-slate-500 text-[11px] leading-tight">Values derived from liquidity and retail data.</p>
                                 </div>
                                 <div className="space-y-3">
                                     <div className="p-2 w-10 h-10 bg-white/5 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
                                         <Search className="w-5 h-5 text-indigo-400" />
                                     </div>
                                     <h5 className="font-bold text-lg">AI Prediction</h5>
-                                    <p className="text-slate-400 text-sm leading-relaxed">Powered by advanced AI models to estimate real-time fair market value.</p>
+                                    <p className="text-slate-400 dark:text-slate-500 text-sm leading-relaxed">Powered by advanced AI models to estimate real-time fair market value.</p>
                                 </div>
                                 <div className="space-y-3">
                                     <div className="p-2 w-10 h-10 bg-white/5 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
                                         <Sparkles className="w-5 h-5 text-indigo-400" />
                                     </div>
                                     <h5 className="font-bold text-lg">Brand Strength</h5>
-                                    <p className="text-slate-400 text-sm leading-relaxed">Analysis of length, keyword density, and TLD authority.</p>
+                                    <p className="text-slate-400 dark:text-slate-500 text-sm leading-relaxed">Analysis of length, keyword density, and TLD authority.</p>
                                 </div>
                             </div>
                         </div>
@@ -475,38 +475,38 @@ function InstantAppraisalContent() {
 
                 {/* Disclaimer */}
                 <div className="mt-6 pt-4 border-t border-slate-200/60 text-center animate-in fade-in duration-700">
-                    <p className="text-xs text-slate-400 leading-relaxed max-w-2xl mx-auto px-4 font-normal uppercase tracking-wide">
+                    <p className="text-xs text-slate-400 dark:text-slate-500 leading-relaxed max-w-2xl mx-auto px-4 font-normal uppercase tracking-wide">
                         Computer-generated estimates powered by CrushDomains AI. Not professional advice. Actual prices vary. <a href="/terms-of-service" className="underline hover:text-indigo-500 transition-colors">Terms</a>.
                     </p>
                 </div>
 
                 {/* SEO FAQ Section */}
-                <section className="mt-12 bg-white/60 backdrop-blur-xl rounded-2xl shadow-xl p-6 md:p-8 border border-white max-w-4xl w-full mx-auto">
+                <section className="mt-12 bg-white/60 dark:bg-slate-950/60 backdrop-blur-xl rounded-2xl shadow-xl p-6 md:p-8 border border-white dark:border-slate-800 max-w-4xl w-full mx-auto">
                     <div className="text-center mb-6">
-                        <h2 className="text-xl md:text-2xl font-bold text-slate-800">Domain Appraisal FAQs</h2>
+                        <h2 className="text-xl md:text-2xl font-bold text-slate-800 dark:text-slate-200">Domain Appraisal FAQs</h2>
                     </div>
                     <div className="grid md:grid-cols-2 gap-4">
-                        <div className="bg-white rounded-xl p-4 border border-slate-100 shadow-sm">
-                            <h3 className="font-bold text-slate-800 text-sm mb-1.5">How does the free domain appraisal work?</h3>
-                            <p className="text-sm text-slate-600 leading-relaxed">
+                        <div className="bg-white dark:bg-slate-950 rounded-xl p-4 border border-slate-100 dark:border-slate-800/60 shadow-sm">
+                            <h3 className="font-bold text-slate-800 dark:text-slate-200 text-sm mb-1.5">How does the free domain appraisal work?</h3>
+                            <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
                                 Our tool evaluates multiple factors including domain length, TLD extension (.com vs others), keyword popularity, brandability scores (like pronounceability), and recent comparable market sales to generate an estimated value.
                             </p>
                         </div>
-                        <div className="bg-white rounded-xl p-4 border border-slate-100 shadow-sm">
-                            <h3 className="font-bold text-slate-800 text-sm mb-1.5">What is domain liquidity?</h3>
-                            <p className="text-sm text-slate-600 leading-relaxed">
+                        <div className="bg-white dark:bg-slate-950 rounded-xl p-4 border border-slate-100 dark:border-slate-800/60 shadow-sm">
+                            <h3 className="font-bold text-slate-800 dark:text-slate-200 text-sm mb-1.5">What is domain liquidity?</h3>
+                            <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
                                 Domain liquidity refers to the estimated wholesale price a domain could quickly sell for to another investor (often at auction), whereas the Market Value is the higher retail price an end-user business might pay over time.
                             </p>
                         </div>
-                        <div className="bg-white rounded-xl p-4 border border-slate-100 shadow-sm">
-                            <h3 className="font-bold text-slate-800 text-sm mb-1.5">Are automated domain appraisals accurate?</h3>
-                            <p className="text-sm text-slate-600 leading-relaxed">
+                        <div className="bg-white dark:bg-slate-950 rounded-xl p-4 border border-slate-100 dark:border-slate-800/60 shadow-sm">
+                            <h3 className="font-bold text-slate-800 dark:text-slate-200 text-sm mb-1.5">Are automated domain appraisals accurate?</h3>
+                            <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
                                 Automated appraisals provide a solid baseline and market context, but they are estimates. The true value of a domain is ultimately what a buyer is willing to pay. We suggest using our valuation as a starting point for negotiations.
                             </p>
                         </div>
-                        <div className="bg-white rounded-xl p-4 border border-slate-100 shadow-sm">
-                            <h3 className="font-bold text-slate-800 text-sm mb-1.5">Can I appraise multiple domains at once?</h3>
-                            <p className="text-sm text-slate-600 leading-relaxed">
+                        <div className="bg-white dark:bg-slate-950 rounded-xl p-4 border border-slate-100 dark:border-slate-800/60 shadow-sm">
+                            <h3 className="font-bold text-slate-800 dark:text-slate-200 text-sm mb-1.5">Can I appraise multiple domains at once?</h3>
+                            <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
                                 Yes! You can use our Bulk Appraisal tool (linked at the top of this page) to upload a list of domains or a CSV file from marketplaces like NameJet and evaluate up to 200 domains instantly.
                             </p>
                         </div>
@@ -557,7 +557,7 @@ function InstantAppraisalContent() {
                     />
                 </section>
             </div>
-            <footer className="mt-auto py-6 text-slate-400 text-xs font-medium">
+            <footer className="mt-auto py-6 text-slate-400 dark:text-slate-500 text-xs font-medium">
                 © 2026 CrushDomains. All rights reserved.
             </footer>
         </div >
@@ -567,7 +567,7 @@ function InstantAppraisalContent() {
 export default function InstantAppraisal() {
     return (
         <Suspense fallback={
-            <div className="min-h-screen flex items-center justify-center bg-slate-50">
+            <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900">
                 <Loader2 className="w-10 h-10 animate-spin text-indigo-500" />
             </div>
         }>

@@ -163,7 +163,7 @@ function GeneratorContent() {
     };
 
     return (
-        <main className="min-h-screen bg-slate-50 font-sans text-slate-900 selection:bg-indigo-100 italic-none">
+        <main className="min-h-screen bg-slate-50 dark:bg-slate-900 font-sans text-slate-900 dark:text-slate-50 selection:bg-indigo-100 italic-none">
             <style dangerouslySetInnerHTML={{
                 __html: `
                 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
@@ -172,6 +172,10 @@ function GeneratorContent() {
                     background: rgba(255, 255, 255, 0.8);
                     backdrop-filter: blur(12px);
                     border: 1px solid rgba(255, 255, 255, 0.3);
+                }
+                .dark .premium-glass {
+                    background: rgba(15, 23, 42, 0.8);
+                    border: 1px solid rgba(30, 41, 59, 0.5);
                 }
                 .btn-primary {
                     background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
@@ -183,6 +187,7 @@ function GeneratorContent() {
                 }
                 .custom-scrollbar::-webkit-scrollbar { width: 6px; }
                 .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+                .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; }
             `}} />
 
             <div className="max-w-4xl mx-auto px-6 py-4 md:py-4">
@@ -191,72 +196,72 @@ function GeneratorContent() {
                         <MapPin className="w-6 h-6 md:w-7 md:h-7 text-indigo-500 flex-shrink-0" />
                         Geo Domain Generator
                     </PageTitle>
-                    <p className="max-w-2xl mx-auto text-xs text-slate-500 leading-relaxed font-normal">
+                    <p className="max-w-2xl mx-auto text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-normal">
                         Generate intelligent, location-based, and premium .com domains in seconds using our geo-focused engine.
                     </p>
                 </header>
 
                 {/* Main Generator Form */}
-                <div className="premium-glass rounded-2xl shadow-xl p-4 md:p-5 mb-4 border border-white">
+                <div className="premium-glass rounded-2xl shadow-xl p-4 md:p-5 mb-4 border border-white dark:border-slate-800">
                     <form onSubmit={handleSubmit} className="space-y-3">
                         <div className="space-y-2">
-                            <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Keyword</label>
+                            <label className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Keyword</label>
                             <input
                                 value={keyword1}
                                 onChange={(e) => setKeyword1(e.target.value)}
                                 type="text"
                                 required
                                 placeholder="e.g. Dental"
-                                className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all text-slate-800 font-medium text-sm"
+                                className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all text-slate-800 dark:text-slate-200 font-medium text-sm"
                             />
                         </div>
 
-                        <hr className="border-slate-100" />
+                        <hr className="border-slate-100 dark:border-slate-800/60" />
 
                         <div className="grid md:grid-cols-3 gap-3">
                             <div className="space-y-2">
-                                <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Country</label>
+                                <label className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Country</label>
                                 <div className="relative">
                                     <select
                                         value={country}
                                         onChange={(e) => setCountry(e.target.value)}
-                                        className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none appearance-none cursor-pointer text-slate-800 font-medium text-sm"
+                                        className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none appearance-none cursor-pointer text-slate-800 dark:text-slate-200 font-medium text-sm"
                                     >
                                         <option value="USA">USA</option>
                                         <option value="Canada">Canada</option>
                                         <option value="Australia">Australia</option>
                                         <option value="UK">UK</option>
                                     </select>
-                                    <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 text-lg">▾</div>
+                                    <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 dark:text-slate-500 text-lg">▾</div>
                                 </div>
                             </div>
                             <div className="space-y-2">
-                                <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Location Type</label>
+                                <label className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Location Type</label>
                                 <div className="relative">
                                     <select
                                         value={locationType}
                                         onChange={(e) => setLocationType(e.target.value)}
-                                        className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none appearance-none cursor-pointer text-slate-800 font-medium text-sm"
+                                        className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none appearance-none cursor-pointer text-slate-800 dark:text-slate-200 font-medium text-sm"
                                     >
                                         <option value="Cities">Cities</option>
                                         <option value="States">States / Provinces</option>
                                         <option value="Codes">State / Province Codes</option>
                                     </select>
-                                    <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 text-lg">▾</div>
+                                    <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 dark:text-slate-500 text-lg">▾</div>
                                 </div>
                             </div>
                             <div className="space-y-2">
-                                <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Position</label>
+                                <label className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Position</label>
                                 <div className="relative">
                                     <select
                                         value={keywordPosition}
                                         onChange={(e) => setKeywordPosition(e.target.value)}
-                                        className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none appearance-none cursor-pointer text-slate-800 font-medium text-sm"
+                                        className="w-full px-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none appearance-none cursor-pointer text-slate-800 dark:text-slate-200 font-medium text-sm"
                                     >
                                         <option value="after">City + Keyword</option>
                                         <option value="before">Keyword + City</option>
                                     </select>
-                                    <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 text-lg">▾</div>
+                                    <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 dark:text-slate-500 text-lg">▾</div>
                                 </div>
                             </div>
                         </div>
@@ -275,32 +280,32 @@ function GeneratorContent() {
                 {hasGenerated && (
                     <div className="animate-in fade-in slide-in-from-bottom-8 duration-700">
                         {/* Advanced Filter Bar */}
-                        <div className="bg-white/50 border border-slate-100 rounded-xl p-3 mb-3 shadow-sm">
+                        <div className="bg-white/50 dark:bg-slate-950/50 border border-slate-100 dark:border-slate-800/60 rounded-xl p-3 mb-3 shadow-sm">
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                 <div className="space-y-2">
                                     <div className="flex justify-between">
-                                        <label className="text-[9px] font-black uppercase tracking-widest text-slate-400">Min Score: <span className="text-indigo-600">{filterScore}</span></label>
+                                        <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Min Score: <span className="text-indigo-600">{filterScore}</span></label>
                                     </div>
                                     <input
                                         value={filterScore}
                                         onChange={(e) => setFilterScore(parseInt(e.target.value))}
-                                        type="range" min="0" max="100" step="5" className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+                                        type="range" min="0" max="100" step="5" className="w-full h-1.5 bg-slate-200 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-600"
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-[9px] font-black uppercase tracking-widest text-slate-400">Max Length</label>
+                                    <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Max Length</label>
                                     <input
                                         value={filterLength}
                                         onChange={(e) => setFilterLength(e.target.value)}
-                                        type="number" placeholder="e.g. 10" className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl outline-none focus:border-indigo-400 text-sm font-bold text-slate-700"
+                                        type="number" placeholder="e.g. 10" className="w-full px-4 py-2 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:border-indigo-400 text-sm font-bold text-slate-700 dark:text-slate-300"
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-[9px] font-black uppercase tracking-widest text-slate-400">Availability</label>
+                                    <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Availability</label>
                                     <select
                                         value={filterAvailability}
                                         onChange={(e) => setFilterAvailability(e.target.value)}
-                                        className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl outline-none focus:border-indigo-400 text-sm font-bold text-slate-700 appearance-none cursor-pointer"
+                                        className="w-full px-4 py-2 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:border-indigo-400 text-sm font-bold text-slate-700 dark:text-slate-300 appearance-none cursor-pointer"
                                     >
                                         <option value="all">Show All</option>
                                         <option value="available">Available Only</option>
@@ -312,15 +317,15 @@ function GeneratorContent() {
 
                         <div className="flex items-center justify-between mb-2">
                             <div className="flex flex-col gap-0.5">
-                                <h2 className="text-xl font-semibold text-slate-800">Domain Suggestions</h2>
+                                <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-200">Domain Suggestions</h2>
                                 <span className="text-xs font-medium text-indigo-600">Total domains generated: {totalDomainsCount}</span>
                             </div>
-                            <span className="px-3 py-1 bg-white border border-slate-200 rounded-full text-[9px] font-semibold text-slate-400 uppercase tracking-widest shadow-sm">Instant Filter Enabled</span>
+                            <span className="px-3 py-1 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-full text-[9px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest shadow-sm">Instant Filter Enabled</span>
                         </div>
 
                         <div className="grid gap-2 max-h-[800px] overflow-y-auto pr-2 custom-scrollbar">
                             {filteredDomains.length === 0 ? (
-                                <p className="text-center text-slate-500 py-8 italic font-medium">No domains match your filters.</p>
+                                <p className="text-center text-slate-500 dark:text-slate-400 py-8 italic font-medium">No domains match your filters.</p>
                             ) : (
                                 <>
                                     {filteredDomains.slice(0, visibleCount).map((d) => (
@@ -335,10 +340,10 @@ function GeneratorContent() {
                                         <div className="mt-8 flex justify-center">
                                             <button
                                                 onClick={() => setVisibleCount(prev => prev + 20)}
-                                                className="px-8 py-3 bg-white border border-slate-200 rounded-2xl text-slate-600 font-bold hover:bg-slate-50 hover:border-slate-300 transition-all flex items-center gap-2 shadow-sm"
+                                                className="px-8 py-3 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-2xl text-slate-600 dark:text-slate-400 font-bold hover:bg-slate-50 hover:border-slate-300 transition-all flex items-center gap-2 shadow-sm"
                                             >
                                                 Load More Results
-                                                <span className="text-slate-400 text-xs font-medium">({filteredDomains.length - visibleCount} remaining)</span>
+                                                <span className="text-slate-400 dark:text-slate-500 text-xs font-medium">({filteredDomains.length - visibleCount} remaining)</span>
                                             </button>
                                         </div>
                                     )}
@@ -347,7 +352,7 @@ function GeneratorContent() {
                         </div>
 
                         <div className="mt-8 p-6 bg-indigo-50/50 rounded-2xl border border-indigo-100 flex items-start gap-4">
-                            <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center shrink-0">
+                            <div className="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center shrink-0">
                                 <Info className="w-5 h-5 text-indigo-600" />
                             </div>
                             <div>
@@ -358,33 +363,33 @@ function GeneratorContent() {
                             </div>
                         </div>
 
-                        <p className="mt-8 text-[10px] text-slate-400 text-center font-medium">
+                        <p className="mt-8 text-[10px] text-slate-400 dark:text-slate-500 text-center font-medium">
                             All scores and valuations are automated estimates. Please refer to our <a href="/terms-of-service" className="underline hover:text-indigo-500 transition-colors">Terms of Service</a> for details.
                         </p>
                     </div>
                 )}
 
                 {/* SEO FAQ Section */}
-                <section className="mt-16 bg-white/50 backdrop-blur-xl rounded-2xl shadow-xl p-6 md:p-8 border border-white">
+                <section className="mt-16 bg-white/50 dark:bg-slate-950/50 backdrop-blur-xl rounded-2xl shadow-xl p-6 md:p-8 border border-white dark:border-slate-800">
                     <div className="text-center mb-6">
-                        <h2 className="text-xl md:text-2xl font-bold text-slate-800">Geo Domain Generator FAQs</h2>
+                        <h2 className="text-xl md:text-2xl font-bold text-slate-800 dark:text-slate-200">Geo Domain Generator FAQs</h2>
                     </div>
                     <div className="space-y-4">
-                        <div className="bg-slate-50 rounded-xl p-4 border border-slate-100">
-                            <h3 className="font-bold text-slate-800 text-sm mb-1.5">What is a geo domain?</h3>
-                            <p className="text-sm text-slate-600 leading-relaxed">
+                        <div className="bg-slate-50 dark:bg-slate-900 rounded-xl p-4 border border-slate-100 dark:border-slate-800/60">
+                            <h3 className="font-bold text-slate-800 dark:text-slate-200 text-sm mb-1.5">What is a geo domain?</h3>
+                            <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
                                 A geo domain strictly combines a location (like a city or state) with a specific service or industry keyword (e.g., ChicagoPlumbing.com or DenverDentist.com). These domains are highly brandable and perform exceptionally well in local search results.
                             </p>
                         </div>
-                        <div className="bg-slate-50 rounded-xl p-4 border border-slate-100">
-                            <h3 className="font-bold text-slate-800 text-sm mb-1.5">Are geo domains good for local SEO?</h3>
-                            <p className="text-sm text-slate-600 leading-relaxed">
+                        <div className="bg-slate-50 dark:bg-slate-900 rounded-xl p-4 border border-slate-100 dark:border-slate-800/60">
+                            <h3 className="font-bold text-slate-800 dark:text-slate-200 text-sm mb-1.5">Are geo domains good for local SEO?</h3>
+                            <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
                                 Yes. Having the target city and service directly in the domain name gives you an instant relevance signal to search engines. It also clearly communicates to your local customers exactly what you do and where you are, increasing click-through rates.
                             </p>
                         </div>
-                        <div className="bg-slate-50 rounded-xl p-4 border border-slate-100">
-                            <h3 className="font-bold text-slate-800 text-sm mb-1.5">Can I buy the domains I generate here?</h3>
-                            <p className="text-sm text-slate-600 leading-relaxed">
+                        <div className="bg-slate-50 dark:bg-slate-900 rounded-xl p-4 border border-slate-100 dark:border-slate-800/60">
+                            <h3 className="font-bold text-slate-800 dark:text-slate-200 text-sm mb-1.5">Can I buy the domains I generate here?</h3>
+                            <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
                                 Absolutely. Once you find an available domain you like, simply click the "Register" button to secure it immediately through our registrar partners before someone else does.
                             </p>
                         </div>
@@ -428,7 +433,7 @@ function GeneratorContent() {
                 </section>
 
                 <footer className="mt-24 text-center">
-                    <p className="text-slate-400 text-base font-normal">© 2026 Crush Domains • Premium Domain Engine</p>
+                    <p className="text-slate-400 dark:text-slate-500 text-base font-normal">© 2026 Crush Domains • Premium Domain Engine</p>
                 </footer>
             </div>
         </main>
@@ -438,7 +443,7 @@ function GeneratorContent() {
 export default function GeneratorPage() {
     return (
         <Suspense fallback={
-            <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+            <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center">
                 <div className="text-indigo-600 font-semibold animate-pulse">Loading Generator...</div>
             </div>
         }>

@@ -178,7 +178,7 @@ export default function BulkAppraisalPage() {
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-900 py-12 px-4 sm:px-6 lg:px-8">
             <div className="max-w-6xl mx-auto space-y-8">
 
                 {/* Input View */}
@@ -189,13 +189,13 @@ export default function BulkAppraisalPage() {
                                 <Sparkles className="w-7 h-7 md:w-8 md:h-8 text-indigo-500 flex-shrink-0" />
                                 Bulk Valuation
                             </PageTitle>
-                            <p className="text-base md:text-lg text-slate-500 font-normal mx-auto max-w-2xl leading-relaxed">
+                            <p className="text-base md:text-lg text-slate-500 dark:text-slate-400 font-normal mx-auto max-w-2xl leading-relaxed">
                                 Analyze up to 200 domains at once using Crushdomains Valuation.
                             </p>
                             {/* Loading State in Header if processing but no results yet */}
                             {isLoading && (
                                 <div className="pt-2 flex justify-center">
-                                    <span className="px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-xs font-semibold flex items-center gap-2">
+                                    <span className="px-3 py-1 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 rounded-full text-xs font-semibold flex items-center gap-2">
                                         <Loader2 className="w-4 h-4 animate-spin" />
                                         Processing...
                                     </span>
@@ -203,9 +203,9 @@ export default function BulkAppraisalPage() {
                             )}
                         </header>
 
-                        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 space-y-6">
+                        <div className="bg-white dark:bg-slate-950 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 space-y-6">
                             <div className="space-y-2">
-                                <label className="block text-sm font-medium text-slate-700">
+                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
                                     Enter domains (one per line)
                                 </label>
                                 <textarea
@@ -213,7 +213,7 @@ export default function BulkAppraisalPage() {
                                     onChange={(e) => setRawInput(e.target.value)}
                                     disabled={isLoading}
                                     placeholder="example.com&#10;test.com&#10;awesome.io"
-                                    className="w-full h-48 px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all resize-y"
+                                    className="w-full h-48 px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-700 dark:text-slate-300 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all resize-y"
                                 />
                             </div>
 
@@ -230,20 +230,20 @@ export default function BulkAppraisalPage() {
                                     <label
                                         htmlFor="csv-upload"
                                         className={clsx(
-                                            "flex items-center gap-2 px-4 py-2 bg-slate-100 text-slate-600 rounded-lg text-sm font-medium cursor-pointer hover:bg-slate-200 transition-colors",
+                                            "flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-400 rounded-lg text-sm font-medium cursor-pointer hover:bg-slate-200 transition-colors",
                                             isLoading && "pointer-events-none opacity-50"
                                         )}
                                     >
                                         <Upload className="w-4 h-4" />
                                         Upload CSV
                                     </label>
-                                    <p className="text-xs text-slate-400 mt-1 pl-1">
+                                    <p className="text-xs text-slate-400 dark:text-slate-500 mt-1 pl-1">
                                         First column used as domain list
                                     </p>
                                 </div>
 
                                 <div className="flex items-center gap-3">
-                                    <div className="text-right text-sm text-slate-500">
+                                    <div className="text-right text-sm text-slate-500 dark:text-slate-400">
                                         {rawInput.split('\n').filter(l => l.trim()).length} / 200
                                     </div>
                                     <button
@@ -278,9 +278,9 @@ export default function BulkAppraisalPage() {
 
                 {/* Results View */}
                 {results.length > 0 && (
-                    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div className="bg-white dark:bg-slate-950 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
                         {/* Results Header */}
-                        <div className="p-6 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div className="p-6 border-b border-slate-100 dark:border-slate-800/60 flex flex-col md:flex-row md:items-center justify-between gap-4">
                             <div className="flex items-center gap-3">
                                 <div className="p-2 bg-amber-100 rounded-lg">
                                     {/* Simple Stack Icon or similar */}
@@ -290,21 +290,21 @@ export default function BulkAppraisalPage() {
                                     </div>
                                 </div>
                                 <div>
-                                    <h2 className="text-2xl font-semibold text-slate-900">Bulk Valuation</h2>
-                                    <p className="text-base text-slate-500 font-normal">{results.length} domains analyzed</p>
+                                    <h2 className="text-2xl font-semibold text-slate-900 dark:text-slate-50">Bulk Valuation</h2>
+                                    <p className="text-base text-slate-500 dark:text-slate-400 font-normal">{results.length} domains analyzed</p>
                                 </div>
                             </div>
 
                             <div className="flex items-center gap-3">
                                 <button
                                     onClick={handleReset}
-                                    className="px-4 py-2 text-slate-500 hover:text-slate-800 font-medium text-sm transition-colors"
+                                    className="px-4 py-2 text-slate-500 dark:text-slate-400 hover:text-slate-800 font-medium text-sm transition-colors"
                                 >
                                     Reset
                                 </button>
                                 <button
                                     onClick={exportCSV}
-                                    className="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-medium transition-colors"
+                                    className="flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 text-slate-700 dark:text-slate-300 rounded-lg text-sm font-medium transition-colors"
                                 >
                                     <FileDown className="w-4 h-4" />
                                     CSV
@@ -318,12 +318,12 @@ export default function BulkAppraisalPage() {
 
 
                         {/* Pagination Toolbar */}
-                        <div className="px-6 py-3 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row justify-between items-center gap-4 text-base text-slate-500">
+                        <div className="px-6 py-3 border-b border-slate-100 dark:border-slate-800/60 bg-slate-50/50 dark:bg-slate-900/50 flex flex-col sm:flex-row justify-between items-center gap-4 text-base text-slate-500 dark:text-slate-400">
 
                             <div className="flex items-center gap-2">
                                 <span>Rows per page:</span>
                                 <select
-                                    className="bg-white border border-slate-200 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                                    className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
                                     value={itemsPerPage}
                                     onChange={(e) => {
                                         setItemsPerPage(Number(e.target.value));
@@ -364,7 +364,7 @@ export default function BulkAppraisalPage() {
                         <div className="overflow-x-auto">
                             <table className="w-full text-left text-base border-collapse">
                                 <thead>
-                                    <tr className="bg-slate-50/50 border-b border-slate-200">
+                                    <tr className="bg-slate-50/50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700">
                                         {[
                                             { id: 'domain', label: 'DOMAIN' },
                                             { id: 'auction', label: 'AUCTION' },
@@ -375,7 +375,7 @@ export default function BulkAppraisalPage() {
                                                 key={col.id}
                                                 onClick={() => handleSort(col.id as SortField)}
                                                 className={clsx(
-                                                    "p-4 text-xs font-bold text-slate-400 cursor-pointer hover:bg-slate-100 transition-colors select-none tracking-wider",
+                                                    "p-4 text-xs font-bold text-slate-400 dark:text-slate-500 cursor-pointer hover:bg-slate-100 transition-colors select-none tracking-wider",
                                                     col.id !== 'domain' && "text-right"
                                                 )}
                                             >
@@ -394,12 +394,12 @@ export default function BulkAppraisalPage() {
                                 <tbody className="divide-y divide-slate-100">
                                     {paginatedResults.map((row, i) => (
                                         <tr key={i} className="hover:bg-slate-50/50 transition-colors group">
-                                            <td className="p-4 font-mono font-semibold text-slate-900 group-hover:text-indigo-600 transition-colors text-lg">
+                                            <td className="p-4 font-mono font-semibold text-slate-900 dark:text-slate-50 group-hover:text-indigo-600 transition-colors text-lg">
                                                 {row.domain}
                                             </td>
-                                            <td className="p-4 text-slate-400 font-mono text-base text-right">{formatCurrency(row.auction)}</td>
-                                            <td className="p-4 text-slate-600 font-mono text-base text-right">{formatCurrency(row.market)}</td>
-                                            <td className="p-4 text-slate-900 font-mono font-bold text-base text-right">{formatCurrency(row.broker)}</td>
+                                            <td className="p-4 text-slate-400 dark:text-slate-500 font-mono text-base text-right">{formatCurrency(row.auction)}</td>
+                                            <td className="p-4 text-slate-600 dark:text-slate-400 font-mono text-base text-right">{formatCurrency(row.market)}</td>
+                                            <td className="p-4 text-slate-900 dark:text-slate-50 font-mono font-bold text-base text-right">{formatCurrency(row.broker)}</td>
                                         </tr>
                                     ))}
                                 </tbody>

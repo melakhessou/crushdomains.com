@@ -61,12 +61,12 @@ export function DynadotFilters({
     };
 
     return (
-        <div className="px-5 py-4 bg-slate-50/50 border-b border-slate-100 space-y-4">
+        <div className="px-5 py-4 bg-slate-50/50 dark:bg-slate-900/50 border-b border-slate-100 dark:border-slate-800/60 space-y-4">
             <div className="flex flex-wrap gap-6 items-start">
                 {/* TLD Multi-select */}
                 <div className="space-y-2 flex-1 min-w-[280px]">
                     <div className="flex items-center justify-between">
-                        <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Filter by TLDs</label>
+                        <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Filter by TLDs</label>
                         {filters.selectedTlds.length > 0 && (
                             <button
                                 onClick={clearTlds}
@@ -87,7 +87,7 @@ export function DynadotFilters({
                                         'px-3 py-1.5 rounded-full text-xs font-bold border transition-all flex items-center gap-1',
                                         isSelected
                                             ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm shadow-indigo-200'
-                                            : 'bg-white text-slate-600 border-slate-200 hover:border-indigo-300 hover:text-indigo-600'
+                                            : 'bg-white dark:bg-slate-950 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:border-indigo-300 hover:text-indigo-600'
                                     )}
                                 >
                                     {isSelected && <Check className="w-3 h-3" />}
@@ -101,31 +101,31 @@ export function DynadotFilters({
                 {/* Numeric Filters */}
                 <div className="flex gap-4">
                     <div className="space-y-1">
-                        <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Max Price (USD)</label>
+                        <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Max Price (USD)</label>
                         <input
                             type="number"
                             min={0}
                             placeholder="No limit"
                             value={filters.maxPrice ?? ''}
                             onChange={e => onChange({ ...filters, maxPrice: e.target.value ? Number(e.target.value) : null })}
-                            className="block w-32 px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
+                            className="block w-32 px-3 py-2 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
                         />
                     </div>
 
                     <div className="space-y-1">
-                        <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Min Bids</label>
+                        <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Min Bids</label>
                         <input
                             type="number"
                             min={0}
                             value={filters.minBids || ''}
                             placeholder="0"
                             onChange={e => onChange({ ...filters, minBids: Number(e.target.value) || 0 })}
-                            className="block w-28 px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
+                            className="block w-28 px-3 py-2 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
                         />
                     </div>
 
                     <div className="space-y-1">
-                        <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">SETTINGS</label>
+                        <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">SETTINGS</label>
                         <div className="flex flex-col gap-1.5 pt-0.5">
                             <label className="flex items-center gap-2 cursor-pointer group">
                                 <div className="relative flex items-center justify-center">
@@ -133,11 +133,11 @@ export function DynadotFilters({
                                         type="checkbox"
                                         checked={filters.noHyphens}
                                         onChange={() => onChange({ ...filters, noHyphens: !filters.noHyphens })}
-                                        className="peer appearance-none w-4 h-4 border border-slate-300 rounded bg-white checked:bg-indigo-600 checked:border-indigo-600 transition-all cursor-pointer"
+                                        className="peer appearance-none w-4 h-4 border border-slate-300 rounded bg-white dark:bg-slate-950 checked:bg-indigo-600 checked:border-indigo-600 transition-all cursor-pointer"
                                     />
                                     <Check className="absolute w-3 h-3 text-white opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none" />
                                 </div>
-                                <span className="text-sm text-slate-600 group-hover:text-indigo-600 transition-colors">No Hyphens</span>
+                                <span className="text-sm text-slate-600 dark:text-slate-400 group-hover:text-indigo-600 transition-colors">No Hyphens</span>
                             </label>
                             <label className="flex items-center gap-2 cursor-pointer group">
                                 <div className="relative flex items-center justify-center">
@@ -145,11 +145,11 @@ export function DynadotFilters({
                                         type="checkbox"
                                         checked={filters.noNumbers}
                                         onChange={() => onChange({ ...filters, noNumbers: !filters.noNumbers })}
-                                        className="peer appearance-none w-4 h-4 border border-slate-300 rounded bg-white checked:bg-indigo-600 checked:border-indigo-600 transition-all cursor-pointer"
+                                        className="peer appearance-none w-4 h-4 border border-slate-300 rounded bg-white dark:bg-slate-950 checked:bg-indigo-600 checked:border-indigo-600 transition-all cursor-pointer"
                                     />
                                     <Check className="absolute w-3 h-3 text-white opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none" />
                                 </div>
-                                <span className="text-sm text-slate-600 group-hover:text-indigo-600 transition-colors">No Numbers</span>
+                                <span className="text-sm text-slate-600 dark:text-slate-400 group-hover:text-indigo-600 transition-colors">No Numbers</span>
                             </label>
                         </div>
                     </div>
@@ -159,15 +159,15 @@ export function DynadotFilters({
             <div className="flex flex-wrap gap-6 items-start">
                 {/* Search */}
                 <div className="space-y-1 flex-1 min-w-[200px]">
-                    <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Search Domain</label>
+                    <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Search Domain</label>
                     <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500" />
                         <input
                             type="text"
                             placeholder="e.g. crypto, finance…"
                             value={localSearch}
                             onChange={e => setLocalSearch(e.target.value)}
-                            className="block w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-800 placeholder:text-slate-400 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
+                            className="block w-full pl-9 pr-4 py-2 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
                         />
                     </div>
                 </div>
@@ -175,7 +175,7 @@ export function DynadotFilters({
                 {/* Domain Name Pattern */}
                 <div className="space-y-1 flex-1 min-w-[280px]">
                     <div className="flex items-center gap-1.5">
-                        <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Domain Name Pattern</label>
+                        <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Domain Name Pattern</label>
                         <Tooltip content={
                             <div className="space-y-2 p-1 w-64">
                                 <div className="grid grid-cols-2 gap-x-4 gap-y-1">
@@ -195,12 +195,12 @@ export function DynadotFilters({
                                         </div>
                                     ))}
                                 </div>
-                                <p className="text-xs text-slate-400 border-t border-slate-700/50 pt-1.5 leading-tight">
+                                <p className="text-xs text-slate-400 dark:text-slate-500 border-t border-slate-700/50 pt-1.5 leading-tight">
                                     Separate patterns with spaces (logical OR). Matches only the domain name part.
                                 </p>
                             </div>
                         }>
-                            <Info className="w-3.5 h-3.5 text-slate-400 hover:text-indigo-500 transition-colors" />
+                            <Info className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 hover:text-indigo-500 transition-colors" />
                         </Tooltip>
                         {patternCount > 0 && (
                             <span className="ml-auto text-xs font-semibold text-indigo-600">
@@ -214,14 +214,14 @@ export function DynadotFilters({
                         value={filters.patternInput}
                         onChange={e => onChange({ ...filters, patternInput: e.target.value })}
                         maxLength={300}
-                        className="block w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm font-mono text-slate-800 placeholder:text-slate-400 placeholder:font-sans focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
+                        className="block w-full px-3 py-2 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-mono text-slate-800 dark:text-slate-200 placeholder:text-slate-400 placeholder:font-sans focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
                     />
                 </div>
             </div>
 
             {/* Results match label */}
             <div className="flex items-center justify-between pt-1">
-                <span className="text-xs font-medium text-slate-400 italic">
+                <span className="text-xs font-medium text-slate-400 dark:text-slate-500 italic">
                     {totalMatches} domains match your criteria (out of {totalAvailable} available)
                 </span>
             </div>

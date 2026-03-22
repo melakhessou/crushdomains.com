@@ -209,7 +209,7 @@ export function AuctionsPageClient({ auctions, generatedAt }: Props) {
     const fetchedLabel = new Date(generatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-slate-50 to-indigo-100">
+        <div className="min-h-screen bg-gradient-to-br from-indigo-50 dark:from-slate-950 via-slate-50 dark:via-slate-900 to-indigo-100 dark:to-indigo-950/20">
             <div className="max-w-screen-2xl mx-auto px-4 md:px-8 py-8 space-y-6">
 
                 {/* ── Header ── */}
@@ -218,9 +218,9 @@ export function AuctionsPageClient({ auctions, generatedAt }: Props) {
                         <Gavel className="w-7 h-7 md:w-8 md:h-8 text-indigo-500 flex-shrink-0" />
                         Expired Domain Auctions
                     </PageTitle>
-                    <p className="text-lg text-slate-500 font-normal mx-auto max-w-2xl leading-relaxed">
+                    <p className="text-lg text-slate-500 dark:text-slate-400 font-normal mx-auto max-w-2xl leading-relaxed">
                         Best expired-domain auctions from{' '}
-                        <a href={DYNADOT_AFF_LINK} target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:text-indigo-700 font-semibold underline underline-offset-2">
+                        <a href={DYNADOT_AFF_LINK} target="_blank" rel="noopener noreferrer" className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-semibold underline underline-offset-2">
                             Dynadot
                         </a>
                         {' '}— filtered for deals.
@@ -238,27 +238,27 @@ export function AuctionsPageClient({ auctions, generatedAt }: Props) {
                 </header>
 
                 {/* ── Status bar ── */}
-                <div className="flex flex-wrap items-center gap-3 text-sm text-slate-500">
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full font-semibold">
+                <div className="flex flex-wrap items-center gap-3 text-sm text-slate-500 dark:text-slate-400">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30 rounded-full font-semibold">
                         <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                         Live
                     </span>
-                    <span className="inline-flex items-center gap-1 bg-white/60 border border-slate-200 px-3 py-1 rounded-full font-medium">
+                    <span className="inline-flex items-center gap-1 bg-white/60 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 px-3 py-1 rounded-full font-medium">
                         Fetched {fetchedLabel}
                     </span>
-                    <span className="bg-indigo-50 border border-indigo-200 text-indigo-700 px-3 py-1 rounded-full font-semibold">
+                    <span className="bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/30 text-indigo-700 dark:text-indigo-400 px-3 py-1 rounded-full font-semibold">
                         {filteredAndSorted.length} deals · {auctions.length} total
                     </span>
                 </div>
 
                 {/* ── Filter + Table card ── */}
-                <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-lg border border-white/50 overflow-hidden">
+                <div className="bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl rounded-2xl shadow-lg border border-white/50 dark:border-slate-800 overflow-hidden">
 
                     {/* Filter toggle */}
-                    <div className="flex items-center justify-between px-5 py-3 border-b border-slate-100">
+                    <div className="flex items-center justify-between px-5 py-3 border-b border-slate-100 dark:border-slate-800">
                         <button
                             onClick={() => setShowFilters(!showFilters)}
-                            className="flex items-center gap-2 text-base font-semibold text-slate-700 hover:text-indigo-600 transition-colors"
+                            className="flex items-center gap-2 text-base font-semibold text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
                         >
                             <SlidersHorizontal className="w-4 h-4" />
                             {showFilters ? 'Hide Filters' : 'Show Filters'}

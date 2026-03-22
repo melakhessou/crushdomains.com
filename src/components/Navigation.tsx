@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { Sparkles, LayoutDashboard, Search, FileText, Menu, X, Gavel } from 'lucide-react';
 import { useState } from 'react';
 import clsx from 'clsx';
+import { ThemeToggle } from './ThemeToggle';
 
 const NAV_ITEMS = [
     { label: 'Filter Deleting Domains', href: '/filter', icon: LayoutDashboard },
@@ -19,7 +20,7 @@ export function Navigation() {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
     return (
-        <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200/60 shadow-sm">
+        <nav className="sticky top-0 z-50 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border-b border-slate-200/60 dark:border-slate-800/60 shadow-sm">
             <div className="max-w-7xl mx-auto px-6 md:px-10">
                 <div className="flex h-16 items-center justify-between">
 
@@ -53,15 +54,19 @@ export function Navigation() {
                                 </Link>
                             );
                         })}
+                        <ThemeToggle />
                     </div>
 
-                    {/* Mobile Menu Button */}
-                    <button
-                        className="md:hidden p-2 text-slate-500 hover:bg-slate-50 rounded-lg transition-colors"
-                        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                    >
-                        {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-                    </button>
+                    {/* Mobile Menu Button & Toggle */}
+                    <div className="flex items-center gap-2 md:hidden">
+                        <ThemeToggle />
+                        <button
+                            className="p-2 text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors"
+                            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                        >
+                            {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                        </button>
+                    </div>
                 </div>
 
                 {/* Mobile menu dropdown */}
@@ -76,8 +81,8 @@ export function Navigation() {
                                     className={clsx(
                                         "flex items-center gap-3 p-3 rounded-xl text-sm font-bold transition-all",
                                         isActive
-                                            ? "bg-indigo-50 text-indigo-600"
-                                            : "text-slate-600 hover:bg-slate-50"
+                                            ? "bg-indigo-50 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400"
+                                            : "text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50"
                                     )}
                                     onClick={() => setIsMobileMenuOpen(false)}
                                 >

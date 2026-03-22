@@ -29,7 +29,7 @@ function CopyButton({ text }: { text: string }) {
     return (
         <button
             onClick={handleCopy}
-            className="p-1 hover:bg-slate-100/50 rounded-md transition-colors text-slate-400 hover:text-indigo-600 relative group shrink-0"
+            className="p-1 hover:bg-slate-100/50 rounded-md transition-colors text-slate-400 dark:text-slate-500 hover:text-indigo-600 relative group shrink-0"
             title="Copy domain"
         >
             {copied ? (
@@ -59,15 +59,15 @@ interface Props {
 
 function tldStyle(tld: string): string {
     const map: Record<string, string> = {
-        com: 'bg-emerald-100 text-emerald-700 border-emerald-200',
-        net: 'bg-amber-100  text-amber-700  border-amber-200',
-        io: 'bg-blue-100   text-blue-700   border-blue-200',
-        org: 'bg-purple-100 text-purple-700 border-purple-200',
-        co: 'bg-cyan-100   text-cyan-700   border-cyan-200',
-        ai: 'bg-fuchsia-100 text-fuchsia-700 border-fuchsia-200',
-        xyz: 'bg-rose-100 text-rose-700 border-rose-200',
+        com: 'bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20',
+        net: 'bg-amber-100  text-amber-700  border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20',
+        io: 'bg-blue-100   text-blue-700   border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20',
+        org: 'bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-500/10 dark:text-purple-400 dark:border-purple-500/20',
+        co: 'bg-cyan-100   text-cyan-700   border-cyan-200 dark:bg-cyan-500/10 dark:text-cyan-400 dark:border-cyan-500/20',
+        ai: 'bg-fuchsia-100 text-fuchsia-700 border-fuchsia-200 dark:bg-fuchsia-500/10 dark:text-fuchsia-400 dark:border-fuchsia-500/20',
+        xyz: 'bg-rose-100 text-rose-700 border-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20',
     };
-    return map[tld] || 'bg-slate-100 text-slate-600 border-slate-200';
+    return map[tld] || 'bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700';
 }
 
 function parsePrice(str: string) {
@@ -95,10 +95,10 @@ function SkeletonRows() {
     return (
         <>
             {[1, 2, 3, 4, 5].map((i) => (
-                <tr key={i} className="border-b border-slate-100">
+                <tr key={i} className="border-b border-slate-100 dark:border-slate-800/60">
                     {Array.from({ length: 10 }, (_, j) => (
                         <td key={j} className="px-3 py-3">
-                            <div className="h-4 bg-slate-200 rounded animate-pulse" style={{ width: `${50 + (j * 7) % 40}%` }} />
+                            <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded animate-pulse" style={{ width: `${50 + (j * 7) % 40}%` }} />
                         </td>
                     ))}
                 </tr>
@@ -136,19 +136,19 @@ export function ResultsTable({
         { key: 'age', label: 'Age', hideOnMobile: true },
     ];
 
-    const thClass = 'px-3 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap cursor-pointer select-none hover:text-indigo-600 transition-colors';
+    const thClass = 'px-3 py-3 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider whitespace-nowrap cursor-pointer select-none hover:text-indigo-600 transition-colors';
 
     return (
         <div className="flex flex-col">
             {/* ── Pagination ── */}
             {totalItems > 0 && (
-                <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-3 border-b border-slate-100 bg-slate-50/20">
-                    <div className="flex items-center gap-2 text-xs text-slate-600">
+                <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-3 border-b border-slate-100 dark:border-slate-800/60 bg-slate-50/50 dark:bg-slate-900/50">
+                    <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400">
                         <span className="font-medium">Show</span>
                         <select
                             value={pageSize}
                             onChange={e => onPageSizeChange(Number(e.target.value) as PageSize)}
-                            className="px-2 py-1 bg-white border border-slate-200 rounded-lg text-xs text-slate-800 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none"
+                            className="px-2 py-1 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none"
                         >
                             <option value={25}>25</option>
                             <option value={50}>50</option>
@@ -158,16 +158,16 @@ export function ResultsTable({
                         <span className="font-medium">per page</span>
                     </div>
 
-                    <span className="text-xs text-slate-500 font-medium">
-                        Page <strong className="text-slate-700">{currentPageSafe}</strong> / {totalPages}
-                        <span className="ml-2 text-slate-400">({totalItems} results)</span>
+                    <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                        Page <strong className="text-slate-700 dark:text-slate-300">{currentPageSafe}</strong> / {totalPages}
+                        <span className="ml-2 text-slate-400 dark:text-slate-500">({totalItems} results)</span>
                     </span>
 
                     <div className="flex items-center gap-1">
                         <button
                             onClick={() => onPageChange(Math.max(1, currentPage - 1))}
                             disabled={currentPageSafe <= 1}
-                            className="flex items-center gap-1 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                            className="flex items-center gap-1 px-3 py-1.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                         >
                             <ChevronLeft className="w-3.5 h-3.5" />
                             Prev
@@ -175,7 +175,7 @@ export function ResultsTable({
                         <button
                             onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
                             disabled={currentPageSafe >= totalPages}
-                            className="flex items-center gap-1 px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                            className="flex items-center gap-1 px-3 py-1.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                         >
                             Next
                             <ChevronRight className="w-3.5 h-3.5" />
@@ -186,9 +186,9 @@ export function ResultsTable({
 
             <div className="overflow-x-auto">
                 <table className="w-full text-base" style={{ minWidth: 960 }}>
-                    <thead className="bg-slate-50/80 border-b border-slate-200">
+                    <thead className="bg-slate-50/80 dark:bg-slate-900/80 border-b border-slate-200 dark:border-slate-700">
                         <tr>
-                            <th className="px-3 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                            <th className="px-3 py-3 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                                 TLD
                             </th>
                             {cols.map(({ key, label, hideOnMobile }) => (
@@ -203,7 +203,7 @@ export function ResultsTable({
                                     </span>
                                 </th>
                             ))}
-                            <th className="px-3 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                            <th className="px-3 py-3 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                                 Action
                             </th>
                         </tr>
@@ -214,10 +214,10 @@ export function ResultsTable({
                         ) : auctions.length === 0 ? (
                             <tr>
                                 <td colSpan={10} className="px-4 py-20 text-center">
-                                    <div className="flex flex-col items-center gap-3 text-slate-400">
+                                    <div className="flex flex-col items-center gap-3 text-slate-400 dark:text-slate-500">
                                         <Gavel className="w-10 h-10 text-slate-300" />
-                                        <p className="font-semibold text-slate-500">No auctions found</p>
-                                        <p className="text-xs max-w-xs text-center text-slate-400">
+                                        <p className="font-semibold text-slate-500 dark:text-slate-400">No auctions found</p>
+                                        <p className="text-xs max-w-xs text-center text-slate-400 dark:text-slate-500">
                                             No auctions match the current filters. Try adjusting your criteria.
                                         </p>
                                         <button
@@ -236,13 +236,13 @@ export function ResultsTable({
                                 const appraisal = parseDynaAppraisal(auction.dyna_appraisal);
                                 const bidUrl = `https://www.dynadot.com/market/auction/${auction.domain}?aff=CRUSHDOMAINS&utm_source=crushdomains&utm_campaign=dynadot-ambassador`;
                                 return (
-                                    <tr key={auction.auction_id} className="border-b border-slate-100 hover:bg-indigo-50/30 transition-colors">
+                                    <tr key={auction.auction_id} className="border-b border-slate-100 dark:border-slate-800/60 hover:bg-indigo-50/30 dark:hover:bg-indigo-500/10 transition-colors">
                                         <td className="px-3 py-3">
                                             <span className={clsx('px-1.5 py-0.5 rounded-md text-xs font-bold border whitespace-nowrap font-mono uppercase tracking-tight', tldStyle(auction.tld ?? ''))}>
                                                 .{auction.tld}
                                             </span>
                                         </td>
-                                        <td className="px-3 py-3 font-semibold text-slate-800 max-w-[200px]">
+                                        <td className="px-3 py-3 font-semibold text-slate-800 dark:text-slate-200 max-w-[200px]">
                                             <div className="flex items-center gap-1.5 min-w-0">
                                                 <CopyButton text={auction.domain} />
                                                 <a
@@ -256,32 +256,32 @@ export function ResultsTable({
                                                 </a>
                                             </div>
                                         </td>
-                                        <td className={clsx('px-3 py-3 text-xs font-medium whitespace-nowrap', isUrgent ? 'text-red-500' : 'text-slate-500')}>
+                                        <td className={clsx('px-3 py-3 text-xs font-medium whitespace-nowrap', isUrgent ? 'text-red-500' : 'text-slate-500 dark:text-slate-400')}>
                                             {isUrgent && '⏰ '}{auction.time_left}
                                         </td>
-                                        <td className="px-3 py-3 font-mono font-semibold text-slate-700">
+                                        <td className="px-3 py-3 font-mono font-semibold text-slate-700 dark:text-slate-300">
                                             ${price.toFixed(2)}
                                         </td>
                                         <td className="px-3 py-3">
                                             <span className={clsx(
                                                 'inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-bold',
-                                                auction.bids > 20 ? 'bg-red-100 text-red-600' :
-                                                    auction.bids < 5 ? 'bg-emerald-50 text-emerald-600' :
-                                                        'bg-slate-100 text-slate-600'
+                                                auction.bids > 20 ? 'bg-red-100 text-red-600 dark:bg-red-500/10 dark:text-red-400' :
+                                                    auction.bids < 5 ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400' :
+                                                        'bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-400'
                                             )}>
                                                 {auction.bids > 20 ? '🔥 ' : ''}{auction.bids}
                                             </span>
                                         </td>
-                                        <td className="px-3 py-3 text-xs text-slate-600 hidden lg:table-cell">
+                                        <td className="px-3 py-3 text-xs text-slate-600 dark:text-slate-400 hidden lg:table-cell">
                                             {formatNumber(auction.visitors)}
                                         </td>
                                         <td className="px-3 py-3 hidden lg:table-cell">
                                             {appraisal > 0 ? (
                                                 <span className={clsx(
                                                     'inline-flex items-center px-1.5 py-0.5 rounded-md text-xs font-bold border',
-                                                    appraisal >= 100 ? 'bg-emerald-100 text-emerald-700 border-emerald-200' :
-                                                        appraisal >= 20 ? 'bg-blue-100 text-blue-700 border-blue-200' :
-                                                            'bg-slate-100 text-slate-500 border-slate-200'
+                                                    appraisal >= 100 ? 'bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20' :
+                                                        appraisal >= 20 ? 'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20' :
+                                                            'bg-slate-100 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700'
                                                 )}>
                                                     ${appraisal.toFixed(0)}
                                                 </span>
@@ -289,16 +289,16 @@ export function ResultsTable({
                                                 <span className="text-slate-300 text-base">—</span>
                                             )}
                                         </td>
-                                        <td className="px-3 py-3 text-xs text-slate-600 hidden lg:table-cell">
+                                        <td className="px-3 py-3 text-xs text-slate-600 dark:text-slate-400 hidden lg:table-cell">
                                             {formatNumber(auction.links)}
                                         </td>
-                                        <td className="px-3 py-3 text-base text-slate-600 hidden lg:table-cell">
+                                        <td className="px-3 py-3 text-base text-slate-600 dark:text-slate-400 hidden lg:table-cell">
                                             {auction.age != null ? (
                                                 <span className={clsx(
                                                     'inline-flex items-center px-1.5 py-0.5 rounded-md text-xs font-bold font-mono',
-                                                    auction.age >= 10 ? 'bg-emerald-50 text-emerald-700' :
-                                                        auction.age >= 3 ? 'bg-blue-50 text-blue-700' :
-                                                            'bg-slate-50 text-slate-500'
+                                                    auction.age >= 10 ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400' :
+                                                        auction.age >= 3 ? 'bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400' :
+                                                            'bg-slate-50 dark:bg-slate-900 text-slate-500 dark:text-slate-400'
                                                 )}>
                                                     {auction.age}y
                                                 </span>

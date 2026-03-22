@@ -53,13 +53,13 @@ export function FileUpload({ onFileSelect, accept = '.csv', label = 'Upload CSV'
         }}
       />
       <div className="flex flex-col items-center justify-center pt-5 pb-6 text-center px-4">
-        <div className={clsx("p-2 rounded-full mb-3 transition-colors", isDragging ? "bg-indigo-100" : "bg-slate-100 group-hover:bg-indigo-50")}>
-          <Upload className={clsx("w-6 h-6", isDragging ? "text-indigo-600" : "text-slate-400 group-hover:text-indigo-500")} />
+        <div className={clsx("p-2 rounded-full mb-3 transition-colors", isDragging ? "bg-indigo-100 dark:bg-indigo-900/40" : "bg-slate-100 dark:bg-slate-800/80 group-hover:bg-indigo-50")}>
+          <Upload className={clsx("w-6 h-6", isDragging ? "text-indigo-600" : "text-slate-400 dark:text-slate-500 group-hover:text-indigo-500")} />
         </div>
-        <p className="mb-1 text-sm font-medium text-slate-700">
+        <p className="mb-1 text-sm font-medium text-slate-700 dark:text-slate-300">
           <span className="text-indigo-600 hover:underline">{label}</span>
         </p>
-        <p className="text-xs text-slate-500">or drag and drop CSV</p>
+        <p className="text-xs text-slate-500 dark:text-slate-400">or drag and drop CSV</p>
       </div>
     </div>
   );

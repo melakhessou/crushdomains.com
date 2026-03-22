@@ -23,7 +23,7 @@ export function PageTitle({ children, className, disableTwoTone = true }: PageTi
                     "text-3xl md:text-4xl font-bold tracking-tight",
                     className
                 )}>
-                    <span className="text-slate-900">{firstPart} </span>
+                    <span className="text-slate-900 dark:text-slate-50">{firstPart} </span>
                     <span className="text-indigo-600">{lastWord}</span>
                 </h1>
             );

@@ -204,36 +204,36 @@ export function ExpiredDomainsDashboard({ initialSearch = '', nicheTitle }: Dash
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-slate-50 to-indigo-100 p-4 md:p-10 font-sans text-slate-800">
+        <div className="min-h-screen bg-gradient-to-br from-indigo-50 dark:from-slate-950 via-slate-50 dark:via-slate-900 to-indigo-100 dark:to-indigo-950/20 p-4 md:p-10 font-sans text-slate-800 dark:text-slate-200">
             <div className="max-w-7xl mx-auto space-y-8">
                 <header className="text-center space-y-3 relative">
                     <PageTitle className="flex items-center justify-center gap-3">
                         <Sparkles className="w-7 h-7 md:w-8 md:h-8 text-indigo-500 flex-shrink-0" />
                         {nicheTitle || 'Filter Expiring / Deleting Domains'}
                     </PageTitle>
-                    <p className="text-lg text-slate-500 font-normal mx-auto max-w-2xl leading-relaxed">
+                    <p className="text-lg text-slate-500 dark:text-slate-400 font-normal mx-auto max-w-2xl leading-relaxed">
                         {nicheTitle ? `${nicheTitle} Niche Dashboard` : 'Premium Domain Investor Dashboard'}
                     </p>
                     {lastUpdated && (
                         <div className="pt-2 flex justify-center">
-                            <div className="px-4 py-2 bg-white/60 backdrop-blur-md rounded-full text-xs font-bold text-indigo-600 border border-indigo-100 shadow-sm uppercase tracking-wider">
+                            <div className="px-4 py-2 bg-white/60 dark:bg-slate-950/60 backdrop-blur-md rounded-full text-xs font-bold text-indigo-600 border border-indigo-100 shadow-sm uppercase tracking-wider">
                                 Data Updated: {lastUpdated}
                             </div>
                         </div>
                     )}
                 </header>
 
-                <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-lg border border-white/50 overflow-hidden">
+                <div className="bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl rounded-2xl shadow-lg border border-white/50 dark:border-slate-800/50 overflow-hidden">
                     {/* Filter toggle */}
-                    <div className="flex items-center justify-between px-5 py-3 border-b border-slate-100">
+                    <div className="flex items-center justify-between px-5 py-3 border-b border-slate-100 dark:border-slate-800/60">
                         <button
                             onClick={() => setShowFilters(!showFilters)}
-                            className="flex items-center gap-2 text-base font-semibold text-slate-700 hover:text-indigo-600 transition-colors"
+                            className="flex items-center gap-2 text-base font-semibold text-slate-700 dark:text-slate-300 hover:text-indigo-600 transition-colors"
                         >
                             <SlidersHorizontal className="w-4 h-4" />
                             {showFilters ? 'Hide Filters' : 'Show Filters'}
                             {allDomains.length > 0 && (
-                                <span className="bg-slate-100 text-slate-500 text-[10px] font-bold px-2 py-0.5 rounded-full">
+                                <span className="bg-slate-100 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 text-[10px] font-bold px-2 py-0.5 rounded-full">
                                     {allDomains.length} total
                                 </span>
                             )}
@@ -242,23 +242,23 @@ export function ExpiredDomainsDashboard({ initialSearch = '', nicheTitle }: Dash
 
                     {/* Filter section */}
                     {showFilters && (
-                        <div className="px-5 py-6 bg-slate-50/50 border-b border-slate-100 space-y-6">
+                        <div className="px-5 py-6 bg-slate-50/50 dark:bg-slate-900/50 border-b border-slate-100 dark:border-slate-800/60 space-y-6">
                             <div className="flex flex-wrap gap-8 items-start">
                                 {/* Left: Data Source & Keyword Search */}
                                 <div className="space-y-4 flex-1 min-w-[280px]">
                                     <div className="space-y-1.5">
-                                        <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Data Source</label>
+                                        <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Data Source</label>
                                         <FileUpload onFileSelect={handleFileUpload} />
                                         {isParsing && <p className="text-xs font-medium text-indigo-500 mt-2 animate-pulse">Parsing CSV...</p>}
                                     </div>
                                     <div className="space-y-1.5">
-                                        <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Keyword Search</label>
+                                        <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Keyword Search</label>
                                         <div className="relative group">
-                                            <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
+                                            <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400 dark:text-slate-500 group-focus-within:text-indigo-500 transition-colors" />
                                             <input
                                                 type="text"
                                                 placeholder="Search domains..."
-                                                className="w-full pl-9 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
+                                                className="w-full pl-9 pr-4 py-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
                                                 value={searchTerm}
                                                 onChange={(e) => setSearchTerm(e.target.value)}
                                             />
@@ -270,7 +270,7 @@ export function ExpiredDomainsDashboard({ initialSearch = '', nicheTitle }: Dash
                                 <div className="space-y-6 flex-1 min-w-[280px]">
                                     <div className="space-y-1.5">
                                         <div className="flex items-center gap-1.5">
-                                            <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Pattern</label>
+                                            <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Pattern</label>
                                             <Tooltip content={
                                                 <div className="space-y-2 p-1 w-64">
                                                     <div className="grid grid-cols-2 gap-x-4 gap-y-1">
@@ -291,20 +291,20 @@ export function ExpiredDomainsDashboard({ initialSearch = '', nicheTitle }: Dash
                                                     </div>
                                                 </div>
                                             }>
-                                                <AlertCircle size={14} className="text-slate-400 cursor-help hover:text-indigo-500 transition-colors" />
+                                                <AlertCircle size={14} className="text-slate-400 dark:text-slate-500 cursor-help hover:text-indigo-500 transition-colors" />
                                             </Tooltip>
                                         </div>
                                         <input
                                             type="text"
                                             placeholder="e.g. CVCV, NNN"
-                                            className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-mono uppercase focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
+                                            className="w-full px-3 py-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-mono uppercase focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
                                             value={patternFilter}
                                             onChange={(e) => setPatternFilter(e.target.value)}
                                         />
                                     </div>
 
                                     <div className="space-y-1.5">
-                                        <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">SETTINGS</label>
+                                        <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">SETTINGS</label>
                                         <div className="flex flex-col gap-2 pt-1">
                                             <label className="flex items-center gap-2 cursor-pointer group">
                                                 <div className="relative flex items-center justify-center">
@@ -312,11 +312,11 @@ export function ExpiredDomainsDashboard({ initialSearch = '', nicheTitle }: Dash
                                                         type="checkbox"
                                                         checked={noHyphens}
                                                         onChange={(e) => setNoHyphens(e.target.checked)}
-                                                        className="peer appearance-none w-4 h-4 border border-slate-300 rounded bg-white checked:bg-indigo-600 checked:border-indigo-600 transition-all cursor-pointer"
+                                                        className="peer appearance-none w-4 h-4 border border-slate-300 rounded bg-white dark:bg-slate-950 checked:bg-indigo-600 checked:border-indigo-600 transition-all cursor-pointer"
                                                     />
                                                     <Check className="absolute w-3 h-3 text-white opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none" />
                                                 </div>
-                                                <span className="text-sm text-slate-600 group-hover:text-indigo-600 transition-colors">No Hyphens</span>
+                                                <span className="text-sm text-slate-600 dark:text-slate-400 group-hover:text-indigo-600 transition-colors">No Hyphens</span>
                                             </label>
                                             <label className="flex items-center gap-2 cursor-pointer group">
                                                 <div className="relative flex items-center justify-center">
@@ -324,11 +324,11 @@ export function ExpiredDomainsDashboard({ initialSearch = '', nicheTitle }: Dash
                                                         type="checkbox"
                                                         checked={noNumbers}
                                                         onChange={(e) => setNoNumbers(e.target.checked)}
-                                                        className="peer appearance-none w-4 h-4 border border-slate-300 rounded bg-white checked:bg-indigo-600 checked:border-indigo-600 transition-all cursor-pointer"
+                                                        className="peer appearance-none w-4 h-4 border border-slate-300 rounded bg-white dark:bg-slate-950 checked:bg-indigo-600 checked:border-indigo-600 transition-all cursor-pointer"
                                                     />
                                                     <Check className="absolute w-3 h-3 text-white opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none" />
                                                 </div>
-                                                <span className="text-sm text-slate-600 group-hover:text-indigo-600 transition-colors">No Numbers</span>
+                                                <span className="text-sm text-slate-600 dark:text-slate-400 group-hover:text-indigo-600 transition-colors">No Numbers</span>
                                             </label>
                                         </div>
                                     </div>
@@ -337,9 +337,9 @@ export function ExpiredDomainsDashboard({ initialSearch = '', nicheTitle }: Dash
                                 {/* Right: Extension & Length */}
                                 <div className="space-y-4 flex-1 min-w-[240px]">
                                     <div className="space-y-1.5">
-                                        <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Extension</label>
+                                        <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Extension</label>
                                         <select
-                                            className="block w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-sm appearance-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
+                                            className="block w-full px-3 py-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl text-sm appearance-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
                                             value={tldFilter}
                                             onChange={(e) => setTldFilter(e.target.value)}
                                         >
@@ -348,10 +348,10 @@ export function ExpiredDomainsDashboard({ initialSearch = '', nicheTitle }: Dash
                                         </select>
                                     </div>
                                     <div className="space-y-1.5">
-                                        <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Length</label>
+                                        <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Length</label>
                                         <div className="grid grid-cols-2 gap-2">
-                                            <input type="number" placeholder="Min" className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all" value={minLen} onChange={(e) => setMinLen(e.target.value ? Number(e.target.value) : '')} />
-                                            <input type="number" placeholder="Max" className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all" value={maxLen} onChange={(e) => setMaxLen(e.target.value ? Number(e.target.value) : '')} />
+                                            <input type="number" placeholder="Min" className="w-full px-3 py-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all" value={minLen} onChange={(e) => setMinLen(e.target.value ? Number(e.target.value) : '')} />
+                                            <input type="number" placeholder="Max" className="w-full px-3 py-2.5 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all" value={maxLen} onChange={(e) => setMaxLen(e.target.value ? Number(e.target.value) : '')} />
                                         </div>
                                     </div>
                                 </div>
@@ -359,14 +359,14 @@ export function ExpiredDomainsDashboard({ initialSearch = '', nicheTitle }: Dash
                         </div>
                     )}
 
-                    <div className="bg-white overflow-hidden flex flex-col h-full min-h-[600px] sm:min-h-[800px]">
-                        <div className="p-4 border-b border-slate-100 flex flex-wrap justify-between items-center bg-white/50 gap-3">
+                    <div className="bg-white dark:bg-slate-950 overflow-hidden flex flex-col h-full min-h-[600px] sm:min-h-[800px]">
+                        <div className="p-4 border-b border-slate-100 dark:border-slate-800/60 flex flex-wrap justify-between items-center bg-white/50 dark:bg-slate-950/50 gap-3">
                             <div className="flex items-baseline gap-2">
-                                <h2 className="text-xl font-semibold text-slate-800">Results</h2>
-                                <span className="text-base font-normal text-slate-400">({totalItems})</span>
+                                <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-200">Results</h2>
+                                <span className="text-base font-normal text-slate-400 dark:text-slate-500">({totalItems})</span>
                             </div>
                             <div className="flex items-center gap-2 sm:gap-3 ml-auto sm:ml-0">
-                                <button onClick={handleCopy} disabled={totalItems === 0} className={clsx("flex items-center gap-2 px-3 py-2 text-xs sm:text-sm font-semibold rounded-lg border", copied ? "bg-emerald-50 text-emerald-600 border-emerald-200" : "bg-white text-slate-600 border-slate-200")}>
+                                <button onClick={handleCopy} disabled={totalItems === 0} className={clsx("flex items-center gap-2 px-3 py-2 text-xs sm:text-sm font-semibold rounded-lg border", copied ? "bg-emerald-50 text-emerald-600 border-emerald-200" : "bg-white dark:bg-slate-950 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700")}>
                                     <Copy size={16} /> {copied ? 'Copied' : 'Copy'}
                                 </button>
                                 <button onClick={handleExport} disabled={totalItems === 0} className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-xs sm:text-sm font-semibold rounded-lg">
@@ -377,11 +377,11 @@ export function ExpiredDomainsDashboard({ initialSearch = '', nicheTitle }: Dash
 
 
                         {/* Pagination Toolbar */}
-                        <div className="px-4 py-2 sm:py-3 border-b border-slate-100 bg-white/50 flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-4 text-xs sm:text-sm text-slate-500">
+                        <div className="px-4 py-2 sm:py-3 border-b border-slate-100 dark:border-slate-800/60 bg-white/50 dark:bg-slate-950/50 flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-4 text-xs sm:text-sm text-slate-500 dark:text-slate-400">
                             <div className="flex items-center gap-2">
                                 <span>Rows:</span>
                                 <select
-                                    className="bg-white border border-slate-200 rounded px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                                    className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
                                     value={itemsPerPage}
                                     onChange={(e) => {
                                         setItemsPerPage(Number(e.target.value));
@@ -425,32 +425,32 @@ export function ExpiredDomainsDashboard({ initialSearch = '', nicheTitle }: Dash
                 </div>
 
                 {/* SEO FAQ Section */}
-                <section className="mt-16 bg-white/60 backdrop-blur-xl rounded-2xl shadow-xl p-6 md:p-8 border border-white max-w-5xl mx-auto">
+                <section className="mt-16 bg-white/60 dark:bg-slate-950/60 backdrop-blur-xl rounded-2xl shadow-xl p-6 md:p-8 border border-white dark:border-slate-800 max-w-5xl mx-auto">
                     <div className="text-center mb-6">
-                        <h2 className="text-xl md:text-2xl font-bold text-slate-800">Domain Filtering FAQs</h2>
+                        <h2 className="text-xl md:text-2xl font-bold text-slate-800 dark:text-slate-200">Domain Filtering FAQs</h2>
                     </div>
                     <div className="grid md:grid-cols-2 gap-4">
-                        <div className="bg-white rounded-xl p-4 border border-slate-100 shadow-sm">
-                            <h3 className="font-bold text-slate-800 text-sm mb-1.5">What is a deleting or expiring domain?</h3>
-                            <p className="text-sm text-slate-600 leading-relaxed">
+                        <div className="bg-white dark:bg-slate-950 rounded-xl p-4 border border-slate-100 dark:border-slate-800/60 shadow-sm">
+                            <h3 className="font-bold text-slate-800 dark:text-slate-200 text-sm mb-1.5">What is a deleting or expiring domain?</h3>
+                            <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
                                 When a domain owner fails to renew their domain name, it goes through an expiration process. If it's not renewed during the grace period, it "drops" or deletes, becoming available for anyone else to register or catch via auction platforms like NameJet.
                             </p>
                         </div>
-                        <div className="bg-white rounded-xl p-4 border border-slate-100 shadow-sm">
-                            <h3 className="font-bold text-slate-800 text-sm mb-1.5">How do I use this domain filter tool?</h3>
-                            <p className="text-sm text-slate-600 leading-relaxed">
+                        <div className="bg-white dark:bg-slate-950 rounded-xl p-4 border border-slate-100 dark:border-slate-800/60 shadow-sm">
+                            <h3 className="font-bold text-slate-800 dark:text-slate-200 text-sm mb-1.5">How do I use this domain filter tool?</h3>
+                            <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
                                 Simply upload a CSV file from NameJet or a similar domain auction marketplace. Our tool will parse the data and allow you to filter thousands of domains by length, keywords, extension, and pattern (like CVCV) instantly in your browser.
                             </p>
                         </div>
-                        <div className="bg-white rounded-xl p-4 border border-slate-100 shadow-sm">
-                            <h3 className="font-bold text-slate-800 text-sm mb-1.5">What are CVCV domain patterns?</h3>
-                            <p className="text-sm text-slate-600 leading-relaxed">
+                        <div className="bg-white dark:bg-slate-950 rounded-xl p-4 border border-slate-100 dark:border-slate-800/60 shadow-sm">
+                            <h3 className="font-bold text-slate-800 dark:text-slate-200 text-sm mb-1.5">What are CVCV domain patterns?</h3>
+                            <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
                                 CVCV stands for Consonant-Vowel-Consonant-Vowel (like "Data" or "Nomi"). These 4-letter patterns are highly prized by domain investors because they are usually highly pronounceable and brandable. You can use our Pattern filter to find these specific structures.
                             </p>
                         </div>
-                        <div className="bg-white rounded-xl p-4 border border-slate-100 shadow-sm">
-                            <h3 className="font-bold text-slate-800 text-sm mb-1.5">Is my CSV data kept private?</h3>
-                            <p className="text-sm text-slate-600 leading-relaxed">
+                        <div className="bg-white dark:bg-slate-950 rounded-xl p-4 border border-slate-100 dark:border-slate-800/60 shadow-sm">
+                            <h3 className="font-bold text-slate-800 dark:text-slate-200 text-sm mb-1.5">Is my CSV data kept private?</h3>
+                            <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
                                 Yes! Our domain parsing and filtering engine runs entirely in your local browser. Your uploaded CSV lists are never sent to our servers, ensuring your proprietary research remains 100% private to you.
                             </p>
                         </div>

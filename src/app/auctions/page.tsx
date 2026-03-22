@@ -21,7 +21,7 @@ export default async function AuctionsPage() {
 
     if (data.status === 'error') {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-slate-50 to-indigo-100">
+            <div className="min-h-screen bg-gradient-to-br from-indigo-50 dark:from-slate-950 via-slate-50 dark:via-slate-900 to-indigo-100 dark:to-indigo-950/20">
                 <div className="max-w-screen-xl mx-auto px-4 md:px-8 py-12">
                     <div className="bg-red-50 border border-red-200 rounded-2xl p-6 space-y-3">
                         <h2 className="text-lg font-bold text-red-700">Erreur de chargement des enchères</h2>
